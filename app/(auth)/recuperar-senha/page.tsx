@@ -13,7 +13,7 @@ export default function RecoverPasswordPage() {
     event.preventDefault();
     const supabase = createClient();
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/dashboard`
+      redirectTo: `${window.location.origin}/redefinir-senha`
     });
     setMessage("Se este e-mail existir, você receberá um link de recuperação.");
   }

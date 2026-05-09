@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BriefcaseBusiness, Globe2, LogOut } from "lucide-react";
+import { BarChart3, BriefcaseBusiness, FileClock, Gauge, Globe2, LayoutDashboard, LogOut, Settings, UserCircle } from "lucide-react";
 import { Button, inputClass } from "@/components/ui";
 import { useLanguage } from "@/components/language-provider";
 import { locales, navCopy, type Locale } from "@/lib/i18n";
@@ -56,26 +56,35 @@ export function PublicNav() {
 export function AppNav({ isAdmin = false }: { isAdmin?: boolean }) {
   const { locale } = useLanguage();
   const copy = navCopy[locale];
+  const links = [
+    { href: "/dashboard", label: copy.dashboard, Icon: LayoutDashboard },
+    { href: "/gerador", label: "Gerador", Icon: BriefcaseBusiness },
+    { href: "/ats-score", label: "ATS Score", Icon: Gauge },
+    { href: "/historico", label: copy.history, Icon: FileClock },
+    { href: "/assinatura", label: "Assinatura", Icon: BarChart3 },
+    { href: "/conta", label: "Conta", Icon: UserCircle },
+    { href: "/configuracoes", label: "Configurações", Icon: Settings }
+  ];
 
   return (
-    <header className="border-b border-white/10 bg-ink/80">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-ink/95 backdrop-blur">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <span className="grid size-9 place-items-center rounded-md bg-white text-ink">
             <BriefcaseBusiness size={18} />
           </span>
           GlobalHire AI
         </Link>
-        <nav className="flex items-center gap-4 text-sm text-white/70">
+        <nav className="flex max-w-full items-center gap-2 overflow-x-auto text-sm text-white/70">
           <LanguageSelector />
-          <Link href="/dashboard" className="hover:text-white">
-            {copy.dashboard}
-          </Link>
-          <Link href="/historico" className="hover:text-white">
-            {copy.history}
-          </Link>
+          {links.map(({ href, label, Icon }) => (
+            <Link key={href} href={href} className="inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-2 hover:bg-white/8 hover:text-white">
+              <Icon size={16} />
+              {label}
+            </Link>
+          ))}
           {isAdmin ? (
-            <Link href="/admin" className="hover:text-white">
+            <Link href="/admin" className="shrink-0 rounded-md px-2 py-2 hover:bg-white/8 hover:text-white">
               {copy.admin}
             </Link>
           ) : null}

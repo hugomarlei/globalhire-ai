@@ -1,7 +1,7 @@
 "use client";
 
-import { Download, FileText, Loader2, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { Download, FileText, FileUp, Loader2, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button, Card, Field, inputClass, textareaClass } from "@/components/ui";
 import { normalizeDocumentText } from "@/lib/document-format";
 import { useLanguage } from "@/components/language-provider";
@@ -84,7 +84,44 @@ export function DashboardGenerator({ hasPaidPlan }: { hasPaidPlan: boolean }) {
   const [appliedImprovements, setAppliedImprovements] = useState<AppliedImprovement[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingUpload, setLoadingUpload] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState("");
+  const [generationStep, setGenerationStep] = useState(0);
   const copy = dashboardCopy[locale];
+  const steps = ["Analisando currículo", "Lendo descrição da vaga", "Comparando ATS", "Gerando documento", "Finalizando resultado"];
+
+  useEffect(() => {
+    if (!loading) {
+      setGenerationStep(0);
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setGenerationStep((current) => Math.min(current + 1, steps.length - 1));
+    }, 1100);
+
+    return () => window.clearInterval(timer);
+  }, [loading, steps.length]);
+
+  async function upload(file: File | null) {
+    if (!file) return;
+    setLoadingUpload(true);
+    setUploadMessage("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await fetch("/api/upload/parse", { method: "POST", body: formData });
+    const data = await response.json();
+    setLoadingUpload(false);
+
+    if (!response.ok) {
+      setUploadMessage(data.error || "Não consegui ler o arquivo.");
+      return;
+    }
+
+    setResume(data.text);
+    setUploadMessage("Currículo importado com sucesso.");
+  }
 
   async function generate() {
     setLoading(true);
@@ -155,6 +192,14 @@ export function DashboardGenerator({ hasPaidPlan }: { hasPaidPlan: boolean }) {
           <h1 className="text-2xl font-semibold">{copy.generatorTitle}</h1>
         </div>
         <div className="mt-6 grid gap-4">
+          <Field label="Upload PDF/DOCX">
+            <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-brand-500/40 bg-brand-500/10 p-3 text-sm text-brand-50 hover:bg-brand-500/15">
+              {loadingUpload ? <Loader2 className="animate-spin" size={18} /> : <FileUp size={18} />}
+              {loadingUpload ? "Lendo arquivo..." : "Importar currículo"}
+              <input className="hidden" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => upload(event.target.files?.[0] || null)} />
+            </label>
+          </Field>
+          {uploadMessage ? <p className="text-sm text-white/60">{uploadMessage}</p> : null}
           <Field label={copy.resume}>
             <textarea className={textareaClass} value={resume} onChange={(e) => setResume(e.target.value)} placeholder={copy.resumePlaceholder} />
           </Field>
@@ -190,6 +235,17 @@ export function DashboardGenerator({ hasPaidPlan }: { hasPaidPlan: boolean }) {
             {loading ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
             {loading ? copy.generating : copy.generate}
           </Button>
+          {loading ? (
+            <div className="rounded-md border border-brand-500/20 bg-brand-500/10 p-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-brand-50">
+                <Loader2 className="animate-spin" size={17} />
+                {steps[generationStep]}
+              </div>
+              <div className="mt-3 h-2 rounded-full bg-white/10">
+                <div className="h-2 rounded-full bg-brand-500 transition-all duration-500" style={{ width: `${((generationStep + 1) / steps.length) * 100}%` }} />
+              </div>
+            </div>
+          ) : null}
         </div>
       </Card>
 
@@ -216,7 +272,7 @@ export function DashboardGenerator({ hasPaidPlan }: { hasPaidPlan: boolean }) {
           </div>
         </div>
         <pre className="mt-5 min-h-[520px] whitespace-pre-wrap rounded-md border border-white/10 bg-black/25 p-4 text-sm leading-6 text-white/82">
-          {output || copy.emptyOutput}
+          {loading ? "Preparando resultado premium..." : output || copy.emptyOutput}
         </pre>
         <div className="mt-4 rounded-md border border-white/10 bg-white/5 p-4">
           <div className="flex items-center gap-2">

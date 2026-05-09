@@ -294,6 +294,15 @@ export default function Home() {
           {copy.primaryCta}
         </Button>
       </section>
+      <footer className="border-t border-white/10 px-4 py-8 text-sm text-white/50 sm:px-6">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p>GlobalHire AI © 2026</p>
+          <div className="flex gap-4">
+            <a href="/termos" className="hover:text-white">Termos</a>
+            <a href="/privacidade" className="hover:text-white">Privacidade</a>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }

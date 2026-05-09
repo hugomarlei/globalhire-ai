@@ -3,12 +3,24 @@ import { DashboardGenerator } from "@/components/dashboard-generator";
 import { UpgradePlans } from "@/components/upgrade-plans";
 import { Card } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
+import { createClient } from "@/lib/supabase-server";
 import { effectivePlanId, hasAdminBypass, plans } from "@/lib/plans";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const { user, profile } = await requireUser();
+  const supabase = await createClient();
   const isBypassAccount = hasAdminBypass(profile?.email || user.email);
   const plan = plans[effectivePlanId(profile?.plan, profile?.email || user.email)] || plans.free;
+  const since = new Date();
+  since.setDate(1);
+  since.setHours(0, 0, 0, 0);
+  const [{ count }, { data: latest }] = await Promise.all([
+    supabase.from("generations").select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("created_at", since.toISOString()),
+    supabase.from("generations").select("id,type,language,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3)
+  ]);
+  const used = count || 0;
+  const usagePercent = plan.monthlyLimit >= 9999 ? 100 : Math.min(100, Math.round((used / plan.monthlyLimit) * 100));
 
   return (
     <div className="grid gap-6">
@@ -20,8 +32,11 @@ export default async function DashboardPage() {
         </Card>
         <Card>
           <Gauge className="text-mint" size={22} />
-          <p className="mt-3 text-sm text-white/50">Limite mensal</p>
-          <p className="text-2xl font-semibold">{plan.monthlyLimit >= 9999 ? "Ilimitado" : plan.monthlyLimit}</p>
+          <p className="mt-3 text-sm text-white/50">Uso mensal</p>
+          <p className="text-2xl font-semibold">{used}/{plan.monthlyLimit >= 9999 ? "∞" : plan.monthlyLimit}</p>
+          <div className="mt-3 h-2 rounded-full bg-white/10">
+            <div className="h-2 rounded-full bg-brand-500" style={{ width: `${usagePercent}%` }} />
+          </div>
         </Card>
         <Card>
           <Shield className="text-coral" size={22} />
@@ -63,6 +78,28 @@ export default async function DashboardPage() {
           </div>
         </div>
       </Card>
+      <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+        <Card>
+          <h2 className="text-xl font-semibold">Quick actions</h2>
+          <div className="mt-4 grid gap-2">
+            <Link href="/ats-score" className="rounded-md border border-white/10 p-3 text-sm text-white/75 hover:bg-white/8">Analisar ATS Score</Link>
+            <Link href="/historico" className="rounded-md border border-white/10 p-3 text-sm text-white/75 hover:bg-white/8">Ver histórico</Link>
+            <Link href="/assinatura" className="rounded-md border border-white/10 p-3 text-sm text-white/75 hover:bg-white/8">Comparar planos</Link>
+          </div>
+        </Card>
+        <Card>
+          <h2 className="text-xl font-semibold">Últimas gerações</h2>
+          <div className="mt-4 grid gap-2">
+            {(latest || []).map((item) => (
+              <div key={item.id} className="flex items-center justify-between rounded-md border border-white/10 p-3 text-sm text-white/70">
+                <span>{item.type} · {item.language}</span>
+                <span className="text-white/40">{new Date(item.created_at).toLocaleDateString("pt-BR")}</span>
+              </div>
+            ))}
+            {!latest?.length ? <p className="text-sm text-white/50">Gere seu primeiro documento para preencher esta área.</p> : null}
+          </div>
+        </Card>
+      </div>
       <DashboardGenerator hasPaidPlan={plan.id !== "free"} />
       <div>
         <h2 className="mb-4 text-2xl font-semibold">Upgrade de plano</h2>

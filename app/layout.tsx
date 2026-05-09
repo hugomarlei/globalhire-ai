@@ -1,11 +1,21 @@
 import type { Metadata } from "next";
+import { AnalyticsScripts } from "@/components/analytics-scripts";
 import { LanguageProvider } from "@/components/language-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "GlobalHire AI",
   description:
-    "Currículos ATS, cartas de apresentação e LinkedIn para vagas internacionais com IA."
+    "Currículos ATS, ATS Score, cartas de apresentação e LinkedIn para vagas internacionais com IA.",
+  openGraph: {
+    title: "GlobalHire AI",
+    description: "Otimize currículos internacionais, ATS Score e materiais profissionais com IA.",
+    type: "website",
+    url: "https://globalhire.ai"
+  },
+  icons: {
+    icon: "/favicon.ico"
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -13,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR" className="dark">
       <body>
         <LanguageProvider>{children}</LanguageProvider>
+        <AnalyticsScripts />
       </body>
     </html>
   );
