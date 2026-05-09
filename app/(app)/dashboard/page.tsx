@@ -103,7 +103,7 @@ export default async function DashboardPage() {
       <DashboardGenerator hasPaidPlan={plan.id !== "free"} />
       <div>
         <h2 className="mb-4 text-2xl font-semibold">Upgrade de plano</h2>
-        <UpgradePlans />
+        <UpgradePlans currentPlan={plan.id} />
       </div>
     </div>
   );

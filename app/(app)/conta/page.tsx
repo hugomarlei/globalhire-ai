@@ -8,7 +8,7 @@ export default async function AccountPage() {
   const supabase = await createClient();
   const { data: subscription } = await supabase
     .from("subscriptions")
-    .select("status")
+    .select("status,current_period_end")
     .eq("user_id", user.id)
     .maybeSingle();
   const plan = plans[effectivePlanId(profile?.plan, user.email)] || plans.free;
@@ -19,6 +19,7 @@ export default async function AccountPage() {
       planName={plan.name}
       monthlyLimit={plan.monthlyLimit >= 9999 ? "Ilimitado" : String(plan.monthlyLimit)}
       subscriptionStatus={subscription?.status || "free"}
+      currentPeriodEnd={subscription?.current_period_end}
     />
   );
 }

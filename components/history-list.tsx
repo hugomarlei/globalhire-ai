@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Copy, RefreshCw } from "lucide-react";
+import { Copy, Download, Eye, FilePlus2, RefreshCw, Search } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Card, inputClass } from "@/components/ui";
+import { Button, Card, inputClass } from "@/components/ui";
 
 type HistoryItem = {
   id: string;
@@ -14,11 +14,38 @@ type HistoryItem = {
   created_at: string;
 };
 
+const typeLabels: Record<string, string> = {
+  ats_resume: "Currículos",
+  cover_letter: "Cartas",
+  linkedin_summary: "LinkedIn",
+  recruiter_message: "Recrutadores",
+  interview_prep: "Entrevista",
+  translate_resume: "Tradução"
+};
+
+function downloadText(item: HistoryItem) {
+  const blob = new Blob([item.output], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `globalhire-${item.type}-${item.id}.txt`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export function HistoryList({ items }: { items: HistoryItem[] }) {
   const [filter, setFilter] = useState("all");
+  const [query, setQuery] = useState("");
   const [copied, setCopied] = useState("");
   const types = useMemo(() => Array.from(new Set(items.map((item) => item.type))), [items]);
-  const filtered = filter === "all" ? items : items.filter((item) => item.type === filter);
+  const filtered = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return items.filter((item) => {
+      const matchesFilter = filter === "all" || item.type === filter;
+      const searchable = `${item.type} ${item.language} ${item.target_country} ${item.output}`.toLowerCase();
+      return matchesFilter && (!normalizedQuery || searchable.includes(normalizedQuery));
+    });
+  }, [filter, items, query]);
 
   async function copyText(id: string, text: string) {
     await navigator.clipboard.writeText(text);
@@ -27,47 +54,90 @@ export function HistoryList({ items }: { items: HistoryItem[] }) {
   }
 
   return (
-    <div className="grid gap-4">
-      <div className="flex flex-col gap-3 rounded-lg border border-white/10 bg-white/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="grid gap-5">
+      <div className="flex flex-col gap-4 rounded-lg border border-white/10 bg-white/5 p-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold">Histórico</h1>
-          <p className="mt-1 text-sm text-white/55">Revise documentos gerados, copie resultados e gere novas versões.</p>
+          <h1 className="text-3xl font-semibold">Documentos</h1>
+          <p className="mt-1 text-sm text-white/55">Histórico, versões geradas e materiais prontos para candidatura.</p>
         </div>
-        <select className={`${inputClass} max-w-xs`} value={filter} onChange={(event) => setFilter(event.target.value)}>
-          <option value="all">Todos os tipos</option>
-          {types.map((type) => <option key={type} value={type}>{type}</option>)}
-        </select>
+        <Button href="/gerador" className="bg-brand-500 text-ink hover:bg-brand-600">
+          <FilePlus2 size={17} />
+          Criar novo
+        </Button>
       </div>
 
-      {filtered.map((item) => (
-        <Card key={item.id}>
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 className="font-semibold">{item.type}</h2>
-              <p className="mt-1 text-sm text-white/50">{item.language} - {item.target_country}</p>
-              <p className="mt-1 text-xs text-white/40">{new Date(item.created_at).toLocaleString("pt-BR")}</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button onClick={() => copyText(item.id, item.output)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10">
-                <Copy size={16} />
-                {copied === item.id ? "Copiado" : "Copiar"}
+      <Card>
+        <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+          <label className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35" size={17} />
+            <input
+              className={`${inputClass} pl-10`}
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Buscar por tipo, idioma, país ou conteúdo"
+            />
+          </label>
+          <div className="flex max-w-full gap-2 overflow-x-auto">
+            <button onClick={() => setFilter("all")} className={`focus-ring shrink-0 rounded-md px-3 py-2 text-sm font-semibold ${filter === "all" ? "bg-brand-500 text-ink" : "border border-white/10 text-white/70 hover:bg-white/8"}`}>
+              Todos
+            </button>
+            {types.map((type) => (
+              <button key={type} onClick={() => setFilter(type)} className={`focus-ring shrink-0 rounded-md px-3 py-2 text-sm font-semibold ${filter === type ? "bg-brand-500 text-ink" : "border border-white/10 text-white/70 hover:bg-white/8"}`}>
+                {typeLabels[type] || type}
               </button>
-              <Link href="/dashboard" className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10">
-                <RefreshCw size={16} />
-                Regenerar
-              </Link>
-            </div>
+            ))}
           </div>
-          <p className="mt-4 line-clamp-2 text-sm leading-6 text-white/55">{item.output}</p>
-          <details className="mt-4">
-            <summary className="focus-ring inline-flex cursor-pointer rounded-md border border-white/10 px-4 py-2 text-sm font-semibold text-white/80 hover:bg-white/10">
-              Abrir documento
-            </summary>
-            <pre className="mt-4 max-h-72 overflow-auto whitespace-pre-wrap rounded-md bg-black/25 p-4 text-sm leading-6 text-white/78">{item.output}</pre>
-          </details>
+        </div>
+      </Card>
+
+      <div className="grid gap-3">
+        {filtered.map((item) => (
+          <Card key={item.id} className="p-0">
+            <div className="grid gap-4 p-4 lg:grid-cols-[1fr_auto] lg:items-start">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-semibold">{typeLabels[item.type] || item.type}</h2>
+                  <span className="rounded-full bg-white/8 px-2 py-1 text-xs text-white/55">{item.language}</span>
+                  <span className="rounded-full bg-white/8 px-2 py-1 text-xs text-white/55">{item.target_country}</span>
+                </div>
+                <p className="mt-1 text-xs text-white/40">{new Date(item.created_at).toLocaleString("pt-BR")}</p>
+                <p className="mt-3 line-clamp-2 text-sm leading-6 text-white/55">{item.output}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => copyText(item.id, item.output)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10">
+                  <Copy size={16} />
+                  {copied === item.id ? "Copiado" : "Copiar"}
+                </button>
+                <button onClick={() => downloadText(item)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10">
+                  <Download size={16} />
+                  Baixar
+                </button>
+                <Link href="/gerador" className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10">
+                  <RefreshCw size={16} />
+                  Regenerar
+                </Link>
+              </div>
+            </div>
+            <details className="border-t border-white/10 px-4 py-3">
+              <summary className="focus-ring inline-flex cursor-pointer list-none items-center gap-2 rounded-md px-1 py-1 text-sm font-semibold text-white/75 hover:text-white">
+                <Eye size={16} />
+                Abrir documento
+              </summary>
+              <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap rounded-md bg-black/25 p-4 text-sm leading-6 text-white/78">{item.output}</pre>
+            </details>
+          </Card>
+        ))}
+      </div>
+      {!filtered.length ? (
+        <Card>
+          <div className="grid place-items-center gap-3 py-8 text-center">
+            <FilePlus2 className="text-brand-500" size={34} />
+            <h2 className="text-xl font-semibold">Nenhum documento encontrado</h2>
+            <p className="max-w-md text-sm text-white/55">Crie uma versão otimizada ou ajuste os filtros para encontrar documentos anteriores.</p>
+            <Button href="/gerador" className="bg-brand-500 text-ink hover:bg-brand-600">Criar documento</Button>
+          </div>
         </Card>
-      ))}
-      {!filtered.length ? <Card>Nenhum documento encontrado para este filtro.</Card> : null}
+      ) : null}
     </div>
   );
 }

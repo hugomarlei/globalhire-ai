@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { Button, Card, Field, inputClass } from "@/components/ui";
+import { SocialAuthButtons } from "@/components/social-auth-buttons";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,6 +36,9 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <h1 className="text-2xl font-semibold">Entrar</h1>
         <p className="mt-2 text-sm text-white/60">Acesse seu painel da GlobalHire AI.</p>
+        <div className="mt-6">
+          <SocialAuthButtons mode="login" />
+        </div>
         <form onSubmit={submit} className="mt-6 grid gap-4">
           <Field label="E-mail">
             <input className={inputClass} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />

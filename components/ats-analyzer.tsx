@@ -86,6 +86,9 @@ export function AtsAnalyzer() {
         <p className="mt-2 text-sm leading-6 text-white/60">
           Compare seu currículo com uma vaga e veja palavras-chave, match e recomendações antes de aplicar.
         </p>
+        <p className="mt-3 rounded-md border border-white/10 bg-white/5 p-3 text-xs leading-5 text-white/50">
+          O ATS Score é uma estimativa para orientar melhorias. Ele não garante aprovação, entrevista ou resposta de recrutadores.
+        </p>
         <div className="mt-6 grid gap-4">
           <Field label="Upload PDF ou DOCX">
             <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-brand-500/40 bg-brand-500/10 p-4 text-sm text-brand-50 hover:bg-brand-500/15">
@@ -124,7 +127,7 @@ export function AtsAnalyzer() {
                 <div className="h-2 rounded-full bg-brand-500" style={{ width: `${analysis.match}%` }} />
               </div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div id="keywords" className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-md border border-white/10 bg-white/5 p-4">
                 <h2 className="font-semibold">Keywords encontradas</h2>
                 <div className="mt-3 flex flex-wrap gap-2">

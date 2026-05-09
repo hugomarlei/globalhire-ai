@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { Button, Card, Field, inputClass } from "@/components/ui";
+import { SocialAuthButtons } from "@/components/social-auth-buttons";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -44,6 +45,9 @@ export default function SignupPage() {
       <Card className="w-full max-w-md">
         <h1 className="text-2xl font-semibold">Criar conta grátis</h1>
         <p className="mt-2 text-sm text-white/60">Comece com uma geração teste.</p>
+        <div className="mt-6">
+          <SocialAuthButtons mode="signup" />
+        </div>
         <form onSubmit={submit} className="mt-6 grid gap-4">
           <Field label="Nome">
             <input className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} required />
@@ -60,7 +64,7 @@ export default function SignupPage() {
           </Button>
         </form>
         <p className="mt-5 text-sm text-white/60">
-          Ja tem conta? <Link href="/login" className="text-white">Entrar</Link>
+          Já tem conta? <Link href="/login" className="text-white">Entrar</Link>
         </p>
       </Card>
     </main>

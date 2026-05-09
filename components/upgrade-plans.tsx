@@ -3,9 +3,9 @@
 import { CheckCircle2, Loader2, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { Button, Card } from "@/components/ui";
-import { paidPlans } from "@/lib/plans";
+import { paidPlans, type PlanId } from "@/lib/plans";
 
-export function UpgradePlans() {
+export function UpgradePlans({ currentPlan = "free" }: { currentPlan?: PlanId }) {
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState("");
 
@@ -64,8 +64,15 @@ export function UpgradePlans() {
         {paidPlans.map((plan) => (
           <Card key={plan.id} className={`flex h-full flex-col ${plan.id === "pro" ? "border-brand-500/60" : ""}`}>
             <div>
-              <h2 className="text-xl font-semibold">{plan.name}</h2>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-xl font-semibold">{plan.name}</h2>
+                {plan.id === "pro" ? <span className="rounded-full bg-brand-500/15 px-3 py-1 text-xs font-semibold text-brand-500">Recomendado</span> : null}
+                {currentPlan === plan.id ? <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/70">Plano atual</span> : null}
+              </div>
               <p className="mt-2 text-2xl font-semibold">{plan.price}</p>
+              <p className="mt-1 text-xs text-white/45">
+                {plan.monthlyLimit >= 9999 ? "Gerações ilimitadas" : `${plan.monthlyLimit} gerações por mês`}
+              </p>
               <ul className="mt-4 space-y-2 text-sm text-white/70">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex gap-2">
@@ -75,9 +82,9 @@ export function UpgradePlans() {
                 ))}
               </ul>
             </div>
-            <Button className="mt-auto w-full bg-brand-500 text-white hover:bg-brand-600" onClick={() => checkout(plan.id)}>
+            <Button className="mt-auto w-full bg-brand-500 text-ink hover:bg-brand-600" onClick={() => checkout(plan.id)} disabled={currentPlan === plan.id || loading === plan.id}>
               {loading === plan.id ? <Loader2 className="animate-spin" size={17} /> : null}
-              Assinar
+              {currentPlan === plan.id ? "Plano atual" : "Assinar"}
             </Button>
           </Card>
         ))}

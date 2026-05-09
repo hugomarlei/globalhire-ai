@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, FileText, FileUp, Loader2, Sparkles } from "lucide-react";
+import { AlertTriangle, Copy, Download, FileText, FileUp, Loader2, RefreshCw, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button, Card, Field, inputClass, textareaClass } from "@/components/ui";
 import { normalizeDocumentText } from "@/lib/document-format";
@@ -72,17 +72,19 @@ function templateStyles(template: PdfTemplate) {
   return `${base}\n${variants[template]}`;
 }
 
-export function DashboardGenerator({ hasPaidPlan }: { hasPaidPlan: boolean }) {
+export function DashboardGenerator({ hasPaidPlan, initialType }: { hasPaidPlan: boolean; initialType?: GenerationType }) {
   const { locale } = useLanguage();
   const [resume, setResume] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [language, setLanguage] = useState("English");
   const [targetCountry, setTargetCountry] = useState("Estados Unidos");
-  const [type, setType] = useState<GenerationType>("ats_resume");
+  const [type, setType] = useState<GenerationType>(initialType || "ats_resume");
   const [pdfTemplate, setPdfTemplate] = useState<PdfTemplate>("executive");
   const [output, setOutput] = useState("");
   const [appliedImprovements, setAppliedImprovements] = useState<AppliedImprovement[]>([]);
   const [error, setError] = useState("");
+  const [limitReached, setLimitReached] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingUpload, setLoadingUpload] = useState(false);
   const [uploadMessage, setUploadMessage] = useState("");
@@ -115,17 +117,18 @@ export function DashboardGenerator({ hasPaidPlan }: { hasPaidPlan: boolean }) {
     setLoadingUpload(false);
 
     if (!response.ok) {
-      setUploadMessage(data.error || "Não consegui ler o arquivo.");
+      setUploadMessage(data.error || "Não consegui ler o arquivo. Se for um PDF escaneado, cole o texto manualmente.");
       return;
     }
 
     setResume(data.text);
-    setUploadMessage("Currículo importado com sucesso.");
+    setUploadMessage("Currículo importado com sucesso. Revise o texto abaixo antes de gerar.");
   }
 
   async function generate() {
     setLoading(true);
     setError("");
+    setLimitReached(false);
     setOutput("");
     setAppliedImprovements([]);
 
@@ -140,6 +143,7 @@ export function DashboardGenerator({ hasPaidPlan }: { hasPaidPlan: boolean }) {
 
     if (!response.ok) {
       setError(data.error || copy.errorFallback);
+      setLimitReached(response.status === 402);
       return;
     }
 
@@ -157,6 +161,13 @@ export function DashboardGenerator({ hasPaidPlan }: { hasPaidPlan: boolean }) {
           : item
       )
     );
+  }
+
+  async function copyOutput() {
+    if (!output) return;
+    await navigator.clipboard.writeText(normalizeDocumentText(output));
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1800);
   }
 
   function exportPdf() {
@@ -200,6 +211,9 @@ export function DashboardGenerator({ hasPaidPlan }: { hasPaidPlan: boolean }) {
             </label>
           </Field>
           {uploadMessage ? <p className="text-sm text-white/60">{uploadMessage}</p> : null}
+          <p className="rounded-md border border-white/10 bg-white/5 p-3 text-xs leading-5 text-white/50">
+            Arquivos PDF/DOCX são lidos automaticamente. PDFs escaneados ou em imagem podem falhar; nesse caso, copie e cole o texto do currículo no campo abaixo.
+          </p>
           <Field label={copy.resume}>
             <textarea className={textareaClass} value={resume} onChange={(e) => setResume(e.target.value)} placeholder={copy.resumePlaceholder} />
           </Field>
@@ -230,7 +244,14 @@ export function DashboardGenerator({ hasPaidPlan }: { hasPaidPlan: boolean }) {
               </select>
             </Field>
           </div>
-          {error ? <p className="rounded-md bg-coral/15 p-3 text-sm text-coral">{error}</p> : null}
+          {error ? (
+            <div className="rounded-md bg-coral/15 p-3 text-sm text-coral">
+              <p className="flex items-center gap-2 font-semibold"><AlertTriangle size={16} /> {error}</p>
+              {limitReached ? (
+                <Button href="/assinatura" className="mt-3 bg-brand-500 text-ink hover:bg-brand-600">Fazer upgrade para continuar</Button>
+              ) : null}
+            </div>
+          ) : null}
           <Button type="button" className="bg-brand-500 text-white hover:bg-brand-600" onClick={generate} disabled={loading}>
             {loading ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
             {loading ? copy.generating : copy.generate}
@@ -253,6 +274,24 @@ export function DashboardGenerator({ hasPaidPlan }: { hasPaidPlan: boolean }) {
         <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
           <h2 className="text-xl font-semibold">{copy.finalDocument}</h2>
           <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end">
+            <button
+              type="button"
+              onClick={copyOutput}
+              disabled={!output}
+              className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/10 px-3 text-sm text-white/80 disabled:opacity-40"
+            >
+              <Copy size={17} />
+              {copied ? "Copiado" : "Copiar"}
+            </button>
+            <button
+              type="button"
+              onClick={generate}
+              disabled={loading || !resume}
+              className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/10 px-3 text-sm text-white/80 disabled:opacity-40"
+            >
+              <RefreshCw size={17} />
+              Gerar novamente
+            </button>
             <Field label={copy.pdfTemplate}>
               <select className={`${inputClass} h-10 min-h-10`} value={pdfTemplate} onChange={(event) => setPdfTemplate(event.target.value as PdfTemplate)}>
                 {pdfTemplates.map((template) => (
