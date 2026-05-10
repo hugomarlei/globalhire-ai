@@ -8,7 +8,17 @@ export const plans = {
     name: "Free",
     price: "R$0",
     monthlyLimit: 1,
-    features: ["1 geração premium por mês", "Currículo ATS", "Carta de apresentação", "Resumo LinkedIn", "ATS Score"]
+    features: [
+      "1 uso premium por mês",
+      "Todas as ferramentas por degustação",
+      "Currículo ATS",
+      "Carta de apresentação",
+      "Resumo LinkedIn",
+      "Mensagem para recrutador",
+      "Simular entrevista",
+      "Traduzir currículo",
+      "ATS Score e palavras-chave"
+    ]
   },
   starter: {
     id: "starter",
@@ -63,9 +73,9 @@ export const featureMinimumPlan: Record<GenerationType | "ats_score" | "keywords
   ats_resume: "free",
   cover_letter: "free",
   linkedin_summary: "free",
-  recruiter_message: "pro",
-  interview_prep: "pro",
-  translate_resume: "pro",
+  recruiter_message: "free",
+  interview_prep: "free",
+  translate_resume: "free",
   ats_score: "free",
   keywords: "free"
 };
