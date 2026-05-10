@@ -3,7 +3,7 @@ import { z } from "zod";
 import { buildPrompt } from "@/prompts/ai-prompts";
 import { createClient } from "@/lib/supabase-server";
 import { groq, GROQ_MODEL } from "@/lib/groq";
-import { effectivePlanId, plans } from "@/lib/plans";
+import { canUseFeature, effectivePlanId, optimizationIntensity, plans } from "@/lib/plans";
 import { rateLimit } from "@/lib/rate-limit";
 import { parseAiOutput } from "@/lib/document-format";
 
@@ -54,7 +54,12 @@ export async function POST(request: NextRequest) {
 
     if (profile?.is_blocked) return NextResponse.json({ error: "Conta bloqueada." }, { status: 403 });
 
-    const plan = plans[effectivePlanId(profile?.plan, user.email)] || plans.free;
+    const planId = effectivePlanId(profile?.plan, user.email);
+    const plan = plans[planId] || plans.free;
+
+    if (!canUseFeature(planId, "ats_score")) {
+      return NextResponse.json({ error: "ATS Score e otimização a partir da análise estão disponíveis a partir do plano Pro." }, { status: 403 });
+    }
     const since = new Date();
     since.setDate(1);
     since.setHours(0, 0, 0, 0);
@@ -85,12 +90,16 @@ Contexto da análise ATS já realizada:
 
 Obrigatório: use estes achados para reescrever o currículo de forma mais forte e alinhada à vaga. Incorpore palavras-chave ausentes somente quando forem compatíveis com a experiência real do candidato.`;
 
+    const intensity = optimizationIntensity(planId);
     const prompt = buildPrompt({
       type: "ats_resume",
       resume: parsed.data.resume,
       jobDescription: `${parsed.data.jobDescription}\n\n${scoreContext}`,
       language: parsed.data.language,
-      targetCountry: parsed.data.targetCountry
+      targetCountry: parsed.data.targetCountry,
+      optimizationInstruction: intensity.instruction,
+      planLabel: intensity.label,
+      intensityPercent: intensity.percent
     });
 
     const completion = await groq.chat.completions.create({

@@ -6,6 +6,9 @@ type PromptArgs = {
   jobDescription: string;
   language: string;
   targetCountry: string;
+  optimizationInstruction?: string;
+  planLabel?: string;
+  intensityPercent?: string;
 };
 
 const labels: Record<GenerationType, string> = {
@@ -101,6 +104,8 @@ Contexto estrategico:
 O usuario espera uma transformacao real do material, nao uma reescrita superficial. Seu trabalho e agir como um career strategist, resume writer executivo e recrutador internacional ao mesmo tempo.
 
 Regras de qualidade:
+- Plano aplicado: ${args.planLabel || "Starter/Free"}. Intensidade de otimização esperada: ${args.intensityPercent || "50%"}.
+- Instrução de intensidade: ${args.optimizationInstruction || "Aplique melhoria moderada, fiel ao currículo original e alinhada à vaga quando houver descrição."}
 - Seja especifico, profissional e orientado a resultado.
 - Antes de escrever, analise mentalmente a descrição da vaga e identifique cargo-alvo, responsabilidades, senioridade, competências técnicas, competências comportamentais, palavras-chave ATS e contexto do país.
 - Adapte o documento ao texto da vaga. Não apenas reescreva o currículo com sinônimos.

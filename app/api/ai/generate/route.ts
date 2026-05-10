@@ -3,7 +3,7 @@ import { buildPrompt } from "@/prompts/ai-prompts";
 import { createClient } from "@/lib/supabase-server";
 import { generateSchema } from "@/lib/validation";
 import { groq, GROQ_MODEL } from "@/lib/groq";
-import { effectivePlanId, plans } from "@/lib/plans";
+import { canUseFeature, effectivePlanId, featureMinimumPlan, optimizationIntensity, plans } from "@/lib/plans";
 import { rateLimit } from "@/lib/rate-limit";
 import { parseAiOutput } from "@/lib/document-format";
 
@@ -48,7 +48,14 @@ export async function POST(request: NextRequest) {
 
     if (profile?.is_blocked) return NextResponse.json({ error: "Conta bloqueada." }, { status: 403 });
 
-    const plan = plans[effectivePlanId(profile?.plan, user.email)] || plans.free;
+    const planId = effectivePlanId(profile?.plan, user.email);
+    const plan = plans[planId] || plans.free;
+
+    if (!canUseFeature(planId, parsed.data.type)) {
+      return NextResponse.json({
+        error: `Esta ferramenta está disponível a partir do plano ${plans[featureMinimumPlan[parsed.data.type]].name}.`
+      }, { status: 403 });
+    }
     const since = new Date();
     since.setDate(1);
     since.setHours(0, 0, 0, 0);
@@ -67,12 +74,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "GROQ_API_KEY nao configurada no servidor." }, { status: 500 });
     }
     
+    const intensity = optimizationIntensity(planId);
     const prompt = buildPrompt({
       type: parsed.data.type,
       resume: parsed.data.resume,
       jobDescription: parsed.data.jobDescription,
       language: parsed.data.language,
-      targetCountry: parsed.data.targetCountry
+      targetCountry: parsed.data.targetCountry,
+      optimizationInstruction: intensity.instruction,
+      planLabel: intensity.label,
+      intensityPercent: intensity.percent
     });
 
     const completion = await groq.chat.completions.create({

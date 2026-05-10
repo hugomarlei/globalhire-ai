@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BarChart3, BookOpenText, BriefcaseBusiness, ChevronDown, FileClock, Gauge, Globe2, LayoutDashboard, Linkedin, LogOut, MailPlus, Menu, MessageSquareText, Settings, UserCircle } from "lucide-react";
+import { BarChart3, BookOpenText, BriefcaseBusiness, ChevronDown, FileClock, Gauge, Globe2, Languages, LayoutDashboard, Linkedin, LogOut, MailPlus, Menu, MessageSquareText, MessagesSquare, Settings, UserCircle, Video } from "lucide-react";
 import { Button, inputClass } from "@/components/ui";
 import { useLanguage } from "@/components/language-provider";
 import { locales, navCopy, type Locale } from "@/lib/i18n";
@@ -62,11 +62,14 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
   const copy = navCopy[locale];
   const groups = [
     {
-      label: "Criar",
+      label: "Ferramentas",
       items: [
-        { href: "/gerador", label: "Gerador de currículo", Icon: BriefcaseBusiness },
+        { href: "/gerador", label: "Currículo ATS", Icon: BriefcaseBusiness },
         { href: "/gerador?tipo=cover_letter", label: "Carta de apresentação", Icon: MailPlus },
-        { href: "/gerador?tipo=linkedin_summary", label: "LinkedIn", Icon: Linkedin }
+        { href: "/gerador?tipo=linkedin_summary", label: "Resumo LinkedIn", Icon: Linkedin },
+        { href: "/gerador?tipo=recruiter_message", label: "Mensagem para recrutador", Icon: MessagesSquare },
+        { href: "/gerador?tipo=interview_prep", label: "Simular entrevista", Icon: Video },
+        { href: "/gerador?tipo=translate_resume", label: "Traduzir currículo", Icon: Languages }
       ]
     },
     {
@@ -80,7 +83,7 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
       label: "Documentos",
       items: [
         { href: "/historico", label: "Histórico", Icon: FileClock },
-        { href: "/historico?tab=all", label: "Meus documentos", Icon: MessageSquareText }
+        { href: "/historico?tab=documentos", label: "Meus documentos", Icon: MessageSquareText }
       ]
     }
   ];

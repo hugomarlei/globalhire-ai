@@ -137,7 +137,15 @@ function templateStyles(template: PdfTemplate) {
   return `${base}\n${variants[template]}`;
 }
 
-export function DashboardGenerator({ hasPaidPlan, initialType }: { hasPaidPlan: boolean; initialType?: GenerationType }) {
+export function DashboardGenerator({
+  hasPaidPlan,
+  initialType,
+  allowedTypes
+}: {
+  hasPaidPlan: boolean;
+  initialType?: GenerationType;
+  allowedTypes?: GenerationType[];
+}) {
   const { locale } = useLanguage();
   const [resume, setResume] = useState("");
   const [jobDescription, setJobDescription] = useState("");
@@ -157,6 +165,7 @@ export function DashboardGenerator({ hasPaidPlan, initialType }: { hasPaidPlan: 
   const copy = dashboardCopy[locale];
   const steps = ["Analisando currículo", "Lendo descrição da vaga", "Comparando ATS", "Gerando documento", "Finalizando resultado"];
   const context = generatorContext[type];
+  const visibleTypes = allowedTypes?.length ? types.filter((item) => allowedTypes.includes(item.value)) : types;
 
   useEffect(() => {
     if (!loading) {
@@ -182,7 +191,7 @@ export function DashboardGenerator({ hasPaidPlan, initialType }: { hasPaidPlan: 
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        setUploadMessage(data.error || "Não consegui ler o arquivo. Se for um PDF escaneado, cole o texto manualmente.");
+        setUploadMessage(data.error || "Não consegui extrair o texto deste arquivo. Use PDF ou DOCX com texto selecionável; se for escaneado ou imagem, cole o conteúdo manualmente no campo abaixo.");
         return;
       }
 
@@ -285,7 +294,7 @@ export function DashboardGenerator({ hasPaidPlan, initialType }: { hasPaidPlan: 
           </Field>
           {uploadMessage ? <p className="text-sm text-white/60">{uploadMessage}</p> : null}
           <p className="rounded-md border border-white/10 bg-white/5 p-3 text-xs leading-5 text-white/50">
-            Arquivos PDF/DOCX são lidos automaticamente. PDFs escaneados ou em imagem podem falhar; nesse caso, copie e cole o texto do currículo no campo abaixo.
+            Aceitamos PDF e DOCX com texto real, até 5 MB. Se o arquivo for uma imagem ou PDF escaneado, a leitura automática pode não funcionar; nesse caso, cole o texto manualmente abaixo.
           </p>
           <Field label={context.resumeLabel}>
             <textarea className={textareaClass} value={resume} onChange={(e) => setResume(e.target.value)} placeholder={context.resumePlaceholder} />
@@ -313,7 +322,7 @@ export function DashboardGenerator({ hasPaidPlan, initialType }: { hasPaidPlan: 
             </Field>
             <Field label={copy.deliveryType}>
               <select className={inputClass} value={type} onChange={(e) => setType(e.target.value as GenerationType)}>
-                {types.map((item) => <option key={item.value} value={item.value}>{copy.deliveryTypes[item.value]}</option>)}
+                {visibleTypes.map((item) => <option key={item.value} value={item.value}>{copy.deliveryTypes[item.value]}</option>)}
               </select>
             </Field>
           </div>

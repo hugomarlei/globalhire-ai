@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 
     if (cleanText.length < 100) {
       return NextResponse.json({
-        error: "Não consegui extrair texto suficiente. Se o PDF for escaneado ou imagem, cole o currículo manualmente."
+        error: "O arquivo abriu, mas não encontrei texto suficiente para importar. Isso acontece com PDF escaneado ou imagem. Você pode copiar e colar o texto do currículo manualmente no campo abaixo."
       }, { status: 422 });
     }
 
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("upload_parse_error", error);
     return NextResponse.json({
-      error: "Não consegui ler o arquivo. Tente outro PDF/DOCX ou cole o texto manualmente."
+      error: "Não consegui extrair o texto deste arquivo. Use PDF ou DOCX com texto selecionável; se for escaneado, cole o conteúdo manualmente."
     }, { status: 500 });
   }
 }
