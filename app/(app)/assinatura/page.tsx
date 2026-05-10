@@ -24,7 +24,7 @@ export default async function SubscriptionPage() {
         currentPeriodEnd={subscription?.current_period_end}
         initialTab="subscription"
       />
-      <section id="upgrade" className="grid gap-3">
+      <section id="planos" className="scroll-mt-28 grid gap-3">
         <div>
           <h2 className="text-2xl font-semibold">Comparar planos</h2>
           <p className="mt-2 text-sm text-white/60">Escolha o plano ideal sem perder seu histórico ou configurações.</p>

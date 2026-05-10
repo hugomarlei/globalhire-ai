@@ -73,7 +73,7 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
       label: "Analisar",
       items: [
         { href: "/ats-score", label: "ATS Score", Icon: Gauge },
-        { href: "/ats-score#keywords", label: "Palavras-chave", Icon: BookOpenText }
+        { href: "/ats-score?modo=keywords#keywords", label: "Palavras-chave", Icon: BookOpenText }
       ]
     },
     {

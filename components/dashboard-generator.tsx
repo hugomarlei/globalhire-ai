@@ -30,6 +30,71 @@ const pdfTemplates: Array<{ value: PdfTemplate; label: string }> = [
   { value: "compact", label: "Compacto premium" }
 ];
 
+const generatorContext: Record<GenerationType, {
+  title: string;
+  subtitle: string;
+  resumeLabel: string;
+  resumePlaceholder: string;
+  jobPlaceholder: string;
+  cta: string;
+  empty: string;
+}> = {
+  ats_resume: {
+    title: "Gerador de Currículo ATS",
+    subtitle: "Transforme seu currículo em uma versão internacional, clara e alinhada à descrição da vaga.",
+    resumeLabel: "Currículo atual",
+    resumePlaceholder: "Cole aqui seu currículo completo. Inclua experiências, formação, ferramentas, idiomas e certificações.",
+    jobPlaceholder: "Cole a descrição da vaga para a IA adaptar o currículo ao cargo, país e palavras-chave.",
+    cta: "Gerar currículo ATS",
+    empty: "Seu currículo otimizado aparecerá aqui, limpo e pronto para exportar."
+  },
+  cover_letter: {
+    title: "Gerador de Carta de Apresentação",
+    subtitle: "Crie uma carta objetiva, persuasiva e conectada à vaga escolhida.",
+    resumeLabel: "Currículo ou base profissional",
+    resumePlaceholder: "Cole seu currículo ou um resumo da sua experiência para sustentar a carta.",
+    jobPlaceholder: "Cole a vaga ou contexto da empresa para personalizar a carta.",
+    cta: "Gerar carta de apresentação",
+    empty: "Sua carta de apresentação aparecerá aqui com tom profissional e pronta para envio."
+  },
+  linkedin_summary: {
+    title: "Gerador de Resumo LinkedIn",
+    subtitle: "Posicione seu perfil para recrutadores internacionais com um resumo forte e humano.",
+    resumeLabel: "Base profissional",
+    resumePlaceholder: "Cole seu currículo ou descreva sua trajetória, especialidade, ferramentas e objetivo profissional.",
+    jobPlaceholder: "Opcional: cole uma vaga ou área-alvo para direcionar o posicionamento do LinkedIn.",
+    cta: "Gerar resumo LinkedIn",
+    empty: "Seu resumo de LinkedIn aparecerá aqui, pronto para colar no perfil."
+  },
+  recruiter_message: {
+    title: "Mensagem para Recrutador",
+    subtitle: "Escreva uma abordagem curta, natural e relevante para iniciar conversa.",
+    resumeLabel: "Base profissional",
+    resumePlaceholder: "Cole seu currículo ou pontos principais da sua experiência.",
+    jobPlaceholder: "Cole a vaga, nome do cargo ou contexto do recrutador.",
+    cta: "Gerar mensagem",
+    empty: "Sua mensagem para recrutador aparecerá aqui."
+  },
+  interview_prep: {
+    title: "Preparação para Entrevista",
+    subtitle: "Prepare respostas, riscos e argumentos com base na vaga e no seu histórico.",
+    resumeLabel: "Currículo ou experiência",
+    resumePlaceholder: "Cole seu currículo ou descreva sua experiência principal.",
+    jobPlaceholder: "Cole a descrição da vaga para gerar perguntas e respostas direcionadas.",
+    cta: "Preparar entrevista",
+    empty: "Seu roteiro de preparação para entrevista aparecerá aqui."
+  },
+  translate_resume: {
+    title: "Tradução e Adaptação Internacional",
+    subtitle: "Adapte o currículo para o idioma, país e convenções do mercado-alvo.",
+    resumeLabel: "Currículo original",
+    resumePlaceholder: "Cole o currículo que deseja traduzir e adaptar.",
+    jobPlaceholder: "Opcional: cole uma vaga para adaptar termos, senioridade e palavras-chave.",
+    cta: "Traduzir e adaptar",
+    empty: "Seu currículo traduzido e adaptado aparecerá aqui."
+  }
+};
+
 function escapeHtml(value: string) {
   const entities: Record<string, string> = { "<": "&lt;", ">": "&gt;", "&": "&amp;" };
   return value.replace(/[<>&]/g, (char) => entities[char] || char);
@@ -91,6 +156,7 @@ export function DashboardGenerator({ hasPaidPlan, initialType }: { hasPaidPlan: 
   const [generationStep, setGenerationStep] = useState(0);
   const copy = dashboardCopy[locale];
   const steps = ["Analisando currículo", "Lendo descrição da vaga", "Comparando ATS", "Gerando documento", "Finalizando resultado"];
+  const context = generatorContext[type];
 
   useEffect(() => {
     if (!loading) {
@@ -109,20 +175,24 @@ export function DashboardGenerator({ hasPaidPlan, initialType }: { hasPaidPlan: 
     if (!file) return;
     setLoadingUpload(true);
     setUploadMessage("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/upload/parse", { method: "POST", body: formData });
+      const data = await response.json().catch(() => ({}));
 
-    const formData = new FormData();
-    formData.append("file", file);
-    const response = await fetch("/api/upload/parse", { method: "POST", body: formData });
-    const data = await response.json();
-    setLoadingUpload(false);
+      if (!response.ok) {
+        setUploadMessage(data.error || "Não consegui ler o arquivo. Se for um PDF escaneado, cole o texto manualmente.");
+        return;
+      }
 
-    if (!response.ok) {
-      setUploadMessage(data.error || "Não consegui ler o arquivo. Se for um PDF escaneado, cole o texto manualmente.");
-      return;
+      setResume(data.text);
+      setUploadMessage(`Currículo importado com sucesso: ${Math.round(data.text.length / 100) / 10} mil caracteres extraídos.`);
+    } catch {
+      setUploadMessage("Não consegui concluir o upload. Tente novamente ou cole o texto manualmente.");
+    } finally {
+      setLoadingUpload(false);
     }
-
-    setResume(data.text);
-    setUploadMessage("Currículo importado com sucesso. Revise o texto abaixo antes de gerar.");
   }
 
   async function generate() {
@@ -200,7 +270,10 @@ export function DashboardGenerator({ hasPaidPlan, initialType }: { hasPaidPlan: 
       <Card>
         <div className="flex items-center gap-2">
           <Sparkles className="text-brand-500" size={22} />
-          <h1 className="text-2xl font-semibold">{copy.generatorTitle}</h1>
+          <div>
+            <h1 className="text-2xl font-semibold">{context.title}</h1>
+            <p className="mt-1 text-sm leading-6 text-white/60">{context.subtitle}</p>
+          </div>
         </div>
         <div className="mt-6 grid gap-4">
           <Field label="Upload PDF/DOCX">
@@ -214,11 +287,11 @@ export function DashboardGenerator({ hasPaidPlan, initialType }: { hasPaidPlan: 
           <p className="rounded-md border border-white/10 bg-white/5 p-3 text-xs leading-5 text-white/50">
             Arquivos PDF/DOCX são lidos automaticamente. PDFs escaneados ou em imagem podem falhar; nesse caso, copie e cole o texto do currículo no campo abaixo.
           </p>
-          <Field label={copy.resume}>
-            <textarea className={textareaClass} value={resume} onChange={(e) => setResume(e.target.value)} placeholder={copy.resumePlaceholder} />
+          <Field label={context.resumeLabel}>
+            <textarea className={textareaClass} value={resume} onChange={(e) => setResume(e.target.value)} placeholder={context.resumePlaceholder} />
           </Field>
           <Field label={copy.jobDescription}>
-            <textarea className={textareaClass} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder={copy.jobDescriptionPlaceholder} />
+            <textarea className={textareaClass} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder={context.jobPlaceholder} />
           </Field>
           <div className="grid min-w-0 gap-4 sm:grid-cols-3">
             <Field label={copy.outputLanguage}>
@@ -248,13 +321,16 @@ export function DashboardGenerator({ hasPaidPlan, initialType }: { hasPaidPlan: 
             <div className="rounded-md bg-coral/15 p-3 text-sm text-coral">
               <p className="flex items-center gap-2 font-semibold"><AlertTriangle size={16} /> {error}</p>
               {limitReached ? (
-                <Button href="/assinatura" className="mt-3 bg-brand-500 text-ink hover:bg-brand-600">Fazer upgrade para continuar</Button>
+                <div className="mt-3 grid gap-2">
+                  <p className="text-sm text-coral/85">Seu limite mensal renova no início do próximo mês. Para continuar hoje, faça upgrade.</p>
+                  <Button href="/assinatura#planos" className="bg-brand-500 text-ink hover:bg-brand-600">Fazer upgrade para continuar</Button>
+                </div>
               ) : null}
             </div>
           ) : null}
           <Button type="button" className="bg-brand-500 text-white hover:bg-brand-600" onClick={generate} disabled={loading}>
             {loading ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
-            {loading ? copy.generating : copy.generate}
+            {loading ? copy.generating : context.cta}
           </Button>
           {loading ? (
             <div className="rounded-md border border-brand-500/20 bg-brand-500/10 p-4">
@@ -311,7 +387,7 @@ export function DashboardGenerator({ hasPaidPlan, initialType }: { hasPaidPlan: 
           </div>
         </div>
         <pre className="mt-5 min-h-[520px] whitespace-pre-wrap rounded-md border border-white/10 bg-black/25 p-4 text-sm leading-6 text-white/82">
-          {loading ? "Preparando resultado premium..." : output || copy.emptyOutput}
+          {loading ? "Preparando resultado premium..." : output || context.empty}
         </pre>
         <div className="mt-4 rounded-md border border-white/10 bg-white/5 p-4">
           <div className="flex items-center gap-2">

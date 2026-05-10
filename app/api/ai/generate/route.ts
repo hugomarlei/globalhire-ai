@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       .gte("created_at", since.toISOString());
 
     if ((count || 0) >= plan.monthlyLimit) {
-      return NextResponse.json({ error: "Voce atingiu o limite do seu plano neste mes." }, { status: 402 });
+      return NextResponse.json({ error: "Você atingiu o limite mensal do seu plano. O limite renova no início do próximo mês." }, { status: 402 });
     }
 
     if (!process.env.GROQ_API_KEY) {

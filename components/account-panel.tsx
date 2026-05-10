@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BarChart3, Copy, CreditCard, Gift, KeyRound, Loader2, LogOut, Settings, ShieldCheck, UserCircle } from "lucide-react";
+import { AlertTriangle, BarChart3, Copy, CreditCard, Gift, KeyRound, Loader2, LogOut, Settings, ShieldCheck, Trash2, UserCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button, Card, Field, inputClass } from "@/components/ui";
 
@@ -30,6 +30,8 @@ export function AccountPanel({
   const [activeTab, setActiveTab] = useState<AccountTab>(initialTab);
   const [error, setError] = useState("");
   const [loadingPortal, setLoadingPortal] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [copiedReferral, setCopiedReferral] = useState(false);
   const referralLink = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -56,6 +58,25 @@ export function AccountPanel({
     await navigator.clipboard.writeText(referralLink);
     setCopiedReferral(true);
     window.setTimeout(() => setCopiedReferral(false), 1800);
+  }
+
+  async function deleteAccount() {
+    setDeletingAccount(true);
+    setError("");
+    const response = await fetch("/api/account/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirmation: deleteConfirmation })
+    });
+    const data = await response.json().catch(() => ({}));
+    setDeletingAccount(false);
+
+    if (!response.ok) {
+      setError(data.error || "Não foi possível excluir a conta.");
+      return;
+    }
+
+    window.location.href = "/";
   }
 
   const tabs: Array<{ id: AccountTab; label: string; Icon: React.ElementType }> = [
@@ -92,6 +113,7 @@ export function AccountPanel({
           ))}
         </div>
       </div>
+      {error ? <p className="rounded-md bg-coral/15 p-3 text-sm text-coral">{error}</p> : null}
 
       {activeTab === "account" ? (
         <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
@@ -132,6 +154,28 @@ export function AccountPanel({
               </form>
             </div>
           </Card>
+          <Card className="border-coral/35 lg:col-span-2">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="text-coral" size={22} />
+              <h2 className="text-xl font-semibold">Excluir conta e dados</h2>
+            </div>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
+              Esta ação é irreversível. Ela remove seus documentos, histórico, assinatura registrada no app e tenta cancelar a assinatura Stripe antes de excluir seu usuário Auth.
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+              <Field label='Digite "EXCLUIR MINHA CONTA" para confirmar'>
+                <input className={inputClass} value={deleteConfirmation} onChange={(event) => setDeleteConfirmation(event.target.value)} />
+              </Field>
+              <Button
+                onClick={deleteAccount}
+                disabled={deletingAccount || deleteConfirmation !== "EXCLUIR MINHA CONTA"}
+                className="border border-coral/40 bg-coral/15 text-coral hover:bg-coral/20"
+              >
+                {deletingAccount ? <Loader2 className="animate-spin" size={17} /> : <Trash2 size={17} />}
+                Excluir conta
+              </Button>
+            </div>
+          </Card>
         </div>
       ) : null}
 
@@ -160,9 +204,8 @@ export function AccountPanel({
               <p className="text-sm text-white/50">Próxima cobrança ou fim do período</p>
               <p className="mt-1 font-semibold">{formatDate(currentPeriodEnd)}</p>
             </div>
-            {error ? <p className="mt-4 rounded-md bg-coral/15 p-3 text-sm text-coral">{error}</p> : null}
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <Button href="/assinatura" className="bg-brand-500 text-ink hover:bg-brand-600">Ver planos</Button>
+              <Button href="/assinatura#planos" className="bg-brand-500 text-ink hover:bg-brand-600">Ver planos</Button>
               <Button onClick={openPortal} disabled={loadingPortal} className="border border-white/10 bg-white/8 text-white hover:bg-white/12">
                 {loadingPortal ? <Loader2 className="animate-spin" size={17} /> : <CreditCard size={17} />}
                 {loadingPortal ? "Abrindo..." : "Gerenciar assinatura"}
@@ -176,7 +219,7 @@ export function AccountPanel({
               <h2 className="text-xl font-semibold">Histórico de pagamentos</h2>
             </div>
             <div className="mt-5 rounded-md border border-dashed border-white/15 bg-black/20 p-5 text-sm leading-6 text-white/60">
-              O histórico detalhado fica disponível no Stripe Customer Portal. Quando houver faturas reais, o usuário poderá visualizar recibos e meios de pagamento por lá.
+              Você pode gerenciar sua assinatura, forma de pagamento e recibos com segurança pelo portal de pagamentos.
             </div>
           </Card>
         </div>

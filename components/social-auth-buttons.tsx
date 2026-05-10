@@ -44,7 +44,7 @@ export function SocialAuthButtons({ mode }: { mode: "login" | "signup" }) {
 
     if (authError) {
       setLoadingProvider(null);
-      setError("Este login social ainda não está configurado. Use e-mail e senha ou ative o provider no Supabase.");
+      setError("Login social ainda não configurado. Use e-mail e senha por enquanto.");
     }
   }
 

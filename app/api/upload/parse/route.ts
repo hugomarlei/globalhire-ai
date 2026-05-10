@@ -9,6 +9,15 @@ const allowedTypes = new Set([
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ]);
 
+function withTimeout<T>(promise: Promise<T>, ms: number) {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error("parse_timeout")), ms);
+    })
+  ]);
+}
+
 export async function POST(request: Request) {
   const supabase = await createClient();
   const {
@@ -24,7 +33,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Envie um arquivo PDF ou DOCX." }, { status: 400 });
   }
 
-  if (!allowedTypes.has(file.type)) {
+  const fileName = file.name.toLowerCase();
+  const isPdf = file.type === "application/pdf" || fileName.endsWith(".pdf");
+  const isDocx =
+    file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    fileName.endsWith(".docx");
+
+  if (!allowedTypes.has(file.type) && !isPdf && !isDocx) {
     return NextResponse.json({ error: "Formato inválido. Use PDF ou DOCX." }, { status: 400 });
   }
 
@@ -37,13 +52,16 @@ export async function POST(request: Request) {
   try {
     let text = "";
 
-    if (file.type === "application/pdf") {
+    if (isPdf) {
       const parser = new PDFParse({ data: buffer });
-      const parsed = await parser.getText();
-      await parser.destroy();
-      text = parsed.text;
+      try {
+        const parsed = await withTimeout(parser.getText(), 20_000);
+        text = parsed.text;
+      } finally {
+        await parser.destroy().catch(() => undefined);
+      }
     } else {
-      const parsed = await mammoth.extractRawText({ buffer });
+      const parsed = await withTimeout(mammoth.extractRawText({ buffer }), 20_000);
       text = parsed.value;
     }
 
@@ -51,7 +69,7 @@ export async function POST(request: Request) {
 
     if (cleanText.length < 100) {
       return NextResponse.json({
-        error: "Não consegui extrair texto suficiente. Você pode colar o currículo manualmente."
+        error: "Não consegui extrair texto suficiente. Se o PDF for escaneado ou imagem, cole o currículo manualmente."
       }, { status: 422 });
     }
 
