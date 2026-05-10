@@ -152,7 +152,7 @@ export default async function DashboardPage() {
                 </Link>
               );
             })}
-            {planId === "pro" || planId === "elite" ? (
+            {planId === "free" || planId === "starter" || planId === "pro" || planId === "elite" ? (
               <Link href="/ats-score" className="flex items-center gap-3 rounded-md border border-white/10 p-3 text-sm text-white/75 hover:bg-white/8">
                 <Gauge className="text-brand-500" size={17} />
                 ATS Score e palavras-chave

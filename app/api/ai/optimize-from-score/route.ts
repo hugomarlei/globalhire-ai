@@ -6,6 +6,7 @@ import { groq, GROQ_MODEL } from "@/lib/groq";
 import { canUseFeature, effectivePlanId, optimizationIntensity, plans } from "@/lib/plans";
 import { rateLimit } from "@/lib/rate-limit";
 import { parseAiOutput } from "@/lib/document-format";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 const optimizeFromScoreSchema = z.object({
   resume: z.string().min(100, "Cole pelo menos 100 caracteres do currículo.").max(20000),
@@ -16,7 +17,8 @@ const optimizeFromScoreSchema = z.object({
   missing: z.array(z.string()).max(30).default([]),
   recommendations: z.array(z.string()).max(10).default([]),
   language: z.string().min(2).max(40).default("Português do Brasil"),
-  targetCountry: z.string().min(2).max(60).default("Estados Unidos")
+  targetCountry: z.string().min(2).max(60).default("Estados Unidos"),
+  turnstileToken: z.string().optional()
 });
 
 function scoreAppliedImprovements(items: string[]) {
@@ -44,6 +46,14 @@ export async function POST(request: NextRequest) {
     const parsed = optimizeFromScoreSchema.safeParse(await request.json());
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.errors[0]?.message || "Dados inválidos." }, { status: 400 });
+    }
+
+    const captcha = await verifyTurnstileToken(
+      parsed.data.turnstileToken,
+      request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for")
+    );
+    if (!captcha.ok) {
+      return NextResponse.json({ error: captcha.error || "Confirme o captcha para otimizar." }, { status: 400 });
     }
 
     const { data: profile } = await supabase

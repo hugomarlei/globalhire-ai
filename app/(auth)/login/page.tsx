@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { Button, Card, Field, inputClass } from "@/components/ui";
 import { SocialAuthButtons } from "@/components/social-auth-buttons";
+import { TurnstileWidget } from "@/components/turnstile-widget";
+import { trackEvent } from "@/lib/analytics";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,6 +17,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [passwordUpdated, setPasswordUpdated] = useState(false);
   const [socialNotConfigured, setSocialNotConfigured] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [captchaReset, setCaptchaReset] = useState(0);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -26,15 +30,29 @@ export default function LoginPage() {
     event.preventDefault();
     setLoading(true);
     setError("");
+    const captchaResponse = await fetch("/api/security/turnstile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: turnstileToken })
+    });
+    if (!captchaResponse.ok) {
+      const data = await captchaResponse.json().catch(() => ({}));
+      setLoading(false);
+      setCaptchaReset((current) => current + 1);
+      setError(data.error || "Confirme o captcha para entrar.");
+      return;
+    }
     const supabase = createClient();
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
 
     if (authError) {
+      setCaptchaReset((current) => current + 1);
       setError("E-mail ou senha incorretos.");
       return;
     }
 
+    trackEvent("login");
     router.push("/dashboard");
     router.refresh();
   }
@@ -60,6 +78,7 @@ export default function LoginPage() {
           <Field label="Senha">
             <input className={inputClass} type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </Field>
+          <TurnstileWidget action="login" onVerify={setTurnstileToken} resetSignal={captchaReset} />
           {error ? <p className="text-sm text-coral">{error}</p> : null}
           <Button type="submit" className="bg-brand-500 text-white hover:bg-brand-600">
             {loading ? "Entrando..." : "Entrar"}

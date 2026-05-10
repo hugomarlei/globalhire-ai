@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import { Button, Card, Field, inputClass, textareaClass } from "@/components/ui";
 import { normalizeDocumentText } from "@/lib/document-format";
 import { useLanguage } from "@/components/language-provider";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 import { dashboardCopy, locales } from "@/lib/i18n";
+import { trackEvent } from "@/lib/analytics";
 import type { GenerationType } from "@/lib/types";
 
 type AppliedImprovement = {
@@ -162,6 +164,8 @@ export function DashboardGenerator({
   const [loadingUpload, setLoadingUpload] = useState(false);
   const [uploadMessage, setUploadMessage] = useState("");
   const [generationStep, setGenerationStep] = useState(0);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [captchaReset, setCaptchaReset] = useState(0);
   const copy = dashboardCopy[locale];
   const steps = ["Analisando currículo", "Lendo descrição da vaga", "Comparando ATS", "Gerando documento", "Finalizando resultado"];
   const context = generatorContext[type];
@@ -214,11 +218,12 @@ export function DashboardGenerator({
     const response = await fetch("/api/ai/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ resume, jobDescription, language, targetCountry, type })
+      body: JSON.stringify({ resume, jobDescription, language, targetCountry, type, turnstileToken })
     });
 
     const data = await response.json();
     setLoading(false);
+    setCaptchaReset((current) => current + 1);
 
     if (!response.ok) {
       setError(data.error || copy.errorFallback);
@@ -227,6 +232,7 @@ export function DashboardGenerator({
     }
 
     setOutput(data.output);
+    trackEvent("generation", { type });
     const rawImprovements = Array.isArray(data.appliedImprovements)
       ? data.appliedImprovements
       : Array.isArray(data.recommendations)
@@ -337,6 +343,7 @@ export function DashboardGenerator({
               ) : null}
             </div>
           ) : null}
+          <TurnstileWidget action="generation" onVerify={setTurnstileToken} resetSignal={captchaReset} />
           <Button type="button" className="bg-brand-500 text-white hover:bg-brand-600" onClick={generate} disabled={loading}>
             {loading ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
             {loading ? copy.generating : context.cta}

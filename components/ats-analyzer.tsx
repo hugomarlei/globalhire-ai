@@ -4,6 +4,8 @@ import Link from "next/link";
 import { AlertTriangle, CheckCircle2, Copy, FileClock, FileUp, Loader2, RefreshCw, SearchCheck, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button, Card, Field, textareaClass } from "@/components/ui";
+import { TurnstileWidget } from "@/components/turnstile-widget";
+import { trackEvent } from "@/lib/analytics";
 
 const stopWords = new Set([
   "and", "or", "the", "with", "for", "para", "com", "uma", "um", "que", "de", "da", "do", "em", "a", "o",
@@ -36,6 +38,8 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
   const [optimizedOutput, setOptimizedOutput] = useState("");
   const [optimizationError, setOptimizationError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [captchaReset, setCaptchaReset] = useState(0);
   const isKeywordMode = mode === "keywords";
 
   const analysis = useMemo(() => {
@@ -104,12 +108,14 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
         missing: analysis.missing,
         recommendations: analysis.recommendations,
         language: "Português do Brasil",
-        targetCountry: "Estados Unidos"
+        targetCountry: "Estados Unidos",
+        turnstileToken
       })
     });
 
     const data = await response.json().catch(() => ({}));
     setOptimizing(false);
+    setCaptchaReset((current) => current + 1);
 
     if (!response.ok) {
       setOptimizationError(data.error || "Não consegui gerar a versão otimizada agora.");
@@ -117,6 +123,7 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
     }
 
     setOptimizedOutput(data.output);
+    trackEvent("ats_score", { score: analysis.score, match: analysis.match });
   }
 
   async function copyOutput() {
@@ -220,6 +227,7 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
                   {optimizationError.toLowerCase().includes("limite") ? <Button href="/assinatura#planos" className="mt-3 bg-brand-500 text-ink hover:bg-brand-600">Ver planos</Button> : null}
                 </div>
               ) : null}
+              <TurnstileWidget action="ats_score" onVerify={setTurnstileToken} resetSignal={captchaReset} />
               <Button onClick={optimizeFromScore} disabled={optimizing || resume.length < 100 || jobDescription.length < 40} className="bg-brand-500 text-ink hover:bg-brand-600">
                 {optimizing ? <Loader2 className="animate-spin" size={17} /> : <Sparkles size={17} />}
                 {optimizing ? "Otimizando currículo..." : "Criar versão otimizada"}

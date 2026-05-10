@@ -8,15 +8,15 @@ export const plans = {
     name: "Free",
     price: "R$0",
     monthlyLimit: 1,
-    features: ["1 geração teste", "Preview do produto", "Histórico básico"]
+    features: ["1 geração premium por mês", "Currículo ATS", "Carta de apresentação", "Resumo LinkedIn", "ATS Score"]
   },
   starter: {
     id: "starter",
     name: "Starter",
     price: "R$29/mes",
-    monthlyLimit: 3,
+    monthlyLimit: 10,
     stripePriceEnv: "NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID",
-    features: ["3 gerações por mês", "Currículo ATS", "Carta de apresentação", "Resumo LinkedIn"]
+    features: ["10 gerações por mês", "Currículo ATS", "Carta de apresentação", "Resumo LinkedIn"]
   },
   pro: {
     id: "pro",
@@ -60,14 +60,14 @@ export const planRank: Record<PlanId, number> = {
 };
 
 export const featureMinimumPlan: Record<GenerationType | "ats_score" | "keywords", PlanId> = {
-  ats_resume: "starter",
-  cover_letter: "starter",
-  linkedin_summary: "starter",
+  ats_resume: "free",
+  cover_letter: "free",
+  linkedin_summary: "free",
   recruiter_message: "pro",
   interview_prep: "pro",
   translate_resume: "pro",
-  ats_score: "pro",
-  keywords: "pro"
+  ats_score: "free",
+  keywords: "free"
 };
 
 export const generationTypeLabels: Record<GenerationType, string> = {
@@ -88,12 +88,12 @@ export function allowedGenerationTypes(planId: PlanId) {
 }
 
 export function optimizationIntensity(planId: PlanId) {
-  if (planId === "elite") {
+  if (planId === "elite" || planId === "free") {
     return {
-      label: "Elite",
+      label: planId === "free" ? "Free premium preview" : "Elite",
       percent: "110%",
       instruction:
-        "Aplique otimização máxima: busque o maior match possível com a vaga, explore intensamente termos ATS compatíveis, reorganize experiências com agressividade estratégica e alinhe o currículo à descrição sem mentir ou criar fatos."
+        "Aplique otimização máxima: busque o maior match possível com a vaga, explore intensamente termos ATS compatíveis, reorganize experiências com agressividade estratégica e alinhe o currículo à descrição sem mentir ou criar fatos. Esta experiência deve mostrar o potencial premium do produto."
     };
   }
 

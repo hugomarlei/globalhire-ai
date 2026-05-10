@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight, CheckCircle2, ClipboardPaste, FileCheck2, Globe2, Instagram, Languages, Linkedin, Music2, ShieldCheck, Sparkles, Target, Zap, type LucideIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/language-provider";
 import { PublicNav } from "@/components/nav";
 import { Button, Card } from "@/components/ui";
@@ -89,10 +90,26 @@ export default function Home() {
   const { locale } = useLanguage();
   const copy = landingCopy[locale];
   const social = socialCopy[locale];
+  const [showLogoutBanner, setShowLogoutBanner] = useState(false);
+
+  useEffect(() => {
+    setShowLogoutBanner(new URLSearchParams(window.location.search).get("logout") === "success");
+  }, []);
 
   return (
     <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(50,232,117,0.20),transparent_34%),linear-gradient(180deg,#050806_0%,#07120E_55%,#0B1F14_100%)]">
       <PublicNav />
+      {showLogoutBanner ? (
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="flex flex-col gap-3 rounded-lg border border-brand-500/25 bg-brand-500/10 p-4 text-sm text-white/78 sm:flex-row sm:items-center sm:justify-between">
+            <span>Você saiu da sua conta. Volte quando quiser para continuar suas candidaturas.</span>
+            <div className="flex flex-wrap gap-2">
+              <Button href="/cadastro" className="h-9 bg-brand-500 px-3 text-ink hover:bg-brand-600">Voltar depois</Button>
+              <Button href="https://www.linkedin.com/shareArticle?mini=true&url=https://globalhire.ai" className="h-9 border border-white/10 bg-white/8 px-3 text-white hover:bg-white/12">Compartilhar</Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <section className="mx-auto grid max-w-7xl gap-10 px-4 pb-20 pt-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pt-20">
         <div>
           <p className="mb-4 inline-flex rounded-md border border-white/10 bg-white/7 px-3 py-1 text-sm text-brand-50">

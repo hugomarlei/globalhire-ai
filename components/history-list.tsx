@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Clock, Copy, Download, Eye, FilePlus2, FolderOpen, RefreshCw, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button, Card, inputClass } from "@/components/ui";
+import { trackEvent } from "@/lib/analytics";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 
 type HistoryItem = {
   id: string;
@@ -37,6 +39,10 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [copied, setCopied] = useState("");
+  const [regenerating, setRegenerating] = useState("");
+  const [notice, setNotice] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [captchaReset, setCaptchaReset] = useState(0);
   const types = useMemo(() => Array.from(new Set(items.map((item) => item.type))), [items]);
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -51,6 +57,27 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
     await navigator.clipboard.writeText(text);
     setCopied(id);
     window.setTimeout(() => setCopied(""), 1800);
+  }
+
+  async function regenerate(id: string) {
+    setRegenerating(id);
+    setNotice("");
+    const response = await fetch("/api/ai/regenerate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ generationId: id, turnstileToken })
+    });
+    const data = await response.json().catch(() => ({}));
+    setRegenerating("");
+    setCaptchaReset((current) => current + 1);
+
+    if (!response.ok) {
+      setNotice(data.error || "Não consegui regenerar este documento agora.");
+      return;
+    }
+
+    trackEvent("document_regenerated");
+    setNotice("Nova versão gerada e salva no histórico. Atualize a página para vê-la na lista.");
   }
 
   return (
@@ -102,7 +129,11 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
             ))}
           </div>
         </div>
+        <div className="mt-4">
+          <TurnstileWidget action="regenerate" onVerify={setTurnstileToken} resetSignal={captchaReset} />
+        </div>
       </Card>
+      {notice ? <p className="rounded-md border border-white/10 bg-white/5 p-3 text-sm text-white/70">{notice}</p> : null}
 
       <div className={mode === "documents" ? "grid gap-3 md:grid-cols-2 xl:grid-cols-3" : "grid gap-3"}>
         {filtered.map((item) => (
@@ -126,10 +157,10 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                   <Download size={16} />
                   Baixar
                 </button>
-                <Link href="/gerador" className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10">
-                  <RefreshCw size={16} />
-                  Regenerar
-                </Link>
+                <button onClick={() => regenerate(item.id)} disabled={regenerating === item.id} className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10 disabled:opacity-50">
+                  <RefreshCw className={regenerating === item.id ? "animate-spin" : ""} size={16} />
+                  {regenerating === item.id ? "Regenerando..." : "Regenerar"}
+                </button>
               </div>
             </div>
             <details className="border-t border-white/10 px-4 py-3">

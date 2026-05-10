@@ -6,6 +6,8 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { Button, Card, Field, inputClass } from "@/components/ui";
 import { SocialAuthButtons } from "@/components/social-auth-buttons";
+import { TurnstileWidget } from "@/components/turnstile-widget";
+import { trackEvent } from "@/lib/analytics";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -14,11 +16,25 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [captchaReset, setCaptchaReset] = useState(0);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setLoading(true);
     setMessage("");
+    const captchaResponse = await fetch("/api/security/turnstile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: turnstileToken })
+    });
+    if (!captchaResponse.ok) {
+      const data = await captchaResponse.json().catch(() => ({}));
+      setLoading(false);
+      setCaptchaReset((current) => current + 1);
+      setMessage(data.error || "Confirme o captcha para criar sua conta.");
+      return;
+    }
     const supabase = createClient();
     const { error } = await supabase.auth.signUp({
       email,
@@ -31,11 +47,13 @@ export default function SignupPage() {
     setLoading(false);
 
     if (error) {
+      setCaptchaReset((current) => current + 1);
       setMessage(error.message);
       return;
     }
 
     setMessage("Conta criada. Se o Supabase pedir confirmação, abra seu e-mail; senão você já pode entrar.");
+    trackEvent("signup");
     router.push("/dashboard");
     router.refresh();
   }
@@ -58,6 +76,7 @@ export default function SignupPage() {
           <Field label="Senha">
             <input className={inputClass} type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
           </Field>
+          <TurnstileWidget action="signup" onVerify={setTurnstileToken} resetSignal={captchaReset} />
           {message ? <p className="text-sm text-white/70">{message}</p> : null}
           <Button type="submit" className="bg-brand-500 text-white hover:bg-brand-600">
             {loading ? "Criando..." : "Criar meu currículo grátis"}

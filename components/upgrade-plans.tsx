@@ -4,6 +4,7 @@ import { CheckCircle2, Loader2, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { Button, Card } from "@/components/ui";
 import { paidPlans, type PlanId } from "@/lib/plans";
+import { trackEvent } from "@/lib/analytics";
 
 export function UpgradePlans({ currentPlan = "free" }: { currentPlan?: PlanId }) {
   const [loading, setLoading] = useState<string | null>(null);
@@ -12,6 +13,7 @@ export function UpgradePlans({ currentPlan = "free" }: { currentPlan?: PlanId })
   async function checkout(plan: string) {
     setLoading(plan);
     setError("");
+    trackEvent("upgrade_click", { plan });
     const response = await fetch("/api/stripe/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -25,6 +27,7 @@ export function UpgradePlans({ currentPlan = "free" }: { currentPlan?: PlanId })
       return;
     }
 
+    trackEvent("checkout_started", { plan });
     window.location.href = data.url;
   }
 

@@ -6,6 +6,7 @@ import { groq, GROQ_MODEL } from "@/lib/groq";
 import { canUseFeature, effectivePlanId, featureMinimumPlan, optimizationIntensity, plans } from "@/lib/plans";
 import { rateLimit } from "@/lib/rate-limit";
 import { parseAiOutput } from "@/lib/document-format";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 function scoreAppliedImprovements(items: string[]) {
   return items.map((item, index) => {
@@ -38,6 +39,14 @@ export async function POST(request: NextRequest) {
     const parsed = generateSchema.safeParse(await request.json());
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.errors[0]?.message || "Dados invalidos." }, { status: 400 });
+    }
+
+    const captcha = await verifyTurnstileToken(
+      parsed.data.turnstileToken,
+      request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for")
+    );
+    if (!captcha.ok) {
+      return NextResponse.json({ error: captcha.error || "Confirme o captcha para gerar." }, { status: 400 });
     }
 
     const { data: profile } = await supabase

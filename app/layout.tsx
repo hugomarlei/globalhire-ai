@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AnalyticsScripts } from "@/components/analytics-scripts";
+import { CookieConsent } from "@/components/cookie-consent";
 import { LanguageProvider } from "@/components/language-provider";
 import "./globals.css";
 
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR" className="dark">
       <body>
         <LanguageProvider>{children}</LanguageProvider>
+        <CookieConsent />
         <AnalyticsScripts />
       </body>
     </html>

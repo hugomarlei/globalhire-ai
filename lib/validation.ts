@@ -6,7 +6,8 @@ export const generateSchema = z.object({
   jobDescription: z.string().max(20000).optional().default(""),
   language: z.string().min(2).max(40),
   targetCountry: z.string().min(2).max(60),
-  type: z.enum(generationTypes)
+  type: z.enum(generationTypes),
+  turnstileToken: z.string().optional()
 });
 
 export const checkoutSchema = z.object({
