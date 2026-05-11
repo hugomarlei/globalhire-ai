@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase-server";
+import { rejectInvalidOrigin } from "@/lib/security";
 
 const schema = z.object({
   userId: z.string().uuid(),
@@ -9,6 +10,9 @@ const schema = z.object({
 });
 
 export async function POST(request: Request) {
+  const originError = rejectInvalidOrigin(request);
+  if (originError) return originError;
+
   await requireAdmin();
   const parsed = schema.safeParse(await request.json());
   if (!parsed.success) return NextResponse.json({ error: "Dados invalidos." }, { status: 400 });

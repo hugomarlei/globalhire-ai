@@ -4,10 +4,11 @@ import { createClient } from "@/lib/supabase-server";
 import { generateSchema } from "@/lib/validation";
 import { groq, GROQ_MODEL } from "@/lib/groq";
 import { canUseFeature, effectivePlanFromSubscription, featureMinimumPlan, optimizationIntensity, plans } from "@/lib/plans";
-import { cooldownLimit } from "@/lib/rate-limit";
+import { buildRateLimitKey, cooldownLimit } from "@/lib/rate-limit";
 import { parseAiOutput } from "@/lib/document-format";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { getLatestActiveSubscription } from "@/lib/subscription-state";
+import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
 
 function scoreAppliedImprovements(items: string[]) {
   return items.map((item, index) => {
@@ -26,6 +27,9 @@ function scoreAppliedImprovements(items: string[]) {
 
 export async function POST(request: NextRequest) {
   try {
+    const originError = rejectInvalidOrigin(request);
+    if (originError) return originError;
+
     const supabase = await createClient();
     const {
       data: { user }
@@ -33,8 +37,8 @@ export async function POST(request: NextRequest) {
 
     if (!user) return NextResponse.json({ error: "Faca login para continuar." }, { status: 401 });
 
-    const ip = request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for") || "unknown";
-    const limited = cooldownLimit(`ai-generate:${user.id || ip}`, 30_000);
+    const ip = getClientIp(request);
+    const limited = await cooldownLimit(buildRateLimitKey("ai-generate", user.id, ip), 30_000);
     if (!limited.ok) return NextResponse.json({ error: "Aguarde 30 segundos antes de gerar novamente." }, { status: 429 });
 
     const parsed = generateSchema.safeParse(await request.json());

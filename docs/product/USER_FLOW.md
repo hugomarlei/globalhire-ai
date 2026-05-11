@@ -49,7 +49,7 @@ Status: IMPLEMENTADO
 PARCIAL:
 
 - Upload de PDF escaneado depende de colagem manual.
-- Rate limit em memória pode variar em produção serverless.
+- Rate limit usa Supabase em produção com fallback em memória para desenvolvimento/falha controlada.
 - Algumas configurações externas ainda dependem de setup manual.
 
 ## Melhorias futuras

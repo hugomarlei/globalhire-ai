@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { createAdminClient, createClient } from "@/lib/supabase-server";
 import { stripe } from "@/lib/stripe";
+import { rejectInvalidOrigin } from "@/lib/security";
 
 const confirmationText = "EXCLUIR MINHA CONTA";
 
 export async function POST(request: Request) {
+  const originError = rejectInvalidOrigin(request);
+  if (originError) return originError;
+
   const supabase = await createClient();
   const {
     data: { user }

@@ -16,7 +16,7 @@ Registrar riscos relevantes para operação, segurança, produto, compliance e d
 | R-002 | Chave secreta exposta | Alto | Baixa/Média | PARCIAL | `.env` ignorado, rotação recomendada |
 | R-003 | Webhook Stripe falha | Alto | Média | PARCIAL | Webhook implementado, precisa monitoramento |
 | R-004 | IA inventa informação | Médio/Alto | Média | PARCIAL | Prompts e avisos de revisão |
-| R-005 | Rate limit insuficiente em serverless | Médio | Média | PARCIAL | Rate limit em memória, futuro persistente |
+| R-005 | Rate limit insuficiente em serverless | Médio | Baixa | PARCIAL | Rate limit Supabase implementado; evoluir para Redis/RPC em escala |
 | R-006 | Consentimento não auditável no banco | Médio | Média | PENDENTE | Criar tabela de consentimentos |
 | R-007 | Falta de backup testado | Alto | Média | PENDENTE | Configurar e testar restore Supabase |
 | R-008 | Texto jurídico não revisado | Médio/Alto | Média | PENDENTE | Revisão com advogado |

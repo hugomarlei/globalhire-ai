@@ -10,7 +10,11 @@ import "./globals.css";
 
 const brandDir = join(process.cwd(), "public", "brand");
 const hasOgImage = existsSync(join(brandDir, "og-image.png"));
+const hasSvgOgImage = existsSync(join(brandDir, "og-image.svg"));
 const hasFavicon = existsSync(join(brandDir, "favicon.ico"));
+const hasSvgFavicon = existsSync(join(brandDir, "favicon.svg"));
+const ogImagePath = hasOgImage ? "/brand/og-image.png" : hasSvgOgImage ? "/brand/og-image.svg" : undefined;
+const faviconPath = hasFavicon ? "/brand/favicon.ico" : hasSvgFavicon ? "/brand/favicon.svg" : undefined;
 
 export const metadata: Metadata = {
   metadataBase: new URL(getAppUrl()),
@@ -27,9 +31,9 @@ export const metadata: Metadata = {
     type: "website",
     url: "/",
     siteName: "GlobalHire AI",
-    images: hasOgImage ? [
+    images: ogImagePath ? [
       {
-        url: "/brand/og-image.png",
+        url: ogImagePath,
         width: 1200,
         height: 630,
         alt: "GlobalHire AI"
@@ -41,9 +45,9 @@ export const metadata: Metadata = {
     title: "GlobalHire AI — Currículos ATS e candidaturas internacionais com IA",
     description:
       "Crie currículos otimizados para ATS, cartas de apresentação e LinkedIn para vagas internacionais com inteligência artificial.",
-    images: hasOgImage ? ["/brand/og-image.png"] : undefined
+    images: ogImagePath ? [ogImagePath] : undefined
   },
-  icons: hasFavicon ? { icon: "/brand/favicon.ico" } : undefined
+  icons: faviconPath ? { icon: faviconPath, shortcut: faviconPath } : undefined
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

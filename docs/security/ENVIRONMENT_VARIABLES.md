@@ -36,6 +36,9 @@ Documentar variáveis de ambiente necessárias e classificar risco de exposiçã
 | `ADMIN_EMAILS` | Config sensível | Servidor | Admin | IMPLEMENTADO |
 | `ADMIN_BYPASS_EMAILS` | Config sensível | Servidor | Bypass de teste | IMPLEMENTADO |
 | `NEXT_PUBLIC_SUPPORT_EMAIL` | Pública | Frontend | Canal de suporte | IMPLEMENTADO |
+| `RETENTION_GENERATIONS_DAYS` | Config | Servidor | Prazo sugerido para retenção de gerações | PARCIAL |
+| `RETENTION_DOCUMENTS_DAYS` | Config | Servidor | Prazo sugerido para retenção de documentos | PARCIAL |
+| `RETENTION_CLEANUP_ENABLED` | Config | Servidor | Ativar cleanup futuro de retenção | PENDENTE |
 
 ## Regras
 

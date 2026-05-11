@@ -60,7 +60,9 @@ Este guia é uma receita de bolo para publicar o GlobalHire AI em `https://www.g
    - `https://globalhireai.com.br/auth/callback`
    - `http://localhost:3000/auth/callback`
 5. Confirme se as tabelas do `supabase/schema.sql` estão criadas.
-6. Confirme se `SUPABASE_SERVICE_ROLE_KEY` está somente na Vercel, nunca no frontend.
+6. Rode também `supabase/rate-limits.sql` para ativar rate limit distribuído.
+7. Confirme que `usage_limits` tem `starter = 10`.
+8. Confirme se `SUPABASE_SERVICE_ROLE_KEY` está somente na Vercel, nunca no frontend.
 
 ## 5. Stripe
 

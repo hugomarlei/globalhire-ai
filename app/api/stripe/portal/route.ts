@@ -2,8 +2,12 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { stripe } from "@/lib/stripe";
 import { getAppUrl } from "@/lib/app-url";
+import { rejectInvalidOrigin } from "@/lib/security";
 
-export async function POST() {
+export async function POST(request: Request) {
+  const originError = rejectInvalidOrigin(request);
+  if (originError) return originError;
+
   const supabase = await createClient();
   const {
     data: { user }

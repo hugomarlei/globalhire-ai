@@ -34,7 +34,7 @@ IMPLEMENTADO:
 
 PARCIAL:
 
-- Rate limit em memória, não distribuído.
+- Rate limit distribuído via Supabase com fallback local; alto volume ainda deve avaliar Redis/RPC transacional.
 - Sentry documentado, mas não necessariamente instalado.
 - Logs técnicos ainda dependem de disciplina de implementação.
 - Auditoria de acesso administrativo não formalizada.

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Clock, Copy, Download, Eye, FilePlus2, FolderOpen, RefreshCw, Search } from "lucide-react";
+import { Clock, Copy, Download, Eye, FilePlus2, FolderOpen, RefreshCw, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button, Card, inputClass } from "@/components/ui";
 import { trackEvent } from "@/lib/analytics";
@@ -41,17 +41,20 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
   const [copied, setCopied] = useState("");
   const [regenerating, setRegenerating] = useState("");
   const [notice, setNotice] = useState("");
+  const [deletedIds, setDeletedIds] = useState<string[]>([]);
+  const [deleting, setDeleting] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
   const [captchaReset, setCaptchaReset] = useState(0);
-  const types = useMemo(() => Array.from(new Set(items.map((item) => item.type))), [items]);
+  const visibleItems = useMemo(() => items.filter((item) => !deletedIds.includes(item.id)), [deletedIds, items]);
+  const types = useMemo(() => Array.from(new Set(visibleItems.map((item) => item.type))), [visibleItems]);
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    return items.filter((item) => {
+    return visibleItems.filter((item) => {
       const matchesFilter = filter === "all" || item.type === filter;
       const searchable = `${item.type} ${item.language} ${item.target_country} ${item.output}`.toLowerCase();
       return matchesFilter && (!normalizedQuery || searchable.includes(normalizedQuery));
     });
-  }, [filter, items, query]);
+  }, [filter, query, visibleItems]);
 
   async function copyText(id: string, text: string) {
     await navigator.clipboard.writeText(text);
@@ -78,6 +81,30 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
 
     trackEvent("document_regenerated");
     setNotice("Nova versão gerada e salva no histórico. Atualize a página para vê-la na lista.");
+  }
+
+  async function deleteItem(id: string) {
+    const confirmed = window.confirm("Excluir este documento do histórico? Esta ação remove a geração salva e não pode ser desfeita.");
+    if (!confirmed) return;
+
+    setDeleting(id);
+    setNotice("");
+
+    const response = await fetch("/api/documents/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ generationId: id })
+    });
+    const data = await response.json().catch(() => ({}));
+    setDeleting("");
+
+    if (!response.ok) {
+      setNotice(data.error || "Não consegui excluir este documento agora.");
+      return;
+    }
+
+    setDeletedIds((current) => [...current, id]);
+    setNotice("Documento excluído do seu histórico.");
   }
 
   return (
@@ -161,6 +188,10 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                 <button onClick={() => regenerate(item.id)} disabled={regenerating === item.id} className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10 disabled:opacity-50">
                   <RefreshCw className={regenerating === item.id ? "animate-spin" : ""} size={16} />
                   {regenerating === item.id ? "Regenerando..." : "Regenerar"}
+                </button>
+                <button onClick={() => deleteItem(item.id)} disabled={deleting === item.id} className="focus-ring inline-flex items-center gap-2 rounded-md border border-red-400/20 px-3 py-2 text-sm text-red-100 hover:bg-red-500/10 disabled:opacity-50">
+                  <Trash2 size={16} />
+                  {deleting === item.id ? "Excluindo..." : "Excluir"}
                 </button>
               </div>
             </div>

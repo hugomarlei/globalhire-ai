@@ -41,7 +41,7 @@ GlobalHire AI é um SaaS web baseado em Next.js App Router, hospedado na Vercel,
 
 ## Limitações conhecidas
 
-- Rate limit atual em memória não é global entre instâncias.
+- Rate limit atual usa Supabase como storage compartilhado, com fallback em memória para desenvolvimento/falha controlada.
 - Consentimento de cookies não está centralizado no banco.
 - Backups dependem do Supabase e plano contratado.
 - Não há fila assíncrona para geração de IA.

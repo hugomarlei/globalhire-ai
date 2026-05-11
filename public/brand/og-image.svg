@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="GlobalHire AI">
+  <rect width="1200" height="630" fill="#06130d"/>
+  <circle cx="990" cy="80" r="300" fill="#9cff6b" opacity=".08"/>
+  <circle cx="160" cy="560" r="260" fill="#9cff6b" opacity=".07"/>
+  <rect x="72" y="72" width="1056" height="486" rx="34" fill="#081b12" stroke="#1f4a2f" stroke-width="2"/>
+  <path d="M168 145 222 170v40c0 42-22 74-54 90-32-16-54-48-54-90v-40l54-25Z" fill="#9cff6b"/>
+  <path d="M143 214 162 233 196 196" fill="none" stroke="#06130d" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="282" y="178" fill="#f4fff7" font-family="Inter, Arial, sans-serif" font-size="58" font-weight="800">GlobalHire AI</text>
+  <text x="282" y="246" fill="#9cff6b" font-family="Inter, Arial, sans-serif" font-size="35" font-weight="700">Currículos ATS para candidaturas internacionais</text>
+  <text x="114" y="395" fill="#f4fff7" font-family="Inter, Arial, sans-serif" font-size="54" font-weight="800">Pare de enviar currículos ignorados.</text>
+  <text x="114" y="455" fill="#b8c8bd" font-family="Inter, Arial, sans-serif" font-size="30">Otimize currículo, carta e LinkedIn com IA, segurança e foco em ATS.</text>
+  <rect x="828" y="364" width="220" height="72" rx="18" fill="#9cff6b"/>
+  <text x="865" y="410" fill="#06130d" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="800">ATS 91%</text>
+</svg>

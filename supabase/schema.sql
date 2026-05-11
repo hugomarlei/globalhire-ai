@@ -55,10 +55,17 @@ create table if not exists public.usage_limits (
 insert into public.usage_limits (plan, monthly_generations)
 values
   ('free', 1),
-  ('starter', 3),
+  ('starter', 10),
   ('pro', 9999),
   ('elite', 9999)
 on conflict (plan) do update set monthly_generations = excluded.monthly_generations;
+
+create table if not exists public.rate_limits (
+  key text primary key,
+  count integer not null default 1,
+  reset_at timestamptz not null,
+  updated_at timestamptz not null default now()
+);
 
 create table if not exists public.documents (
   id uuid primary key default gen_random_uuid(),
@@ -116,6 +123,7 @@ alter table public.subscriptions enable row level security;
 alter table public.generations enable row level security;
 alter table public.usage_limits enable row level security;
 alter table public.documents enable row level security;
+alter table public.rate_limits enable row level security;
 
 drop policy if exists "Users can read own profile" on public.profiles;
 create policy "Users can read own profile" on public.profiles
@@ -155,5 +163,14 @@ create policy "Users can update own documents" on public.documents
 for update using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
 
+drop policy if exists "Users can delete own documents" on public.documents;
+create policy "Users can delete own documents" on public.documents
+for delete using (auth.uid() = user_id);
+
+drop policy if exists "Users can delete own generations" on public.generations;
+create policy "Users can delete own generations" on public.generations
+for delete using (auth.uid() = user_id);
+
 create index if not exists generations_user_created_idx on public.generations(user_id, created_at desc);
 create index if not exists subscriptions_user_idx on public.subscriptions(user_id);
+create index if not exists rate_limits_reset_at_idx on public.rate_limits(reset_at);

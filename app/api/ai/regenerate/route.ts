@@ -5,10 +5,11 @@ import { createClient } from "@/lib/supabase-server";
 import { groq, GROQ_MODEL } from "@/lib/groq";
 import { canUseFeature, effectivePlanFromSubscription, featureMinimumPlan, optimizationIntensity, plans } from "@/lib/plans";
 import { parseAiOutput } from "@/lib/document-format";
-import { cooldownLimit } from "@/lib/rate-limit";
+import { buildRateLimitKey, cooldownLimit } from "@/lib/rate-limit";
 import type { GenerationType } from "@/lib/types";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { getLatestActiveSubscription } from "@/lib/subscription-state";
+import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
 
 const regenerateSchema = z.object({
   generationId: z.string().uuid(),
@@ -26,6 +27,9 @@ function scoreAppliedImprovements(items: string[]) {
 
 export async function POST(request: NextRequest) {
   try {
+    const originError = rejectInvalidOrigin(request);
+    if (originError) return originError;
+
     const supabase = await createClient();
     const {
       data: { user }
@@ -33,8 +37,8 @@ export async function POST(request: NextRequest) {
 
     if (!user) return NextResponse.json({ error: "Faça login para regenerar o documento." }, { status: 401 });
 
-    const ip = request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for") || "unknown";
-    const limited = cooldownLimit(`ai-regenerate:${user.id || ip}`, 30_000);
+    const ip = getClientIp(request);
+    const limited = await cooldownLimit(buildRateLimitKey("ai-regenerate", user.id, ip), 30_000);
     if (!limited.ok) return NextResponse.json({ error: "Aguarde 30 segundos antes de regenerar novamente." }, { status: 429 });
 
     const parsed = regenerateSchema.safeParse(await request.json());
