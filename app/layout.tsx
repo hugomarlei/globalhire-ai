@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { AnalyticsScripts } from "@/components/analytics-scripts";
 import { CookieConsent } from "@/components/cookie-consent";
 import { LanguageProvider } from "@/components/language-provider";
+import { getAppUrl } from "@/lib/app-url";
 import "./globals.css";
 
 const brandDir = join(process.cwd(), "public", "brand");
@@ -11,7 +12,7 @@ const hasOgImage = existsSync(join(brandDir, "og-image.png"));
 const hasFavicon = existsSync(join(brandDir, "favicon.ico"));
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://globalhireai.com.br"),
+  metadataBase: new URL(getAppUrl()),
   title: "GlobalHire AI — Currículos ATS e candidaturas internacionais com IA",
   description:
     "Crie currículos otimizados para ATS, cartas de apresentação e LinkedIn para vagas internacionais com inteligência artificial.",

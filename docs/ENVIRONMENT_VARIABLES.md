@@ -49,7 +49,7 @@ Não trocar para `STRIPE_PRICE_STARTER` sem refatorar o código. Os valores deve
 Use:
 
 ```bash
-NEXT_PUBLIC_APP_URL=https://globalhireai.com.br
+NEXT_PUBLIC_APP_URL=https://www.globalhireai.com.br
 ```
 
 Nunca coloque secrets em variáveis `NEXT_PUBLIC_`.

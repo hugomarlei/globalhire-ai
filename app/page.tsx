@@ -82,7 +82,7 @@ export default function Home() {
             <div className="flex flex-wrap gap-2">
               <Button href="/cadastro" className="h-9 px-3">Criar conta</Button>
               <a
-                href="https://www.linkedin.com/shareArticle?mini=true&url=https://globalhireai.com.br"
+                href="https://www.linkedin.com/shareArticle?mini=true&url=https://www.globalhireai.com.br"
                 target="_blank"
                 rel="noreferrer"
                 className="focus-ring inline-flex h-9 items-center justify-center rounded-md border border-white/10 bg-white/8 px-3 text-sm font-semibold text-white hover:bg-white/12"

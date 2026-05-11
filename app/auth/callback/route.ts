@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase-server";
+import { getAppUrl } from "@/lib/app-url";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -7,9 +8,10 @@ export async function GET(request: NextRequest) {
   const authError = requestUrl.searchParams.get("error") || requestUrl.searchParams.get("error_description");
   const rawNext = requestUrl.searchParams.get("next") || "/dashboard";
   const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/dashboard";
+  const appUrl = getAppUrl();
 
   if (authError) {
-    return NextResponse.redirect(new URL("/login?social=not_configured", requestUrl.origin));
+    return NextResponse.redirect(new URL("/login?social=not_configured", appUrl));
   }
 
   if (code) {
@@ -17,5 +19,5 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  return NextResponse.redirect(new URL(next, requestUrl.origin));
+  return NextResponse.redirect(new URL(next, appUrl));
 }

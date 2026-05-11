@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { Button, Card, Field, inputClass } from "@/components/ui";
+import { getAuthCallbackUrl } from "@/lib/app-url";
 
 export default function RecoverPasswordPage() {
   const [email, setEmail] = useState("");
@@ -13,7 +14,7 @@ export default function RecoverPasswordPage() {
     event.preventDefault();
     const supabase = createClient();
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/redefinir-senha`
+      redirectTo: getAuthCallbackUrl("/redefinir-senha")
     });
     setMessage("Se este e-mail existir, você receberá um link de recuperação.");
   }

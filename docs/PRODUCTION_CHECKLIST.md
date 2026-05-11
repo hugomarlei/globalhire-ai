@@ -1,6 +1,6 @@
 # Checklist de produção — GlobalHire AI
 
-Este guia é uma receita de bolo para publicar o GlobalHire AI em `https://globalhireai.com.br`.
+Este guia é uma receita de bolo para publicar o GlobalHire AI em `https://www.globalhireai.com.br`.
 
 ## 1. Cloudflare
 
@@ -12,7 +12,7 @@ Este guia é uma receita de bolo para publicar o GlobalHire AI em `https://globa
 6. Em **Email > Email Routing**, ative roteamento para:
    - `contato@globalhireai.com.br`
    - `privacy@globalhireai.com.br`
-7. Em **Security > Turnstile**, crie um widget para `globalhireai.com.br` e `localhost`.
+7. Em **Security > Turnstile**, crie um widget permitindo `www.globalhireai.com.br`, `globalhireai.com.br` e `localhost`.
 8. Copie:
    - Site key para `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
    - Secret key para `TURNSTILE_SECRET_KEY`
@@ -22,11 +22,11 @@ Este guia é uma receita de bolo para publicar o GlobalHire AI em `https://globa
 1. Entre em `vercel.com`.
 2. Abra o projeto GlobalHire AI.
 3. Vá em **Settings > Domains**.
-4. Adicione `globalhireai.com.br`.
+4. Adicione `www.globalhireai.com.br` e `globalhireai.com.br`.
 5. Siga os registros DNS que a Vercel pedir na Cloudflare.
 6. Vá em **Settings > Environment Variables**.
 7. Cadastre todas as variáveis do `.env.example`.
-8. Use `NEXT_PUBLIC_APP_URL=https://globalhireai.com.br`.
+8. Use `NEXT_PUBLIC_APP_URL=https://www.globalhireai.com.br`.
 9. Faça novo deploy.
 
 ## 3. Google Cloud
@@ -43,8 +43,9 @@ Este guia é uma receita de bolo para publicar o GlobalHire AI em `https://globa
 
 1. Abra o projeto no Supabase.
 2. Vá em **Authentication > URL Configuration**.
-3. Configure **Site URL** como `https://globalhireai.com.br`.
+3. Configure **Site URL** como `https://www.globalhireai.com.br`.
 4. Adicione redirects permitidos:
+   - `https://www.globalhireai.com.br/auth/callback`
    - `https://globalhireai.com.br/auth/callback`
    - `http://localhost:3000/auth/callback`
 5. Confirme se as tabelas do `supabase/schema.sql` estão criadas.
@@ -59,7 +60,7 @@ Este guia é uma receita de bolo para publicar o GlobalHire AI em `https://globa
    - `NEXT_PUBLIC_STRIPE_PRO_PRICE_ID`
    - `NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID`
 4. Em **Developers > Webhooks**, crie endpoint:
-   - `https://globalhireai.com.br/api/stripe/webhook`
+   - `https://www.globalhireai.com.br/api/stripe/webhook`
 5. Ative eventos:
    - `checkout.session.completed`
    - `customer.subscription.updated`
@@ -70,7 +71,7 @@ Este guia é uma receita de bolo para publicar o GlobalHire AI em `https://globa
 ## 6. Microsoft Clarity
 
 1. Entre em `clarity.microsoft.com`.
-2. Crie um projeto para `globalhireai.com.br`.
+2. Crie um projeto para `www.globalhireai.com.br`.
 3. Copie o Project ID.
 4. Cole na Vercel em `NEXT_PUBLIC_CLARITY_PROJECT_ID`.
 5. O script só carregará se o usuário aceitar analytics no banner de cookies.

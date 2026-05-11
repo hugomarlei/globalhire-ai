@@ -13,7 +13,7 @@ Documentar o fluxo seguro de deploy da GlobalHire AI.
 | Ambiente | URL | Status |
 | --- | --- | --- |
 | Local | `http://localhost:3000` | IMPLEMENTADO |
-| Produção futura | `https://globalhireai.com.br` | PARCIAL |
+| Produção futura | `https://www.globalhireai.com.br` | PARCIAL |
 | Preview Vercel | URLs automáticas | PARCIAL |
 
 ## Processo recomendado

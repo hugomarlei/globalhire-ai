@@ -3,6 +3,7 @@ import { checkoutSchema } from "@/lib/validation";
 import { createClient } from "@/lib/supabase-server";
 import { paidPlans } from "@/lib/plans";
 import { stripe } from "@/lib/stripe";
+import { getAppUrl } from "@/lib/app-url";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Price ID do Stripe ainda nao configurado." }, { status: 500 });
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = getAppUrl();
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer_email: user.email,

@@ -172,7 +172,7 @@ npm run start
 5. Clique em **Add New > Project**.
 6. Escolha o repositorio `globalhire-ai`.
 7. Em **Environment Variables**, cole todas as variaveis do `.env.example`.
-8. Troque `NEXT_PUBLIC_APP_URL` para a URL final da Vercel.
+8. Troque `NEXT_PUBLIC_APP_URL` para o domínio final `https://www.globalhireai.com.br`.
 9. Clique em **Deploy**.
 10. Depois do deploy, volte no Supabase e Stripe para trocar URLs locais pela URL da Vercel.
 
@@ -192,7 +192,7 @@ O Microsoft Clarity so carrega se:
 Para configurar:
 
 1. Entre em [clarity.microsoft.com](https://clarity.microsoft.com).
-2. Crie um projeto para `https://globalhireai.com.br`.
+2. Crie um projeto para `https://www.globalhireai.com.br`.
 3. Copie o Project ID.
 4. Cole na Vercel em `NEXT_PUBLIC_CLARITY_PROJECT_ID`.
 
@@ -288,20 +288,20 @@ public/              Arquivos publicos
 
 4. **Vercel Environment Variables**
    - Cadastre todas as variaveis do `.env.example`.
-   - Use `NEXT_PUBLIC_APP_URL=https://globalhireai.com.br`.
+   - Use `NEXT_PUBLIC_APP_URL=https://www.globalhireai.com.br`.
    - Nunca coloque chaves secretas em variaveis `NEXT_PUBLIC_`.
 
 5. **Google OAuth com dominio real**
    - No Google Cloud, adicione os callbacks do Supabase.
    - No Supabase, configure Site URL e Redirect URLs para producao.
-   - Teste login Google em `https://globalhireai.com.br`.
+   - Teste login Google em `https://www.globalhireai.com.br`.
 
 6. **Stripe Price IDs corretos**
    - Confirme que Starter, Pro e Elite usam IDs `price_...`.
    - Nao use IDs `prod_...`.
 
 7. **Stripe webhook**
-   - Configure `https://globalhireai.com.br/api/stripe/webhook`.
+   - Configure `https://www.globalhireai.com.br/api/stripe/webhook`.
    - Ative eventos de checkout e assinatura.
    - Cole o `STRIPE_WEBHOOK_SECRET` na Vercel.
 

@@ -8,6 +8,7 @@ import { Button, Card, Field, inputClass } from "@/components/ui";
 import { SocialAuthButtons } from "@/components/social-auth-buttons";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import { trackEvent } from "@/lib/analytics";
+import { getAppUrl } from "@/lib/app-url";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function SignupPage() {
       password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: `${window.location.origin}/dashboard`
+        emailRedirectTo: `${getAppUrl()}/dashboard`
       }
     });
     setLoading(false);

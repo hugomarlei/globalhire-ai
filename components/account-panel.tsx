@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AlertTriangle, BarChart3, Copy, CreditCard, Gift, KeyRound, Loader2, LogOut, Settings, ShieldCheck, Trash2, UserCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button, Card, Field, inputClass } from "@/components/ui";
+import { getAppUrl } from "@/lib/app-url";
 
 type AccountTab = "account" | "subscription" | "referrals";
 
@@ -34,8 +35,7 @@ export function AccountPanel({
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [copiedReferral, setCopiedReferral] = useState(false);
   const referralLink = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return `${window.location.origin}/cadastro?ref=${encodeURIComponent(email)}`;
+    return `${getAppUrl()}/cadastro?ref=${encodeURIComponent(email)}`;
   }, [email]);
 
   async function openPortal() {

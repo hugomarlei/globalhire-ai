@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
+import { getAppUrl } from "@/lib/app-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://globalhireai.com.br";
+  const baseUrl = getAppUrl();
   const routes = ["", "/pricing", "/features", "/faq", "/resources", "/support", "/termos", "/privacidade", "/cookies", "/refund-policy", "/data-processing"];
 
   return routes.map((route) => ({
