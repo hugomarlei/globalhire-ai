@@ -2,12 +2,20 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase-server";
-import { planFromPriceId } from "@/lib/plans";
+import { syncStripeSubscription } from "@/lib/stripe-subscription";
 import { stripe } from "@/lib/stripe";
 
-export async function POST(request: Request) {
-  console.log("stripe_webhook_received");
+async function retrieveSubscriptionFromInvoice(invoice: Stripe.Invoice) {
+  const subscriptionId =
+    typeof invoice.subscription === "string"
+      ? invoice.subscription
+      : invoice.subscription?.id;
 
+  if (!subscriptionId) return null;
+  return stripe.subscriptions.retrieve(subscriptionId);
+}
+
+export async function POST(request: Request) {
   const body = await request.text();
   const signature = (await headers()).get("stripe-signature");
 
@@ -29,9 +37,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Assinatura invalida." }, { status: 400 });
   }
 
-  console.log("stripe_webhook_event", {
+  console.log("subscription_event_received", {
     type: event.type,
-    id: event.id
+    eventId: event.id
   });
 
   const supabase = createAdminClient();
@@ -39,96 +47,45 @@ export async function POST(request: Request) {
   try {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
+      const userId = session.client_reference_id || session.metadata?.user_id || null;
+      const subscriptionId = typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
 
-      const userId = session.client_reference_id || session.metadata?.user_id;
-      const subscriptionId = String(session.subscription || "");
-
-      console.log("checkout_session_completed_debug", {
-        userId,
-        subscriptionId,
-        customer: session.customer,
-        metadata: session.metadata
-      });
-
-      if (!userId || !subscriptionId) {
-        console.error("checkout_missing_user_or_subscription", {
-          userId,
-          subscriptionId
-        });
-
+      if (!subscriptionId) {
+        console.warn("checkout_missing_subscription", { sessionId: session.id });
         return NextResponse.json({ received: true });
       }
 
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-      const priceId = subscription.items.data[0]?.price.id || null;
-      const plan = planFromPriceId(priceId);
-
-      console.log("stripe_plan_detected", {
-        priceId,
-        plan,
-        starterEnv: process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID,
-        proEnv: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
-        eliteEnv: process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID
+      await syncStripeSubscription({
+        supabase,
+        subscription,
+        userId,
+        customerId: typeof session.customer === "string" ? session.customer : session.customer?.id,
+        source: "checkout.session.completed"
       });
-
-      const subscriptionResult = await supabase.from("subscriptions").upsert({
-        user_id: userId,
-        stripe_customer_id: String(session.customer || ""),
-        stripe_subscription_id: subscriptionId,
-        stripe_price_id: priceId,
-        plan,
-        status: subscription.status,
-        current_period_end: new Date(subscription.current_period_end * 1000).toISOString()
-      });
-
-      console.log("subscription_upsert_result", subscriptionResult);
-
-      const profileResult = await supabase
-        .from("profiles")
-        .update({ plan })
-        .eq("id", userId);
-
-      console.log("profile_update_result", profileResult);
     }
 
-    if (event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted") {
+    if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted") {
       const subscription = event.data.object as Stripe.Subscription;
-
-      console.log("subscription_event_debug", {
-        subscriptionId: subscription.id,
-        status: subscription.status
+      await syncStripeSubscription({
+        supabase,
+        subscription,
+        source: event.type
       });
+    }
 
-      const priceId = subscription.items.data[0]?.price.id || null;
-      const plan = subscription.status === "active" ? planFromPriceId(priceId) : "free";
+    if (event.type === "invoice.payment_succeeded" || event.type === "invoice.payment_failed") {
+      const invoice = event.data.object as Stripe.Invoice;
+      const subscription = await retrieveSubscriptionFromInvoice(invoice);
 
-      const existingSubscription = await supabase
-        .from("subscriptions")
-        .select("user_id")
-        .eq("stripe_subscription_id", subscription.id)
-        .maybeSingle();
-
-      console.log("existing_subscription_lookup", existingSubscription);
-
-      if (existingSubscription.data?.user_id) {
-        const subscriptionUpdateResult = await supabase
-          .from("subscriptions")
-          .update({
-            stripe_price_id: priceId,
-            plan,
-            status: subscription.status,
-            current_period_end: new Date(subscription.current_period_end * 1000).toISOString()
-          })
-          .eq("stripe_subscription_id", subscription.id);
-
-        console.log("subscription_update_result", subscriptionUpdateResult);
-
-        const profileUpdateResult = await supabase
-          .from("profiles")
-          .update({ plan })
-          .eq("id", existingSubscription.data.user_id);
-
-        console.log("profile_update_from_subscription_result", profileUpdateResult);
+      if (subscription) {
+        await syncStripeSubscription({
+          supabase,
+          subscription,
+          source: event.type
+        });
+      } else {
+        console.warn("invoice_missing_subscription", { invoiceId: invoice.id, eventType: event.type });
       }
     }
 

@@ -38,6 +38,14 @@ Este guia é uma receita de bolo para publicar o GlobalHire AI em `https://www.g
 5. Em **Authorized redirect URIs**, adicione a URL de callback do Supabase.
 6. No Supabase, confirme que o provider Google está ativo.
 7. Teste login Google em produção.
+8. Teste sincronização de plano:
+   - Entre com um usuário Pro.
+   - Abra o Stripe Customer Portal pelo app.
+   - Troque para Elite.
+   - Volte para `/dashboard?subscription=updated`.
+   - Confirme que o dashboard mostra Elite.
+   - No Supabase, confirme que `subscriptions.stripe_price_id` é o Price ID Elite.
+   - Confirme que `subscriptions.plan` e `profiles.plan` estão como `elite`.
 
 ## 4. Supabase
 

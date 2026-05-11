@@ -22,10 +22,16 @@ create table if not exists public.subscriptions (
   stripe_price_id text,
   plan text not null default 'free' check (plan in ('free', 'starter', 'pro', 'elite')),
   status text not null default 'inactive',
+  current_period_start timestamptz,
   current_period_end timestamptz,
+  cancel_at_period_end boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.subscriptions
+  add column if not exists current_period_start timestamptz,
+  add column if not exists cancel_at_period_end boolean not null default false;
 
 create table if not exists public.generations (
   id uuid primary key default gen_random_uuid(),

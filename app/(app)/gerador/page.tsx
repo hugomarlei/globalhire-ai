@@ -1,8 +1,11 @@
 import { DashboardGenerator } from "@/components/dashboard-generator";
 import { UpgradeGate } from "@/components/upgrade-gate";
 import { requireUser } from "@/lib/auth";
-import { allowedGenerationTypes, canUseFeature, effectivePlanId, featureMinimumPlan, plans } from "@/lib/plans";
+import { allowedGenerationTypes, canUseFeature, effectivePlanFromSubscription, featureMinimumPlan, plans } from "@/lib/plans";
+import { createClient } from "@/lib/supabase-server";
 import type { GenerationType } from "@/lib/types";
+
+export const dynamic = "force-dynamic";
 
 const generationTypes: GenerationType[] = ["ats_resume", "cover_letter", "linkedin_summary", "recruiter_message", "interview_prep", "translate_resume"];
 const pageContext: Record<GenerationType, { title: string; subtitle: string }> = {
@@ -34,7 +37,13 @@ const pageContext: Record<GenerationType, { title: string; subtitle: string }> =
 
 export default async function GeneratorPage({ searchParams }: { searchParams?: Promise<{ tipo?: string }> }) {
   const { user, profile } = await requireUser();
-  const planId = effectivePlanId(profile?.plan, profile?.email || user.email);
+  const supabase = await createClient();
+  const { data: subscription } = await supabase
+    .from("subscriptions")
+    .select("plan,status")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const planId = effectivePlanFromSubscription(profile?.plan, subscription?.plan, subscription?.status, profile?.email || user.email);
   const plan = plans[planId] || plans.free;
   const params = searchParams ? await searchParams : {};
   const initialType = generationTypes.includes(params.tipo as GenerationType) ? params.tipo as GenerationType : undefined;

@@ -3,9 +3,12 @@ import type React from "react";
 import { BarChart3, BriefcaseBusiness, CreditCard, ExternalLink, FileText, Gauge, Globe2, Languages, Linkedin, MailPlus, Target } from "lucide-react";
 import { Card } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
-import { createClient } from "@/lib/supabase-server";
-import { allowedGenerationTypes, effectivePlanId, generationTypeLabels, hasAdminBypass, plans } from "@/lib/plans";
+import { createAdminClient, createClient } from "@/lib/supabase-server";
+import { allowedGenerationTypes, effectivePlanFromSubscription, generationTypeLabels, hasAdminBypass, plans } from "@/lib/plans";
+import { syncLatestStripeSubscriptionForUser } from "@/lib/stripe-subscription";
 import type { GenerationType } from "@/lib/types";
+
+export const dynamic = "force-dynamic";
 
 const careerLinks = [
   { label: "LinkedIn", href: "https://www.linkedin.com/jobs/", Icon: Linkedin },
@@ -38,8 +41,22 @@ export default async function DashboardPage({
   const { user, profile } = await requireUser();
   const supabase = await createClient();
   const params = searchParams ? await searchParams : {};
+
+  if (params.subscription === "updated" || params.billing === "updated" || params.checkout === "success") {
+    await syncLatestStripeSubscriptionForUser({
+      supabase: createAdminClient(),
+      userId: user.id
+    }).catch((error) => console.error("dashboard_subscription_sync_error", error));
+  }
+
+  const { data: subscription } = await supabase
+    .from("subscriptions")
+    .select("plan,status,current_period_end")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
   const isBypassAccount = hasAdminBypass(profile?.email || user.email);
-  const planId = effectivePlanId(profile?.plan, profile?.email || user.email);
+  const planId = effectivePlanFromSubscription(profile?.plan, subscription?.plan, subscription?.status, profile?.email || user.email);
   const plan = plans[planId] || plans.free;
   const since = new Date();
   since.setDate(1);

@@ -1,18 +1,20 @@
 import { AccountPanel } from "@/components/account-panel";
 import { UpgradePlans } from "@/components/upgrade-plans";
 import { requireUser } from "@/lib/auth";
-import { effectivePlanId, plans } from "@/lib/plans";
+import { effectivePlanFromSubscription, plans } from "@/lib/plans";
 import { createClient } from "@/lib/supabase-server";
+
+export const dynamic = "force-dynamic";
 
 export default async function SubscriptionPage() {
   const { user, profile } = await requireUser();
   const supabase = await createClient();
   const { data: subscription } = await supabase
     .from("subscriptions")
-    .select("status,current_period_end")
+    .select("plan,status,current_period_end")
     .eq("user_id", user.id)
     .maybeSingle();
-  const plan = plans[effectivePlanId(profile?.plan, user.email)] || plans.free;
+  const plan = plans[effectivePlanFromSubscription(profile?.plan, subscription?.plan, subscription?.status, user.email)] || plans.free;
 
   return (
     <div className="grid gap-8">

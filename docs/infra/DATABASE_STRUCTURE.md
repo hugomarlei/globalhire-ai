@@ -53,6 +53,17 @@ Recomendações:
 - RLS deve impedir acesso cruzado entre usuários.
 - Admin deve ter cuidado extra ao consultar dados profissionais.
 
+## Assinaturas Stripe
+
+IMPLEMENTADO/PARCIAL:
+
+- `subscriptions.plan` deve refletir o plano derivado de `subscription.items.data[0].price.id`.
+- `profiles.plan` é sincronizado como cópia operacional para leitura rápida.
+- `subscriptions.stripe_price_id` armazena o Price ID atual da assinatura.
+- `current_period_start`, `current_period_end` e `cancel_at_period_end` devem ser atualizados por webhook ou sync manual.
+
+Se o banco foi criado antes desses campos, rode `supabase/subscription-sync-fields.sql`.
+
 ## Próximas melhorias
 
 - Documentar schema com diagrama ERD.

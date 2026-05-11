@@ -1,11 +1,20 @@
 import { AtsAnalyzer } from "@/components/ats-analyzer";
 import { UpgradeGate } from "@/components/upgrade-gate";
 import { requireUser } from "@/lib/auth";
-import { canUseFeature, effectivePlanId } from "@/lib/plans";
+import { canUseFeature, effectivePlanFromSubscription } from "@/lib/plans";
+import { createClient } from "@/lib/supabase-server";
+
+export const dynamic = "force-dynamic";
 
 export default async function AtsScorePage({ searchParams }: { searchParams?: Promise<{ modo?: string }> }) {
   const { user, profile } = await requireUser();
-  const planId = effectivePlanId(profile?.plan, profile?.email || user.email);
+  const supabase = await createClient();
+  const { data: subscription } = await supabase
+    .from("subscriptions")
+    .select("plan,status")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const planId = effectivePlanFromSubscription(profile?.plan, subscription?.plan, subscription?.status, profile?.email || user.email);
   if (!canUseFeature(planId, "ats_score")) {
     return (
       <UpgradeGate

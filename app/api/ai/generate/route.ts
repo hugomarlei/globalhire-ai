@@ -3,7 +3,7 @@ import { buildPrompt } from "@/prompts/ai-prompts";
 import { createClient } from "@/lib/supabase-server";
 import { generateSchema } from "@/lib/validation";
 import { groq, GROQ_MODEL } from "@/lib/groq";
-import { canUseFeature, effectivePlanId, featureMinimumPlan, optimizationIntensity, plans } from "@/lib/plans";
+import { canUseFeature, effectivePlanFromSubscription, featureMinimumPlan, optimizationIntensity, plans } from "@/lib/plans";
 import { cooldownLimit } from "@/lib/rate-limit";
 import { parseAiOutput } from "@/lib/document-format";
 import { verifyTurnstileToken } from "@/lib/turnstile";
@@ -49,15 +49,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: captcha.error || "Confirme o captcha para gerar." }, { status: 400 });
     }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("plan,is_blocked")
-      .eq("id", user.id)
-      .single();
+    const [{ data: profile }, { data: subscription }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("plan,is_blocked")
+        .eq("id", user.id)
+        .single(),
+      supabase
+        .from("subscriptions")
+        .select("plan,status")
+        .eq("user_id", user.id)
+        .maybeSingle()
+    ]);
 
     if (profile?.is_blocked) return NextResponse.json({ error: "Conta bloqueada." }, { status: 403 });
 
-    const planId = effectivePlanId(profile?.plan, user.email);
+    const planId = effectivePlanFromSubscription(profile?.plan, subscription?.plan, subscription?.status, user.email);
     const plan = plans[planId] || plans.free;
 
     if (!canUseFeature(planId, parsed.data.type)) {

@@ -139,10 +139,37 @@ export function effectivePlanId(plan: string | null | undefined, email?: string 
   return "free";
 }
 
-export function planFromPriceId(priceId?: string | null): PlanId {
-  if (!priceId) return "free";
+export function getPlanFromStripePriceId(priceId?: string | null): Exclude<PlanId, "free"> | null {
+  if (!priceId) return null;
   if (priceId === process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID) return "starter";
   if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID) return "pro";
   if (priceId === process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID) return "elite";
+  console.warn("unknown_price_id", { priceId: `${priceId.slice(0, 12)}...` });
+  return null;
+}
+
+export function planFromPriceId(priceId?: string | null): PlanId {
+  return getPlanFromStripePriceId(priceId) || "free";
+}
+
+export function effectivePlanFromSubscription(
+  profilePlan: string | null | undefined,
+  subscriptionPlan: string | null | undefined,
+  subscriptionStatus?: string | null,
+  email?: string | null
+): PlanId {
+  if (hasAdminBypass(email)) return "elite";
+  if (
+    (subscriptionStatus === "active" || subscriptionStatus === "trialing") &&
+    (subscriptionPlan === "starter" || subscriptionPlan === "pro" || subscriptionPlan === "elite")
+  ) {
+    return subscriptionPlan;
+  }
+
+  if (subscriptionStatus === "canceled" || subscriptionStatus === "unpaid" || subscriptionStatus === "incomplete_expired") {
+    return "free";
+  }
+
+  if (profilePlan === "starter" || profilePlan === "pro" || profilePlan === "elite") return profilePlan;
   return "free";
 }
