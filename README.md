@@ -95,7 +95,7 @@ Importante: essa chave nunca aparece no frontend. Ela e usada apenas no backend 
    - Starter: R$29/mes
    - Pro: R$79/mes
    - Elite: R$149/mes
-4. Copie os Price IDs e cole no `.env.local`:
+4. Copie os **Price IDs** e cole no `.env.local`. Eles começam com `price_`. Não use IDs que começam com `prod_`.
 
 ```bash
 NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID=price_...
@@ -176,6 +176,46 @@ npm run start
 9. Clique em **Deploy**.
 10. Depois do deploy, volte no Supabase e Stripe para trocar URLs locais pela URL da Vercel.
 
+## Microsoft Clarity e cookies
+
+O app ja tem banner LGPD com tres escolhas:
+
+- Aceitar todos.
+- Rejeitar analytics.
+- Preferencias.
+
+O Microsoft Clarity so carrega se:
+
+1. `NEXT_PUBLIC_CLARITY_PROJECT_ID` estiver preenchido.
+2. O usuario aceitar analytics no banner de cookies.
+
+Para configurar:
+
+1. Entre em [clarity.microsoft.com](https://clarity.microsoft.com).
+2. Crie um projeto para `https://globalhireai.com.br`.
+3. Copie o Project ID.
+4. Cole na Vercel em `NEXT_PUBLIC_CLARITY_PROJECT_ID`.
+
+Importante: nao envie curriculos completos, descricoes de vaga ou documentos gerados para ferramentas de analytics.
+
+## Sentry
+
+O projeto esta preparado para receber variaveis do Sentry sem obrigar instalacao imediata:
+
+```bash
+NEXT_PUBLIC_SENTRY_DSN=
+SENTRY_AUTH_TOKEN=
+```
+
+Use Sentry apenas para erros tecnicos. Nao registre conteudo completo de curriculos, descricoes de vaga, mensagens de recrutador ou respostas de entrevista em logs.
+
+Quando decidir ativar:
+
+1. Crie um projeto Next.js no Sentry.
+2. Copie o DSN para `NEXT_PUBLIC_SENTRY_DSN`.
+3. Configure `SENTRY_AUTH_TOKEN` se for publicar source maps.
+4. Revise custos, retencao e politicas de privacidade.
+
 ## Estrutura de pastas
 
 ```text
@@ -206,6 +246,59 @@ public/              Arquivos publicos
 - Configurar dominio na Vercel.
 - Configurar politicas de privacidade e termos de uso.
 - Publicar conteudo da pasta `/marketing`.
+
+## Checklist amanhã — Produção
+
+1. **Cloudflare Active**
+   - Adicione `globalhireai.com.br` na Cloudflare.
+   - Troque os nameservers no registrador do dominio.
+   - Aguarde o status ficar **Active**.
+
+2. **DNS Vercel na Cloudflare**
+   - Adicione `globalhireai.com.br` na Vercel.
+   - Copie os registros DNS pedidos pela Vercel.
+   - Cole esses registros na Cloudflare.
+
+3. **Email Routing no Cloudflare**
+   - Ative Email Routing.
+   - Crie redirecionamentos para `contato@globalhireai.com.br` e `privacy@globalhireai.com.br`.
+
+4. **Vercel Environment Variables**
+   - Cadastre todas as variaveis do `.env.example`.
+   - Use `NEXT_PUBLIC_APP_URL=https://globalhireai.com.br`.
+   - Nunca coloque chaves secretas em variaveis `NEXT_PUBLIC_`.
+
+5. **Google OAuth com dominio real**
+   - No Google Cloud, adicione os callbacks do Supabase.
+   - No Supabase, configure Site URL e Redirect URLs para producao.
+   - Teste login Google em `https://globalhireai.com.br`.
+
+6. **Stripe Price IDs corretos**
+   - Confirme que Starter, Pro e Elite usam IDs `price_...`.
+   - Nao use IDs `prod_...`.
+
+7. **Stripe webhook**
+   - Configure `https://globalhireai.com.br/api/stripe/webhook`.
+   - Ative eventos de checkout e assinatura.
+   - Cole o `STRIPE_WEBHOOK_SECRET` na Vercel.
+
+8. **Clarity Project ID**
+   - Crie projeto no Microsoft Clarity.
+   - Cole `NEXT_PUBLIC_CLARITY_PROJECT_ID`.
+   - Confirme que o script so carrega apos aceitar analytics.
+
+9. **Sentry DSN**
+   - Opcional para MVP.
+   - Se ativar, use `NEXT_PUBLIC_SENTRY_DSN` e evite logs com dados profissionais sensiveis.
+
+10. **Rotacionar chaves expostas**
+    - Se alguma chave real foi enviada por print, chat ou commit, gere outra chave no provedor.
+    - Atualize Vercel e `.env.local`.
+
+11. **Deploy final**
+    - Rode `npm run build`.
+    - Faça deploy na Vercel.
+    - Teste auth, Groq, Stripe, webhook, upload, cookies, privacidade e termos.
 
 ## Proximos passos para vender
 

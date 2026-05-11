@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase-server";
 import { generateSchema } from "@/lib/validation";
 import { groq, GROQ_MODEL } from "@/lib/groq";
 import { canUseFeature, effectivePlanId, featureMinimumPlan, optimizationIntensity, plans } from "@/lib/plans";
-import { rateLimit } from "@/lib/rate-limit";
+import { cooldownLimit } from "@/lib/rate-limit";
 import { parseAiOutput } from "@/lib/document-format";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 
@@ -32,9 +32,9 @@ export async function POST(request: NextRequest) {
 
     if (!user) return NextResponse.json({ error: "Faca login para continuar." }, { status: 401 });
 
-    const ip = request.headers.get("x-forwarded-for") || user.id;
-    const limited = rateLimit(`ai:${ip}`, 8, 60_000);
-    if (!limited.ok) return NextResponse.json({ error: "Muitas tentativas. Tente novamente em 1 minuto." }, { status: 429 });
+    const ip = request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for") || "unknown";
+    const limited = cooldownLimit(`ai-generate:${user.id || ip}`, 30_000);
+    if (!limited.ok) return NextResponse.json({ error: "Aguarde 30 segundos antes de gerar novamente." }, { status: 429 });
 
     const parsed = generateSchema.safeParse(await request.json());
     if (!parsed.success) {

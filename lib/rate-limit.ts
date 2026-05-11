@@ -16,3 +16,7 @@ export function rateLimit(key: string, limit = 10, windowMs = 60_000) {
   current.count += 1;
   return { ok: true, remaining: limit - current.count };
 }
+
+export function cooldownLimit(key: string, windowMs = 30_000) {
+  return rateLimit(key, 1, windowMs);
+}
