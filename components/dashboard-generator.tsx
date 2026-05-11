@@ -32,6 +32,15 @@ const pdfTemplates: Array<{ value: PdfTemplate; label: string }> = [
   { value: "compact", label: "Compacto premium" }
 ];
 
+const generatedEventByType: Record<GenerationType, string> = {
+  ats_resume: "ats_resume_generated",
+  cover_letter: "cover_letter_generated",
+  linkedin_summary: "linkedin_summary_generated",
+  recruiter_message: "recruiter_message_generated",
+  interview_prep: "interview_prep_generated",
+  translate_resume: "translation_generated"
+};
+
 const generatorContext: Record<GenerationType, {
   title: string;
   subtitle: string;
@@ -201,6 +210,11 @@ export function DashboardGenerator({
 
       setResume(data.text);
       setUploadMessage(`Currículo importado com sucesso: ${Math.round(data.text.length / 100) / 10} mil caracteres extraídos.`);
+      trackEvent("resume_uploaded", {
+        file_type: file.type || file.name.split(".").pop(),
+        file_size_kb: Math.round(file.size / 1024),
+        extracted_chars: data.text.length
+      });
     } catch {
       setUploadMessage("Não consegui concluir o upload. Tente novamente ou cole o texto manualmente.");
     } finally {
@@ -214,6 +228,10 @@ export function DashboardGenerator({
     setLimitReached(false);
     setOutput("");
     setAppliedImprovements([]);
+    trackEvent("generation_started", { type, language, target_country: targetCountry });
+    if (jobDescription.trim().length > 0) {
+      trackEvent("job_description_added", { type, chars_bucket: jobDescription.length > 2000 ? "2000+" : "under_2000" });
+    }
 
     const response = await fetch("/api/ai/generate", {
       method: "POST",
@@ -228,11 +246,12 @@ export function DashboardGenerator({
     if (!response.ok) {
       setError(data.error || copy.errorFallback);
       setLimitReached(response.status === 402);
+      trackEvent(response.status === 402 ? "plan_limit_reached" : "generation_failed", { type, status: response.status });
       return;
     }
 
     setOutput(data.output);
-    trackEvent("generation", { type });
+    trackEvent(generatedEventByType[type], { type, language, target_country: targetCountry });
     const rawImprovements = Array.isArray(data.appliedImprovements)
       ? data.appliedImprovements
       : Array.isArray(data.recommendations)
@@ -258,6 +277,7 @@ export function DashboardGenerator({
   function exportPdf() {
     const printable = window.open("", "_blank");
     if (!printable || !output) return;
+    trackEvent("export_pdf_clicked", { type, template: pdfTemplate, paid: hasPaidPlan });
     const cleanOutput = normalizeDocumentText(output);
     const watermark = hasPaidPlan ? "" : `<div class="watermark">Criado com GlobalHire AI - plano grátis</div>`;
     printable.document.write(`
@@ -295,7 +315,7 @@ export function DashboardGenerator({
             <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-brand-500/40 bg-brand-500/10 p-3 text-sm text-brand-50 hover:bg-brand-500/15">
               {loadingUpload ? <Loader2 className="animate-spin" size={18} /> : <FileUp size={18} />}
               {loadingUpload ? "Lendo arquivo..." : "Importar currículo"}
-              <input className="hidden" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => upload(event.target.files?.[0] || null)} />
+              <input data-clarity-mask="true" className="hidden" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => upload(event.target.files?.[0] || null)} />
             </label>
           </Field>
           {uploadMessage ? <p className="text-sm text-white/60">{uploadMessage}</p> : null}
@@ -303,10 +323,10 @@ export function DashboardGenerator({
             Aceitamos PDF e DOCX com texto real, até 5 MB. Se o arquivo for uma imagem ou PDF escaneado, a leitura automática pode não funcionar; nesse caso, cole o texto manualmente abaixo.
           </p>
           <Field label={context.resumeLabel}>
-            <textarea className={textareaClass} value={resume} onChange={(e) => setResume(e.target.value)} placeholder={context.resumePlaceholder} />
+            <textarea data-clarity-mask="true" className={textareaClass} value={resume} onChange={(e) => setResume(e.target.value)} placeholder={context.resumePlaceholder} />
           </Field>
           <Field label={copy.jobDescription}>
-            <textarea className={textareaClass} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder={context.jobPlaceholder} />
+            <textarea data-clarity-mask="true" className={textareaClass} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder={context.jobPlaceholder} />
           </Field>
           <div className="grid min-w-0 gap-4 sm:grid-cols-3">
             <Field label={copy.outputLanguage}>

@@ -198,6 +198,17 @@ Para configurar:
 
 Importante: nao envie curriculos completos, descricoes de vaga ou documentos gerados para ferramentas de analytics.
 
+## PostHog
+
+PostHog e opcional e funciona sem instalar SDK adicional. Ele so carrega em producao, se o usuario aceitar analytics e se as variaveis estiverem preenchidas:
+
+```bash
+NEXT_PUBLIC_POSTHOG_KEY=
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+```
+
+A camada central fica em `lib/analytics.ts` e remove campos sensiveis antes de enviar eventos. Nao envie curriculos, descricoes de vaga, e-mails, telefones, enderecos, documentos gerados ou tokens para analytics.
+
 ## Sentry
 
 O projeto esta preparado para receber variaveis do Sentry sem obrigar instalacao imediata:
@@ -205,9 +216,11 @@ O projeto esta preparado para receber variaveis do Sentry sem obrigar instalacao
 ```bash
 NEXT_PUBLIC_SENTRY_DSN=
 SENTRY_AUTH_TOKEN=
+SENTRY_ORG=
+SENTRY_PROJECT=
 ```
 
-Use Sentry apenas para erros tecnicos. Nao registre conteudo completo de curriculos, descricoes de vaga, mensagens de recrutador ou respostas de entrevista em logs.
+Use Sentry apenas para erros tecnicos. O SDK completo ainda deve ser instalado/configurado quando voce decidir ativar monitoramento. Nao registre conteudo completo de curriculos, descricoes de vaga, mensagens de recrutador ou respostas de entrevista em logs.
 
 Quando decidir ativar:
 
@@ -215,6 +228,16 @@ Quando decidir ativar:
 2. Copie o DSN para `NEXT_PUBLIC_SENTRY_DSN`.
 3. Configure `SENTRY_AUTH_TOKEN` se for publicar source maps.
 4. Revise custos, retencao e politicas de privacidade.
+
+## Suporte
+
+Configure o e-mail publico de suporte com:
+
+```bash
+NEXT_PUBLIC_SUPPORT_EMAIL=contato@globalhireai.com.br
+```
+
+A pagina publica fica em `/support`.
 
 ## Estrutura de pastas
 

@@ -30,9 +30,14 @@ function mostUsedType(items: Array<{ type: string }>) {
   return Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0];
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { user, profile } = await requireUser();
   const supabase = await createClient();
+  const params = searchParams ? await searchParams : {};
   const isBypassAccount = hasAdminBypass(profile?.email || user.email);
   const planId = effectivePlanId(profile?.plan, profile?.email || user.email);
   const plan = plans[planId] || plans.free;
@@ -66,6 +71,23 @@ export default async function DashboardPage() {
 
   return (
     <div className="grid gap-6">
+      {params.subscription === "updated" || params.billing === "updated" || params.checkout === "success" || params.checkout === "cancelled" ? (
+        <Card className={params.checkout === "cancelled" ? "border-coral/40" : "border-brand-500/50"}>
+          <p className="text-sm font-semibold text-white">
+            {params.checkout === "success"
+              ? "Pagamento confirmado."
+              : params.checkout === "cancelled"
+                ? "Checkout cancelado."
+                : "Assinatura atualizada."}
+          </p>
+          <p className="mt-2 text-sm text-white/65">
+            {params.checkout === "cancelled"
+              ? "Você continua no plano atual. Pode escolher um plano novamente quando quiser."
+              : "O status do seu plano foi atualizado. Se não aparecer imediatamente, aguarde alguns segundos e recarregue a página."}
+          </p>
+        </Card>
+      ) : null}
+
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CreditCard className="text-brand-500" size={22} />

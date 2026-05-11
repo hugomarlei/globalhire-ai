@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2, Loader2, TrendingUp } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Card } from "@/components/ui";
 import { paidPlans, type PlanId } from "@/lib/plans";
 import { trackEvent } from "@/lib/analytics";
@@ -10,10 +10,14 @@ export function UpgradePlans({ currentPlan = "free" }: { currentPlan?: PlanId })
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    trackEvent("pricing_page_viewed", { current_plan: currentPlan });
+  }, [currentPlan]);
+
   async function checkout(plan: string) {
     setLoading(plan);
     setError("");
-    trackEvent("upgrade_click", { plan });
+    trackEvent("upgrade_clicked", { plan });
     const response = await fetch("/api/stripe/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -41,7 +45,7 @@ export function UpgradePlans({ currentPlan = "free" }: { currentPlan?: PlanId })
               <h3 className="text-xl font-semibold">ATS Score estimado</h3>
             </div>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-white/65">
-              Planos pagos liberam mais gerações, templates sem marca d'água e otimizações por vaga para aumentar o alinhamento com recrutadores e sistemas ATS.
+              Planos pagos liberam mais gerações, templates sem marca d&apos;água e otimizações por vaga para aumentar o alinhamento com recrutadores e sistemas ATS.
             </p>
           </div>
           <div className="grid min-w-[220px] gap-2 rounded-lg border border-white/10 bg-black/20 p-4">

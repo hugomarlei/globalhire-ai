@@ -84,6 +84,12 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
 
       setResume(data.text);
       setUploadMessage(`Currículo importado com sucesso: ${Math.round(data.text.length / 100) / 10} mil caracteres extraídos.`);
+      trackEvent("resume_uploaded", {
+        source: "ats_score",
+        file_type: file.type || file.name.split(".").pop(),
+        file_size_kb: Math.round(file.size / 1024),
+        extracted_chars: data.text.length
+      });
     } catch {
       setUploadMessage("Não consegui concluir o upload. Tente novamente ou cole o currículo manualmente.");
     } finally {
@@ -95,6 +101,7 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
     setOptimizing(true);
     setOptimizationError("");
     setOptimizedOutput("");
+    trackEvent("ats_analysis_started", { score: analysis.score, match: analysis.match, mode });
 
     const response = await fetch("/api/ai/optimize-from-score", {
       method: "POST",
@@ -119,11 +126,12 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
 
     if (!response.ok) {
       setOptimizationError(data.error || "Não consegui gerar a versão otimizada agora.");
+      trackEvent(response.status === 402 ? "plan_limit_reached" : "ats_analysis_failed", { status: response.status, mode });
       return;
     }
 
     setOptimizedOutput(data.output);
-    trackEvent("ats_score", { score: analysis.score, match: analysis.match });
+    trackEvent("ats_analysis_completed", { score: analysis.score, match: analysis.match, mode });
   }
 
   async function copyOutput() {
@@ -166,15 +174,15 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
               <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-brand-500/40 bg-brand-500/10 p-4 text-sm text-brand-50 hover:bg-brand-500/15">
                 {loadingUpload ? <Loader2 className="animate-spin" size={18} /> : <FileUp size={18} />}
                 {loadingUpload ? "Lendo arquivo..." : "Selecionar currículo"}
-                <input className="hidden" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => upload(event.target.files?.[0] || null)} />
+                <input data-clarity-mask="true" className="hidden" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => upload(event.target.files?.[0] || null)} />
               </label>
             </Field>
             {uploadMessage ? <p className="text-sm text-white/60">{uploadMessage}</p> : null}
             <Field label="Ou cole o currículo">
-              <textarea className={textareaClass} value={resume} onChange={(event) => setResume(event.target.value)} placeholder="Cole seu currículo completo aqui." />
+              <textarea data-clarity-mask="true" className={textareaClass} value={resume} onChange={(event) => setResume(event.target.value)} placeholder="Cole seu currículo completo aqui." />
             </Field>
             <Field label="Descrição da vaga">
-              <textarea className={textareaClass} value={jobDescription} onChange={(event) => setJobDescription(event.target.value)} placeholder="Cole a descrição da vaga para comparar score e palavras-chave." />
+              <textarea data-clarity-mask="true" className={textareaClass} value={jobDescription} onChange={(event) => setJobDescription(event.target.value)} placeholder="Cole a descrição da vaga para comparar score e palavras-chave." />
             </Field>
           </div>
         </Card>

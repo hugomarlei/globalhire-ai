@@ -53,6 +53,9 @@ function Footer() {
         <div className="flex flex-wrap gap-4">
           <Link href="/privacidade" className="hover:text-white">Privacidade</Link>
           <Link href="/termos" className="hover:text-white">Termos</Link>
+          <Link href="/cookies" className="hover:text-white">Cookies</Link>
+          <Link href="/refund-policy" className="hover:text-white">Reembolso</Link>
+          <Link href="/support" className="hover:text-white">Suporte</Link>
           <button type="button" onClick={openCookiePreferences} className="hover:text-white">
             Preferências de cookies
           </button>
