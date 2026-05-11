@@ -5,11 +5,25 @@ export default function robots(): MetadataRoute.Robots {
   const baseUrl = getAppUrl();
 
   return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: ["/admin", "/dashboard", "/gerador", "/historico", "/conta", "/assinatura", "/configuracoes"]
-    },
+    rules: [
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: [
+          "/admin",
+          "/api",
+          "/assinatura",
+          "/ats-score",
+          "/auth/callback",
+          "/configuracoes",
+          "/conta",
+          "/dashboard",
+          "/gerador",
+          "/historico",
+          "/redefinir-senha"
+        ]
+      }
+    ],
     sitemap: `${baseUrl}/sitemap.xml`
   };
 }
