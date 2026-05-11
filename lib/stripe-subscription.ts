@@ -65,6 +65,23 @@ export function getStripeSubscriptionPriceId(subscription: Stripe.Subscription) 
   return subscription.items.data[0]?.price?.id || null;
 }
 
+type SubscriptionItemWithPeriod = Stripe.SubscriptionItem & {
+  current_period_start?: number | null;
+  current_period_end?: number | null;
+};
+
+function getStripeSubscriptionItem(subscription: Stripe.Subscription) {
+  return subscription.items.data[0] as SubscriptionItemWithPeriod | undefined;
+}
+
+export function getStripeSubscriptionPeriodStart(subscription: Stripe.Subscription) {
+  return subscription.current_period_start || getStripeSubscriptionItem(subscription)?.current_period_start || null;
+}
+
+export function getStripeSubscriptionPeriodEnd(subscription: Stripe.Subscription) {
+  return subscription.current_period_end || getStripeSubscriptionItem(subscription)?.current_period_end || null;
+}
+
 export function isPaidSubscriptionStatus(status?: string | null) {
   return status === "active" || status === "trialing";
 }
@@ -117,9 +134,11 @@ export async function findUserIdForStripeSubscription({
     .from("subscriptions")
     .select("user_id")
     .eq("stripe_customer_id", customerId)
-    .maybeSingle();
+    .order("updated_at", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(1);
 
-  return (byCustomer.data?.user_id as string | undefined) || null;
+  return (byCustomer.data?.[0]?.user_id as string | undefined) || null;
 }
 
 export async function syncStripeSubscription({
@@ -134,11 +153,22 @@ export async function syncStripeSubscription({
     customerId || (typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id) || null;
   const priceId = getStripeSubscriptionPriceId(subscription);
   const mappedPlan = planFromSubscription(subscription);
+  const periodStart = getStripeSubscriptionPeriodStart(subscription);
+  const periodEnd = getStripeSubscriptionPeriodEnd(subscription);
+  const currentPeriodStart = toIsoFromStripeTimestamp(periodStart);
+  const currentPeriodEnd = toIsoFromStripeTimestamp(periodEnd);
 
   console.log("stripe_price_detected", {
     source,
     subscriptionId: subscription.id,
     priceId: priceId ? `${priceId.slice(0, 12)}...` : null
+  });
+
+  console.log("stripe_period_detected", {
+    source,
+    subscriptionId: subscription.id,
+    periodStart: periodStart || null,
+    periodEnd: periodEnd || null
   });
 
   if (!resolvedUserId) {
@@ -153,8 +183,8 @@ export async function syncStripeSubscription({
       stripe_subscription_id: subscription.id,
       stripe_price_id: priceId,
       status: subscription.status,
-      current_period_start: toIsoFromStripeTimestamp(subscription.current_period_start),
-      current_period_end: toIsoFromStripeTimestamp(subscription.current_period_end),
+      current_period_start: currentPeriodStart,
+      current_period_end: currentPeriodEnd,
       cancel_at_period_end: Boolean(subscription.cancel_at_period_end)
     });
 
@@ -168,8 +198,8 @@ export async function syncStripeSubscription({
     stripe_price_id: priceId,
     plan: mappedPlan,
     status: subscription.status,
-    current_period_start: toIsoFromStripeTimestamp(subscription.current_period_start),
-    current_period_end: toIsoFromStripeTimestamp(subscription.current_period_end),
+    current_period_start: currentPeriodStart,
+    current_period_end: currentPeriodEnd,
     cancel_at_period_end: Boolean(subscription.cancel_at_period_end)
   };
 
@@ -189,6 +219,13 @@ export async function syncStripeSubscription({
     subscriptionId: subscription.id,
     plan: mappedPlan,
     status: subscription.status
+  });
+
+  console.log("subscription_period_synced", {
+    source,
+    subscriptionId: subscription.id,
+    currentPeriodStart,
+    currentPeriodEnd
   });
 
   const profileResult = await supabase
@@ -217,23 +254,30 @@ export async function syncLatestStripeSubscriptionForUser({
   supabase: AdminClient;
   userId: string;
 }) {
-  const { data: existing } = await supabase
+  const { data: existingRows } = await supabase
     .from("subscriptions")
-    .select("stripe_customer_id,stripe_subscription_id")
+    .select("stripe_customer_id,stripe_subscription_id,status,updated_at,created_at")
     .eq("user_id", userId)
-    .maybeSingle();
+    .order("updated_at", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  const existing =
+    existingRows?.find((item) => isPaidSubscriptionStatus(item.status)) ||
+    existingRows?.[0] ||
+    null;
 
   let subscription: Stripe.Subscription | null = null;
 
-  if (existing?.stripe_subscription_id) {
-    subscription = await stripe.subscriptions.retrieve(existing.stripe_subscription_id);
-  } else if (existing?.stripe_customer_id) {
+  if (existing?.stripe_customer_id) {
     const subscriptions = await stripe.subscriptions.list({
       customer: existing.stripe_customer_id,
       status: "all",
       limit: 10
     });
     subscription = subscriptions.data.find((item) => isPaidSubscriptionStatus(item.status)) || subscriptions.data[0] || null;
+  } else if (existing?.stripe_subscription_id) {
+    subscription = await stripe.subscriptions.retrieve(existing.stripe_subscription_id);
   }
 
   if (!subscription) return { ok: false as const, error: "no_subscription" as const };

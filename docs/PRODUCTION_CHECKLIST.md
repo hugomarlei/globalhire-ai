@@ -45,6 +45,7 @@ Este guia é uma receita de bolo para publicar o GlobalHire AI em `https://www.g
    - Volte para `/dashboard?subscription=updated`.
    - Confirme que o dashboard mostra Elite.
    - No Supabase, confirme que `subscriptions.stripe_price_id` é o Price ID Elite.
+   - Confirme que `subscriptions.current_period_start` e `subscriptions.current_period_end` foram preenchidos.
    - Confirme que `subscriptions.plan` e `profiles.plan` estão como `elite`.
 
 ## 4. Supabase

@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { createAdminClient, createClient } from "@/lib/supabase-server";
 import { allowedGenerationTypes, effectivePlanFromSubscription, generationTypeLabels, hasAdminBypass, plans } from "@/lib/plans";
 import { syncLatestStripeSubscriptionForUser } from "@/lib/stripe-subscription";
+import { getLatestActiveSubscription } from "@/lib/subscription-state";
 import type { GenerationType } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -49,11 +50,7 @@ export default async function DashboardPage({
     }).catch((error) => console.error("dashboard_subscription_sync_error", error));
   }
 
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("plan,status,current_period_end")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const subscription = await getLatestActiveSubscription(supabase, user.id);
 
   const isBypassAccount = hasAdminBypass(profile?.email || user.email);
   const planId = effectivePlanFromSubscription(profile?.plan, subscription?.plan, subscription?.status, profile?.email || user.email);

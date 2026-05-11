@@ -3,6 +3,7 @@ import { UpgradeGate } from "@/components/upgrade-gate";
 import { requireUser } from "@/lib/auth";
 import { allowedGenerationTypes, canUseFeature, effectivePlanFromSubscription, featureMinimumPlan, plans } from "@/lib/plans";
 import { createClient } from "@/lib/supabase-server";
+import { getLatestActiveSubscription } from "@/lib/subscription-state";
 import type { GenerationType } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -38,11 +39,7 @@ const pageContext: Record<GenerationType, { title: string; subtitle: string }> =
 export default async function GeneratorPage({ searchParams }: { searchParams?: Promise<{ tipo?: string }> }) {
   const { user, profile } = await requireUser();
   const supabase = await createClient();
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("plan,status")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const subscription = await getLatestActiveSubscription(supabase, user.id);
   const planId = effectivePlanFromSubscription(profile?.plan, subscription?.plan, subscription?.status, profile?.email || user.email);
   const plan = plans[planId] || plans.free;
   const params = searchParams ? await searchParams : {};

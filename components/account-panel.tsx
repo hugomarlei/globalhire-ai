@@ -9,7 +9,7 @@ import { getAppUrl } from "@/lib/app-url";
 type AccountTab = "account" | "subscription" | "referrals";
 
 function formatDate(value?: string | null) {
-  if (!value) return "Ainda não disponível";
+  if (!value) return "Período não informado pela Stripe";
   return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(value));
 }
 

@@ -8,6 +8,7 @@ import { parseAiOutput } from "@/lib/document-format";
 import { cooldownLimit } from "@/lib/rate-limit";
 import type { GenerationType } from "@/lib/types";
 import { verifyTurnstileToken } from "@/lib/turnstile";
+import { getLatestActiveSubscription } from "@/lib/subscription-state";
 
 const regenerateSchema = z.object({
   generationId: z.string().uuid(),
@@ -59,17 +60,13 @@ export async function POST(request: NextRequest) {
       }, { status: 422 });
     }
 
-    const [{ data: profile }, { data: subscription }] = await Promise.all([
+    const [{ data: profile }, subscription] = await Promise.all([
       supabase
         .from("profiles")
         .select("plan,is_blocked")
         .eq("id", user.id)
         .single(),
-      supabase
-        .from("subscriptions")
-        .select("plan,status")
-        .eq("user_id", user.id)
-        .maybeSingle()
+      getLatestActiveSubscription(supabase, user.id)
     ]);
 
     if (profile?.is_blocked) return NextResponse.json({ error: "Conta bloqueada." }, { status: 403 });

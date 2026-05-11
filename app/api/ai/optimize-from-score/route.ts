@@ -7,6 +7,7 @@ import { canUseFeature, effectivePlanFromSubscription, optimizationIntensity, pl
 import { cooldownLimit } from "@/lib/rate-limit";
 import { parseAiOutput } from "@/lib/document-format";
 import { verifyTurnstileToken } from "@/lib/turnstile";
+import { getLatestActiveSubscription } from "@/lib/subscription-state";
 
 const optimizeFromScoreSchema = z.object({
   resume: z.string().min(100, "Cole pelo menos 100 caracteres do currículo.").max(20000),
@@ -56,17 +57,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: captcha.error || "Confirme o captcha para otimizar." }, { status: 400 });
     }
 
-    const [{ data: profile }, { data: subscription }] = await Promise.all([
+    const [{ data: profile }, subscription] = await Promise.all([
       supabase
         .from("profiles")
         .select("plan,is_blocked")
         .eq("id", user.id)
         .single(),
-      supabase
-        .from("subscriptions")
-        .select("plan,status")
-        .eq("user_id", user.id)
-        .maybeSingle()
+      getLatestActiveSubscription(supabase, user.id)
     ]);
 
     if (profile?.is_blocked) return NextResponse.json({ error: "Conta bloqueada." }, { status: 403 });
