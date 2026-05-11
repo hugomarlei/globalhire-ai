@@ -72,7 +72,8 @@ export default function LoginPage() {
         <div className="mt-6">
           <SocialAuthButtons mode="login" />
         </div>
-        <form onSubmit={submit} className="mt-6 grid gap-4">
+        <form onSubmit={submit} className="mt-6 grid gap-4" aria-label="Continuar com e-mail">
+          <p className="text-sm font-semibold text-white">Continuar com e-mail</p>
           <Field label="E-mail">
             <input data-clarity-mask="true" className={inputClass} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </Field>

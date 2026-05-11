@@ -33,22 +33,24 @@ export function PublicNav() {
   const copy = navCopy[locale];
 
   return (
-    <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-6">
-      <Link href="/" className="flex items-center gap-2 font-semibold text-white">
+    <header className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:flex-nowrap sm:px-6 sm:py-5">
+      <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold text-white">
         <span className="grid size-9 place-items-center rounded-md bg-white text-ink">
           <BriefcaseBusiness size={18} />
         </span>
-        GlobalHire AI
+        <span className="truncate">GlobalHire AI</span>
       </Link>
-      <nav className="flex items-center gap-3 text-sm text-white/70">
-        <LanguageSelector />
-        <Link href="/login" className="hidden hover:text-white sm:inline">
-          {copy.login}
+      <nav className="flex shrink-0 items-center gap-2 text-sm text-white/70 sm:gap-3">
+        <Link href="/login" className="focus-ring inline-flex h-10 items-center justify-center rounded-md border border-white/12 bg-white/7 px-3 font-semibold text-white hover:bg-white/12 sm:px-4">
+          {copy.login === "Login" ? "Entrar" : copy.login}
         </Link>
-        <Button href="/cadastro" className="h-10 px-4">
+        <Button href="/cadastro" className="h-10 px-3 sm:px-4">
           {copy.signup}
         </Button>
       </nav>
+      <div className="order-3 w-full sm:order-none sm:w-auto">
+        <LanguageSelector />
+      </div>
     </header>
   );
 }

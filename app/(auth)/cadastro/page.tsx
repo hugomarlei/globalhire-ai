@@ -68,7 +68,8 @@ export default function SignupPage() {
         <div className="mt-6">
           <SocialAuthButtons mode="signup" />
         </div>
-        <form onSubmit={submit} className="mt-6 grid gap-4">
+        <form onSubmit={submit} className="mt-6 grid gap-4" aria-label="Continuar com e-mail">
+          <p className="text-sm font-semibold text-white">Continuar com e-mail</p>
           <Field label="Nome">
             <input data-clarity-mask="true" className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} required />
           </Field>

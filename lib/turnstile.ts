@@ -26,7 +26,7 @@ export async function verifyTurnstileToken(token?: string | null, ip?: string | 
 
     if (!data.success) {
       console.warn("turnstile_failed", data["error-codes"]);
-      return { ok: false, error: "Captcha inválido. Atualize a página e tente novamente." };
+      return { ok: false, error: "Captcha inválido ou expirado. Recarregue o captcha e tente novamente." };
     }
 
     return { ok: true };
