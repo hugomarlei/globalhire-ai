@@ -88,6 +88,10 @@ export default function LoginPage() {
           <Link href="/cadastro" className="hover:text-white">Criar conta</Link>
           <Link href="/recuperar-senha" className="hover:text-white">Recuperar senha</Link>
         </div>
+        <p className="mt-5 text-xs leading-5 text-white/45">
+          Ao entrar, você concorda com os <Link href="/termos" className="text-white/70 hover:text-white">Termos de Uso</Link> e confirma ciência da{" "}
+          <Link href="/privacidade" className="text-white/70 hover:text-white">Política de Privacidade</Link>.
+        </p>
       </Card>
     </main>
   );

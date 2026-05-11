@@ -49,12 +49,18 @@ function Footer() {
             <Mail size={15} />
             contato@globalhireai.com.br
           </a>
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/45">
+            <a href="mailto:support@globalhireai.com.br" className="hover:text-white">support@globalhireai.com.br</a>
+            <a href="mailto:privacy@globalhireai.com.br" className="hover:text-white">privacy@globalhireai.com.br</a>
+            <a href="mailto:billing@globalhireai.com.br" className="hover:text-white">billing@globalhireai.com.br</a>
+          </div>
         </div>
         <div className="flex flex-wrap gap-4">
           <Link href="/privacidade" className="hover:text-white">Privacidade</Link>
           <Link href="/termos" className="hover:text-white">Termos</Link>
           <Link href="/cookies" className="hover:text-white">Cookies</Link>
           <Link href="/refund-policy" className="hover:text-white">Reembolso</Link>
+          <Link href="/data-processing" className="hover:text-white">Dados</Link>
           <Link href="/support" className="hover:text-white">Suporte</Link>
           <button type="button" onClick={openCookiePreferences} className="hover:text-white">
             Preferências de cookies

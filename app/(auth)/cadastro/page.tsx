@@ -86,6 +86,11 @@ export default function SignupPage() {
         <p className="mt-5 text-sm text-white/60">
           Já tem conta? <Link href="/login" className="text-white">Entrar</Link>
         </p>
+        <p className="mt-4 text-xs leading-5 text-white/45">
+          Ao criar conta, você concorda com os <Link href="/termos" className="text-white/70 hover:text-white">Termos de Uso</Link>, a{" "}
+          <Link href="/privacidade" className="text-white/70 hover:text-white">Política de Privacidade</Link> e a{" "}
+          <Link href="/cookies" className="text-white/70 hover:text-white">Política de Cookies</Link>.
+        </p>
       </Card>
     </main>
   );

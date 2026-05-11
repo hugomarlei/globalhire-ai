@@ -11,7 +11,9 @@ Este guia é uma receita de bolo para publicar o GlobalHire AI em `https://www.g
 5. Em **DNS**, crie os registros pedidos pela Vercel.
 6. Em **Email > Email Routing**, ative roteamento para:
    - `contato@globalhireai.com.br`
+   - `support@globalhireai.com.br`
    - `privacy@globalhireai.com.br`
+   - `billing@globalhireai.com.br`
 7. Em **Security > Turnstile**, crie um widget permitindo `www.globalhireai.com.br`, `globalhireai.com.br` e `localhost`.
 8. Copie:
    - Site key para `NEXT_PUBLIC_TURNSTILE_SITE_KEY`

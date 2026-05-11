@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BarChart3, BookOpenText, BriefcaseBusiness, ChevronDown, FileClock, Gauge, Globe2, Languages, LayoutDashboard, Linkedin, LogOut, MailPlus, Menu, MessageSquareText, MessagesSquare, Settings, UserCircle, Video } from "lucide-react";
+import { BarChart3, BookOpenText, BriefcaseBusiness, ChevronDown, FileClock, Gauge, Globe2, Languages, LayoutDashboard, LifeBuoy, Linkedin, LogOut, MailPlus, Menu, MessageSquareText, MessagesSquare, Settings, ShieldCheck, UserCircle, Video } from "lucide-react";
 import { Button, inputClass } from "@/components/ui";
 import { useLanguage } from "@/components/language-provider";
 import { locales, navCopy, type Locale } from "@/lib/i18n";
@@ -91,7 +91,9 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
     { href: "/conta", label: "Minha conta", Icon: UserCircle },
     { href: "/assinatura", label: "Assinatura", Icon: BarChart3 },
     { href: "/historico", label: "Histórico", Icon: FileClock },
-    { href: "/configuracoes", label: "Configurações", Icon: Settings }
+    { href: "/configuracoes", label: "Configurações", Icon: Settings },
+    { href: "/support", label: "Suporte", Icon: LifeBuoy },
+    { href: "/privacidade", label: "Privacidade", Icon: ShieldCheck }
   ];
 
   return (

@@ -1,4 +1,5 @@
 import { CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 import { PublicNav } from "@/components/nav";
 import { Button, Card } from "@/components/ui";
 import { paidPlans, plans } from "@/lib/plans";
@@ -29,6 +30,11 @@ export default function PricingPage() {
             </Card>
           ))}
         </div>
+        <p className="mt-6 max-w-3xl text-xs leading-5 text-white/45">
+          Planos pagos são processados pelo Stripe. Antes de assinar, leia os <Link href="/termos" className="text-white/70 hover:text-white">Termos de Uso</Link>, a{" "}
+          <Link href="/privacidade" className="text-white/70 hover:text-white">Política de Privacidade</Link> e a{" "}
+          <Link href="/refund-policy" className="text-white/70 hover:text-white">Política de Cancelamento e Reembolso</Link>.
+        </p>
       </section>
     </main>
   );

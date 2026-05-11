@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { CheckCircle2, Loader2, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button, Card } from "@/components/ui";
@@ -97,6 +98,11 @@ export function UpgradePlans({ currentPlan = "free" }: { currentPlan?: PlanId })
         ))}
       </div>
       {error ? <p className="rounded-md bg-coral/15 p-3 text-sm text-coral">{error}</p> : null}
+      <p className="text-xs leading-5 text-white/45">
+        Ao assinar, você concorda com os <Link href="/termos" className="text-white/70 hover:text-white">Termos de Uso</Link>, a{" "}
+        <Link href="/privacidade" className="text-white/70 hover:text-white">Política de Privacidade</Link> e a{" "}
+        <Link href="/refund-policy" className="text-white/70 hover:text-white">Política de Cancelamento e Reembolso</Link>. Pagamentos são processados pelo Stripe.
+      </p>
     </section>
   );
 }
