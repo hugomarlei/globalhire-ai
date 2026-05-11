@@ -79,7 +79,22 @@ Este guia é uma receita de bolo para publicar o GlobalHire AI em `https://www.g
 6. Copie o signing secret para `STRIPE_WEBHOOK_SECRET`.
 7. Teste checkout sandbox antes de trocar para produção.
 
-## 6. Microsoft Clarity
+## 6. Analytics
+
+1. No Google Analytics, crie uma propriedade GA4 para `https://www.globalhireai.com.br`.
+2. Copie o Measurement ID no formato `G-XXXXXXXXXX`.
+3. Cole na Vercel em `NEXT_PUBLIC_GA_MEASUREMENT_ID`.
+4. No Microsoft Clarity, crie um projeto para `www.globalhireai.com.br`.
+5. Copie o Project ID.
+6. Cole na Vercel em `NEXT_PUBLIC_CLARITY_PROJECT_ID`.
+7. No PostHog, copie a Project API Key e o host.
+8. Cole na Vercel:
+   - `NEXT_PUBLIC_POSTHOG_KEY`
+   - `NEXT_PUBLIC_POSTHOG_HOST`
+9. GA4, Clarity e PostHog só carregam em produção após consentimento de analytics.
+10. Não envie currículos, descrições de vaga, e-mails, telefones, billing ou conteúdo gerado para analytics.
+
+## 7. Microsoft Clarity legado
 
 1. Entre em `clarity.microsoft.com`.
 2. Crie um projeto para `www.globalhireai.com.br`.
@@ -87,7 +102,7 @@ Este guia é uma receita de bolo para publicar o GlobalHire AI em `https://www.g
 4. Cole na Vercel em `NEXT_PUBLIC_CLARITY_PROJECT_ID`.
 5. O script só carregará se o usuário aceitar analytics no banner de cookies.
 
-## 7. Sentry
+## 8. Sentry
 
 1. Crie projeto Next.js no Sentry.
 2. Copie o DSN público para `NEXT_PUBLIC_SENTRY_DSN`.
@@ -95,7 +110,7 @@ Este guia é uma receita de bolo para publicar o GlobalHire AI em `https://www.g
 4. Não envie currículos, descrições de vaga ou documentos completos para logs.
 5. Antes de instalar SDK, revise custos e retenção.
 
-## 8. Testes antes de publicar
+## 9. Testes antes de publicar
 
 1. Cadastro com e-mail e senha.
 2. Login Google.

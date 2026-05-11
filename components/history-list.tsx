@@ -112,6 +112,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
           <label className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35" size={17} />
             <input
+              data-clarity-mask="true"
               className={`${inputClass} pl-10`}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -146,7 +147,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                   <span className="rounded-full bg-white/8 px-2 py-1 text-xs text-white/55">{item.target_country}</span>
                 </div>
                 <p className="mt-1 text-xs text-white/40">{new Date(item.created_at).toLocaleString("pt-BR")}</p>
-                <p className={`${mode === "documents" ? "line-clamp-4" : "line-clamp-2"} mt-3 text-sm leading-6 text-white/55`}>{item.output}</p>
+                <p data-clarity-mask="true" className={`${mode === "documents" ? "line-clamp-4" : "line-clamp-2"} mt-3 text-sm leading-6 text-white/55`}>{item.output}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button onClick={() => copyText(item.id, item.output)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10">
@@ -168,7 +169,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                 <Eye size={16} />
                 Abrir documento
               </summary>
-              <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap rounded-md bg-black/25 p-4 text-sm leading-6 text-white/78">{item.output}</pre>
+              <pre data-clarity-mask="true" className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap rounded-md bg-black/25 p-4 text-sm leading-6 text-white/78">{item.output}</pre>
             </details>
           </Card>
         ))}

@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { AnalyticsScripts } from "@/components/analytics-scripts";
 import { CookieConsent } from "@/components/cookie-consent";
 import { LanguageProvider } from "@/components/language-provider";
+import { GlobalStructuredData } from "@/components/structured-data";
 import { getAppUrl } from "@/lib/app-url";
 import "./globals.css";
 
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR" className="dark">
       <body>
         <LanguageProvider>{children}</LanguageProvider>
+        <GlobalStructuredData />
         <CookieConsent />
         <AnalyticsScripts />
       </body>

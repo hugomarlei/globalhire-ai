@@ -30,6 +30,7 @@ export default function LoginPage() {
     event.preventDefault();
     setLoading(true);
     setError("");
+    trackEvent("login_started", { method: "password" });
     const captchaResponse = await fetch("/api/security/turnstile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -52,7 +53,7 @@ export default function LoginPage() {
       return;
     }
 
-    trackEvent("login");
+    trackEvent("login_completed", { method: "password" });
     router.push("/dashboard");
     router.refresh();
   }
@@ -73,10 +74,10 @@ export default function LoginPage() {
         </div>
         <form onSubmit={submit} className="mt-6 grid gap-4">
           <Field label="E-mail">
-            <input className={inputClass} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input data-clarity-mask="true" className={inputClass} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </Field>
           <Field label="Senha">
-            <input className={inputClass} type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input data-clarity-mask="true" className={inputClass} type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </Field>
           <TurnstileWidget action="login" onVerify={setTurnstileToken} resetSignal={captchaReset} />
           {error ? <p className="text-sm text-coral">{error}</p> : null}

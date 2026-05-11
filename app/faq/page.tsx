@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { PublicNav } from "@/components/nav";
+import { FaqStructuredData } from "@/components/structured-data";
 import { Card } from "@/components/ui";
+import { getAppUrl } from "@/lib/app-url";
 
 const faqs = [
   ["A análise ATS é garantia de aprovação?", "Não. É uma estimativa automatizada para orientar melhorias."],
@@ -8,9 +11,18 @@ const faqs = [
   ["Como cancelo?", "Acesse Assinatura e use o portal seguro de pagamentos Stripe."]
 ];
 
+export const metadata: Metadata = {
+  title: "FAQ | GlobalHire AI",
+  description: "Perguntas frequentes sobre GlobalHire AI, ATS Score, currículos internacionais, upload PDF/DOCX e cancelamento de assinatura.",
+  alternates: {
+    canonical: `${getAppUrl()}/faq`
+  }
+};
+
 export default function FaqPage() {
   return (
     <main className="min-h-screen bg-ink text-white">
+      <FaqStructuredData items={faqs as Array<[string, string]>} />
       <PublicNav />
       <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
         <h1 className="text-4xl font-semibold">FAQ</h1>

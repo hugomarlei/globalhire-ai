@@ -131,7 +131,7 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
     }
 
     setOptimizedOutput(data.output);
-    trackEvent("ats_analysis_completed", { score: analysis.score, match: analysis.match, mode });
+    trackEvent("ats_score_generated", { score: analysis.score, match: analysis.match, mode });
   }
 
   async function copyOutput() {
@@ -266,7 +266,7 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
             </Link>
           </div>
         </div>
-        <pre className="mt-5 min-h-72 whitespace-pre-wrap rounded-md border border-white/10 bg-black/25 p-4 text-sm leading-6 text-white/82">
+        <pre data-clarity-mask="true" className="mt-5 min-h-72 whitespace-pre-wrap rounded-md border border-white/10 bg-black/25 p-4 text-sm leading-6 text-white/82">
           {optimizing ? "Gerando uma versão otimizada com base no score, keywords e recomendações..." : optimizedOutput || "Depois da análise, clique em Criar versão otimizada para ver o currículo reescrito aqui."}
         </pre>
       </Card>

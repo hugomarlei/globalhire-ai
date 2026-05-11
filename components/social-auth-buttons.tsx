@@ -4,6 +4,7 @@ import { Facebook, Linkedin, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { getAuthCallbackUrl } from "@/lib/app-url";
+import { trackEvent } from "@/lib/analytics";
 
 type Provider = "google" | "linkedin_oidc" | "facebook";
 
@@ -32,6 +33,10 @@ export function SocialAuthButtons({ mode }: { mode: "login" | "signup" }) {
   async function signIn(provider: Provider) {
     setLoadingProvider(provider);
     setError("");
+    trackEvent(mode === "login" ? "login_started" : "signup_started", {
+      method: provider === "google" ? "google_oauth" : "social_oauth",
+      provider: provider === "google" ? "google" : provider
+    });
 
     const supabase = createClient();
     const { error: authError } = await supabase.auth.signInWithOAuth({

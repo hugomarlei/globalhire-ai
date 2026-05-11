@@ -33,7 +33,7 @@ const pdfTemplates: Array<{ value: PdfTemplate; label: string }> = [
 ];
 
 const generatedEventByType: Record<GenerationType, string> = {
-  ats_resume: "ats_resume_generated",
+  ats_resume: "resume_generated",
   cover_letter: "cover_letter_generated",
   linkedin_summary: "linkedin_summary_generated",
   recruiter_message: "recruiter_message_generated",
@@ -422,7 +422,7 @@ export function DashboardGenerator({
             </button>
           </div>
         </div>
-        <pre className="mt-5 min-h-[520px] whitespace-pre-wrap rounded-md border border-white/10 bg-black/25 p-4 text-sm leading-6 text-white/82">
+        <pre data-clarity-mask="true" className="mt-5 min-h-[520px] whitespace-pre-wrap rounded-md border border-white/10 bg-black/25 p-4 text-sm leading-6 text-white/82">
           {loading ? "Preparando resultado premium..." : output || context.empty}
         </pre>
         <div className="mt-4 rounded-md border border-white/10 bg-white/5 p-4">
@@ -431,7 +431,7 @@ export function DashboardGenerator({
             <h3 className="font-semibold">{copy.appliedImprovements}</h3>
           </div>
           {appliedImprovements.length ? (
-            <ul className="mt-3 grid gap-2 text-sm leading-6 text-white/72">
+            <ul data-clarity-mask="true" className="mt-3 grid gap-2 text-sm leading-6 text-white/72">
               {appliedImprovements.map((improvement) => (
                 <li key={`${improvement.score}-${improvement.text}`} className="flex gap-3 rounded-md bg-black/20 p-3">
                   <span className="grid h-8 min-w-14 place-items-center rounded-md bg-brand-500/15 text-sm font-semibold text-brand-500">

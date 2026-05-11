@@ -24,6 +24,7 @@ export default function SignupPage() {
     event.preventDefault();
     setLoading(true);
     setMessage("");
+    trackEvent("signup_started", { method: "password" });
     const captchaResponse = await fetch("/api/security/turnstile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -54,7 +55,7 @@ export default function SignupPage() {
     }
 
     setMessage("Conta criada. Se o Supabase pedir confirmação, abra seu e-mail; senão você já pode entrar.");
-    trackEvent("signup");
+    trackEvent("signup_completed", { method: "password" });
     router.push("/dashboard");
     router.refresh();
   }
@@ -69,13 +70,13 @@ export default function SignupPage() {
         </div>
         <form onSubmit={submit} className="mt-6 grid gap-4">
           <Field label="Nome">
-            <input className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+            <input data-clarity-mask="true" className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} required />
           </Field>
           <Field label="E-mail">
-            <input className={inputClass} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input data-clarity-mask="true" className={inputClass} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </Field>
           <Field label="Senha">
-            <input className={inputClass} type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input data-clarity-mask="true" className={inputClass} type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
           </Field>
           <TurnstileWidget action="signup" onVerify={setTurnstileToken} resetSignal={captchaReset} />
           {message ? <p className="text-sm text-white/70">{message}</p> : null}
