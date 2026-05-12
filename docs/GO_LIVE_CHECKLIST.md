@@ -2,7 +2,8 @@
 
 ## Referências
 
-- Log de verificações HTTP e notas de infra: [`PRODUCTION_VERIFICATION_LOG.md`](./PRODUCTION_VERIFICATION_LOG.md)
+- Relatório de sync pasta antiga vs repo: [`STAGING_FOLDER_SYNC_REPORT.md`](./STAGING_FOLDER_SYNC_REPORT.md)
+- Preview Vercel (branch): [`VERCEL_PREVIEW_CHECKLIST.md`](./VERCEL_PREVIEW_CHECKLIST.md)
 - Introspection Supabase (somente leitura): [`../supabase/schema-drift-introspection.sql`](../supabase/schema-drift-introspection.sql)
 - CI no repositório: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)
 

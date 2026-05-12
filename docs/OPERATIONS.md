@@ -3,6 +3,9 @@
 Status: PARCIAL  
 Última revisão: 2026-05-10
 
+Staging / comparação com cópia antiga no disco: [`STAGING_FOLDER_SYNC_REPORT.md`](./STAGING_FOLDER_SYNC_REPORT.md).  
+Preview Vercel (branch não-main): [`VERCEL_PREVIEW_CHECKLIST.md`](./VERCEL_PREVIEW_CHECKLIST.md).
+
 Contexto de produto, domínio canônico, riscos e prioridades: [`MASTER_CONTEXT.md`](./MASTER_CONTEXT.md).
 
 Verificações de produção (append-only, sem secrets): [`PRODUCTION_VERIFICATION_LOG.md`](./PRODUCTION_VERIFICATION_LOG.md).  
