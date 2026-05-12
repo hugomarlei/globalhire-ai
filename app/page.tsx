@@ -79,7 +79,8 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(50,232,117,0.20),transparent_34%),linear-gradient(180deg,#050806_0%,#07120E_55%,#0B1F14_100%)] text-white">
+    <main className="brand-shell relative min-h-screen overflow-hidden text-white">
+      <div className="brand-grid pointer-events-none absolute inset-0" />
       <PublicNav />
       {showLogoutBanner ? (
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -100,31 +101,44 @@ export default function Home() {
         </div>
       ) : null}
 
-      <section className="mx-auto grid max-w-7xl gap-10 px-4 pb-20 pt-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pt-20">
+      <section className="relative mx-auto grid max-w-7xl gap-10 px-4 pb-16 pt-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-20 lg:pt-20">
         <div>
-          <p className="mb-4 inline-flex rounded-md border border-white/10 bg-white/7 px-3 py-1 text-sm text-brand-50">
-            IA para candidaturas internacionais, ATS e posicionamento profissional
+          <p className="mb-4 inline-flex rounded-full border border-brand-500/25 bg-brand-500/10 px-3 py-1 text-sm font-semibold text-brand-50">
+            Get Hired Smarter. · Documentos de carreira com IA para oportunidades globais
           </p>
           <h1 className="max-w-4xl text-5xl font-semibold tracking-normal text-white sm:text-6xl lg:text-7xl">
             Pare de enviar currículos ignorados.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-white/72">
-            Crie candidaturas internacionais otimizadas para ATS, com currículo, carta de apresentação e LinkedIn
-            adaptados à vaga em minutos.
+            Transforme currículo, vaga e objetivo internacional em documentos profissionais otimizados para ATS,
+            claros para recrutadores e prontos para mercados globais.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button href="/cadastro">
               Criar meu currículo grátis <ArrowRight size={18} />
             </Button>
-            <Button href="#precos" className="border border-white/12 bg-white/8 text-white hover:bg-white/12">
+            <Button href="#precos" className="border border-white/12 bg-white/8 text-white shadow-none hover:bg-white/12">
               Ver planos
             </Button>
           </div>
-          <p className="mt-4 text-sm text-white/50">Sem promessas irreais: você recebe documentos melhores, não garantia de contratação.</p>
+          <div className="mt-8 grid max-w-2xl grid-cols-3 gap-3">
+            {[
+              ["ATS", "match por vaga"],
+              ["6", "ferramentas IA"],
+              ["Global", "idioma e mercado"]
+            ].map(([value, label]) => (
+              <div key={value} className="rounded-lg border border-white/10 bg-white/[0.045] p-3">
+                <p className="text-xl font-semibold text-brand-500">{value}</p>
+                <p className="mt-1 text-xs text-white/50">{label}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-sm text-white/50">Tecnologia para competir melhor. Sem promessa de entrevista, emprego ou contratação.</p>
         </div>
 
-        <Card className="p-4">
-          <div className="rounded-lg border border-white/10 bg-ink p-4">
+        <Card className="relative overflow-hidden p-4">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-500 to-transparent" />
+          <div className="rounded-lg border border-white/10 bg-ink/85 p-4">
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <p className="text-sm text-white/50">ATS Score simulado</p>
@@ -141,15 +155,15 @@ export default function Home() {
                 </div>
               </div>
               <div className="rounded-md border border-brand-500/30 bg-brand-500/10 p-4">
-                <p className="text-sm text-brand-50">Versão otimizada</p>
+                <p className="text-sm text-brand-50">Versão alinhada</p>
                 <p className="mt-3 text-4xl font-semibold text-brand-500">91%</p>
                 <div className="mt-4 h-2 rounded-full bg-white/10">
                   <div className="h-2 w-[91%] rounded-full bg-brand-500" />
                 </div>
               </div>
             </div>
-            <div className="mt-4 rounded-md bg-white p-4 text-ink">
-              <p className="text-xs font-semibold uppercase text-brand-700">Demonstração antes/depois</p>
+            <div className="mt-4 rounded-md border border-brand-500/20 bg-white p-4 text-ink">
+              <p className="text-xs font-semibold uppercase text-brand-700">Sinal de clareza profissional</p>
               <p className="mt-2 text-sm leading-6">
                 Antes: “Responsável por relatórios e reuniões.” Depois: “Conduziu análises de performance comercial,
                 priorizou indicadores de receita e apoiou decisões executivas em ambiente internacional.”
@@ -159,14 +173,14 @@ export default function Home() {
         </Card>
       </section>
 
-      <section className="border-y border-white/10 bg-white/[0.03] py-16">
+      <section className="relative border-y border-white/10 bg-white/[0.035] py-16">
         <div className="mx-auto grid max-w-7xl gap-4 px-4 sm:px-6 md:grid-cols-3">
           {[
             ["O problema", "Muitos currículos são rejeitados antes de chegar ao recrutador porque não conversam com a vaga nem com filtros ATS."],
             ["A solução", "A IA compara seu currículo com a descrição da vaga e reescreve seus materiais com linguagem mais clara, específica e alinhada."],
             ["O limite honesto", "A ferramenta aumenta qualidade e aderência, mas a decisão final continua sendo humana e depende do processo seletivo."]
           ].map(([title, text]) => (
-            <Card key={title}>
+            <Card key={title} className="hover:border-brand-500/35">
               <ShieldCheck className="text-brand-500" size={24} />
               <h2 className="mt-4 text-xl font-semibold">{title}</h2>
               <p className="mt-2 text-sm leading-6 text-white/65">{text}</p>
@@ -175,7 +189,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <section className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6">
         <h2 className="text-3xl font-semibold">Como funciona</h2>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           {[
@@ -185,8 +199,8 @@ export default function Home() {
           ].map(([Icon, title, text]) => {
             const StepIcon = Icon as typeof FileText;
             return (
-              <Card key={title as string}>
-                <span className="grid size-11 place-items-center rounded-full border border-brand-500/40 bg-brand-500/10 text-brand-500">
+              <Card key={title as string} className="hover:-translate-y-1 hover:border-brand-500/35">
+                <span className="grid size-11 place-items-center rounded-md border border-brand-500/40 bg-brand-500/10 text-brand-500">
                   <StepIcon size={20} />
                 </span>
                 <p className="mt-4 text-lg font-semibold">{title as string}</p>
@@ -197,7 +211,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6">
+      <section className="relative mx-auto max-w-7xl px-4 pb-20 sm:px-6">
         <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
           <div>
             <h2 className="text-3xl font-semibold">Funcionalidades</h2>
@@ -207,7 +221,7 @@ export default function Home() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {features.map((feature) => (
-              <div key={feature} className="flex items-center gap-3 rounded-md border border-white/10 bg-white/5 p-4">
+              <div key={feature} className="flex items-center gap-3 rounded-md border border-white/10 bg-white/[0.055] p-4 shadow-soft">
                 <CheckCircle2 className="shrink-0 text-mint" size={18} />
                 <span className="text-sm">{feature}</span>
               </div>
@@ -216,7 +230,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-y border-white/10 bg-white/[0.03] py-20">
+      <section className="relative border-y border-white/10 bg-white/[0.035] py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <h2 className="text-3xl font-semibold">Para quem é</h2>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -225,7 +239,7 @@ export default function Home() {
               "Candidatos multilíngues que precisam adaptar currículo e LinkedIn.",
               "Pessoas que querem entender melhor ATS, palavras-chave e aderência à vaga."
             ].map((text) => (
-              <Card key={text}>
+              <Card key={text} className="hover:border-brand-500/35">
                 <Globe2 className="text-brand-500" size={24} />
                 <p className="mt-4 text-sm leading-6 text-white/72">{text}</p>
               </Card>
@@ -234,14 +248,14 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="precos" className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <section id="precos" className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6">
         <h2 className="text-3xl font-semibold">Planos claros para começar</h2>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-white/65">
           Comece com uma geração premium gratuita. Depois escolha o plano que combina com seu volume de candidaturas.
         </p>
         <div className="mt-8 grid gap-4 lg:grid-cols-4">
           {[plans.free, ...paidPlans].map((plan) => (
-            <Card key={plan.id} className={`flex h-full flex-col ${plan.id === "pro" ? "border-brand-500/60" : ""}`}>
+            <Card key={plan.id} className={`flex h-full flex-col ${plan.id === "pro" ? "border-brand-500/60 shadow-glow" : "hover:border-white/20"}`}>
               {plan.id === "pro" ? <p className="mb-3 text-xs font-semibold uppercase text-brand-500">Recomendado</p> : null}
               <h3 className="text-2xl font-semibold">{plan.name}</h3>
               <p className="mt-2 text-3xl font-semibold">{plan.price}</p>

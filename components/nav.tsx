@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { BarChart3, BookOpenText, BriefcaseBusiness, ChevronDown, FileClock, Gauge, Globe2, Languages, LayoutDashboard, LifeBuoy, Linkedin, LogOut, MailPlus, Menu, MessageSquareText, MessagesSquare, Settings, ShieldCheck, UserCircle, Video } from "lucide-react";
 import { Button, inputClass } from "@/components/ui";
 import { useLanguage } from "@/components/language-provider";
@@ -35,10 +36,11 @@ export function PublicNav() {
   return (
     <header className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:flex-nowrap sm:px-6 sm:py-5">
       <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold text-white">
-        <span className="grid size-9 place-items-center rounded-md bg-white text-ink">
-          <BriefcaseBusiness size={18} />
+        <Image src="/branding/logo-symbol.svg" alt="" width={36} height={36} className="size-9 rounded-md shadow-glow" priority />
+        <span className="min-w-0">
+          <span className="block truncate leading-5">GlobalHire AI</span>
+          <span className="hidden text-[11px] font-medium text-white/45 sm:block">Get Hired Smarter.</span>
         </span>
-        <span className="truncate">GlobalHire AI</span>
       </Link>
       <nav className="flex shrink-0 items-center gap-2 text-sm text-white/70 sm:gap-3">
         <Link href="/login" className="focus-ring inline-flex h-10 items-center justify-center rounded-md border border-white/12 bg-white/7 px-3 font-semibold text-white hover:bg-white/12 sm:px-4">
@@ -102,10 +104,11 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
     <header className="sticky top-0 z-40 border-b border-white/10 bg-ink/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <span className="grid size-9 place-items-center rounded-md bg-white text-ink">
-            <BriefcaseBusiness size={18} />
+          <Image src="/branding/logo-symbol.svg" alt="" width={36} height={36} className="size-9 rounded-md shadow-glow" priority />
+          <span>
+            <span className="block leading-5">GlobalHire AI</span>
+            <span className="hidden text-[11px] font-medium text-white/45 sm:block">Get Hired Smarter.</span>
           </span>
-          GlobalHire AI
         </Link>
         <nav className="hidden items-center gap-2 text-sm text-white/70 lg:flex">
           <Link href="/dashboard" className="inline-flex items-center gap-1 rounded-md px-3 py-2 hover:bg-white/8 hover:text-white">

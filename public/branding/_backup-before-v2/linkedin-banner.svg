@@ -1,0 +1,22 @@
+<svg width="1584" height="396" viewBox="0 0 1584 396" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1584" height="396" fill="#050B08"/>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1584" y2="396"><stop stop-color="#32E875" stop-opacity="0.28"/><stop offset="0.55" stop-color="#050B08"/><stop offset="1" stop-color="#7DD3FC" stop-opacity="0.18"/></linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M 48 0 L 0 0 0 48" fill="none" stroke="#ECFFF2" stroke-opacity="0.08" stroke-width="1"/></pattern>
+  </defs>
+  <rect width="1584" height="396" fill="url(#g)"/>
+  <rect width="1584" height="396" fill="url(#grid)"/>
+  <rect x="92" y="78" width="88" height="88" rx="22" fill="#32E875"/>
+  <path d="M112 108V139H156V108M156 108V139" stroke="#050B08" stroke-width="8" stroke-linecap="round"/>
+  <path d="M172 139L185 108L198 139M178 127H192" stroke="#050B08" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="185" cy="99" r="4" fill="#050B08"/>
+  <text x="204" y="128" fill="white" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="800">GlobalHire AI</text>
+  <text x="207" y="176" fill="#32E875" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800">Get Hired Smarter.</text>
+  <text x="92" y="247" fill="#ECFFF2" fill-opacity="0.72" font-family="Inter, Arial, sans-serif" font-size="28">AI-powered ATS resumes and global career documents for international candidates.</text>
+  <text x="92" y="306" fill="#ECFFF2" fill-opacity="0.62" font-family="Inter, Arial, sans-serif" font-size="20">Resume optimization · Cover letters · LinkedIn · Recruiter messages · Interview prep</text>
+  <rect x="1040" y="58" width="456" height="272" rx="26" fill="white" fill-opacity="0.08" stroke="#32E875" stroke-opacity="0.45"/>
+  <text x="1084" y="110" fill="#ECFFF2" fill-opacity="0.7" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700">ATS Match</text>
+  <text x="1084" y="178" fill="#32E875" font-family="Inter, Arial, sans-serif" font-size="58" font-weight="800">91%</text>
+  <rect x="1084" y="204" width="364" height="14" rx="7" fill="white" fill-opacity="0.14"/>
+  <rect x="1084" y="204" width="332" height="14" rx="7" fill="#32E875"/>
+</svg>

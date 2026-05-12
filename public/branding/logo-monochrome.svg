@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="GlobalHire AI symbol monochrome">
+  <rect width="128" height="128" rx="28" fill="#070A0D"/>
+  <circle cx="64" cy="56" r="34" fill="none" stroke="#F4F7F5" stroke-width="7"/>
+  <path d="M30 56h68M64 22c12 13 18 24 18 34s-6 21-18 34M64 22C52 35 46 46 46 56s6 21 18 34" fill="none" stroke="#F4F7F5" stroke-opacity="0.72" stroke-width="5" stroke-linecap="round"/>
+  <path d="M40 71h48c6.1 0 11 4.9 11 11v15c0 6.1-4.9 11-11 11H40c-6.1 0-11-4.9-11-11V82c0-6.1 4.9-11 11-11Z" fill="#F4F7F5"/>
+  <path d="M53 71v-7c0-5 4-9 9-9h4c5 0 9 4 9 9v7" fill="none" stroke="#070A0D" stroke-width="6" stroke-linecap="round"/>
+  <path d="M29 88h70" stroke="#070A0D" stroke-opacity="0.30" stroke-width="5"/>
+</svg>

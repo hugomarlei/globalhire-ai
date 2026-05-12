@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="GlobalHire AI">
+  <rect width="64" height="64" rx="14" fill="#06130d"/>
+  <path d="M32 10 49 18v12c0 11.7-7.2 20.4-17 24-9.8-3.6-17-12.3-17-24V18l17-8Z" fill="#9cff6b"/>
+  <path d="M23 31.8 29.2 38 42 24.8" fill="none" stroke="#06130d" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

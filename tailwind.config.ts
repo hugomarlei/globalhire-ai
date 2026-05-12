@@ -10,20 +10,28 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#07120E",
-        paper: "#F4FFF8",
+        ink: "#070A0D",
+        graphite: "#101418",
+        slate: "#151B22",
+        paper: "#F4F7F5",
         brand: {
-          50: "#ECFFF2",
-          100: "#CFFFE0",
-          500: "#32E875",
-          600: "#20C45A",
-          900: "#0A4F29"
+          50: "#EAF8F3",
+          100: "#CBEDE3",
+          200: "#9BD9C8",
+          500: "#2FBF8F",
+          600: "#249B75",
+          700: "#197B5D",
+          900: "#0A3D31"
         },
-        mint: "#32E875",
-        coral: "#FF6B6B"
+        mint: "#2FBF8F",
+        cyber: "#6EC6D9",
+        violet: "#7C6EE6",
+        amber: "#D9A441",
+        coral: "#E16B6B"
       },
       boxShadow: {
-        soft: "0 24px 80px rgba(15, 23, 42, 0.12)"
+        soft: "0 24px 80px rgba(0, 0, 0, 0.24)",
+        glow: "0 0 0 1px rgba(47, 191, 143, 0.15), 0 22px 70px rgba(47, 191, 143, 0.08)"
       }
     }
   },
