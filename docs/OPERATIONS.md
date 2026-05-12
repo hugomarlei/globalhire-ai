@@ -3,6 +3,11 @@
 Status: PARCIAL  
 Última revisão: 2026-05-10
 
+Contexto de produto, domínio canônico, riscos e prioridades: [`MASTER_CONTEXT.md`](./MASTER_CONTEXT.md).
+
+Verificações de produção (append-only, sem secrets): [`PRODUCTION_VERIFICATION_LOG.md`](./PRODUCTION_VERIFICATION_LOG.md).  
+CI no GitHub: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) (`npm ci`, `typecheck`, `lint`, `build`).
+
 ## Rodar localmente
 
 ```bash

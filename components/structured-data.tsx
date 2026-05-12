@@ -38,12 +38,7 @@ export function GlobalStructuredData() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "GlobalHire AI",
-    url: baseUrl,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${baseUrl}/pricing?q={search_term_string}`,
-      "query-input": "required name=search_term_string"
-    }
+    url: baseUrl
   };
   const softwareApplication = {
     "@context": "https://schema.org",

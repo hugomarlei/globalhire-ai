@@ -93,7 +93,7 @@ Status: IMPLEMENTADO
 
 Risco:
 
-- `SearchAction` aponta para `/pricing?q=` sem busca real. Melhor remover ou criar busca real se quiser 100% aderente.
+- ~~`SearchAction`~~ Removido do JSON-LD `WebSite` em `components/structured-data.tsx` (2026-05-12): não havia busca real em `/pricing?q=`; manter schema honesto evita inconsistência com rich results.
 
 ## Indexing
 
