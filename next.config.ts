@@ -25,6 +25,7 @@ const cspDirectives = [
     "https://js.stripe.com",
     "https://checkout.stripe.com",
     "https://challenges.cloudflare.com",
+    "https://*.cloudflare.com",
     "https://www.googletagmanager.com",
     "https://www.google-analytics.com",
     "https://www.clarity.ms",
@@ -33,6 +34,7 @@ const cspDirectives = [
     "https://app.posthog.com",
     "https://us.i.posthog.com",
     "https://eu.i.posthog.com"
+
   ].join(" "),
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
@@ -48,6 +50,7 @@ const cspDirectives = [
     "https://checkout.stripe.com",
     "https://billing.stripe.com",
     "https://challenges.cloudflare.com",
+    "https://*.cloudflare.com",
     "https://www.google-analytics.com",
     "https://region1.google-analytics.com",
     "https://*.google-analytics.com",
@@ -58,7 +61,7 @@ const cspDirectives = [
     "https://us.i.posthog.com",
     "https://eu.i.posthog.com"
   ].join(" "),
-  "frame-src 'self' https://js.stripe.com https://checkout.stripe.com https://billing.stripe.com https://challenges.cloudflare.com",
+  "frame-src 'self' https://js.stripe.com https://checkout.stripe.com https://billing.stripe.com https://challenges.cloudflare.com https://*.cloudflare.com",
   "worker-src 'self' blob:",
   "manifest-src 'self'"
 ];
