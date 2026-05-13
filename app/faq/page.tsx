@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AutoSiteFooter } from "@/components/site-footer";
 import { PublicNav } from "@/components/nav";
 import { FaqStructuredData } from "@/components/structured-data";
 import { Card } from "@/components/ui";
@@ -21,20 +22,21 @@ export const metadata: Metadata = {
 
 export default function FaqPage() {
   return (
-    <main className="min-h-screen bg-ink text-white">
+    <main className="min-h-screen bg-paper text-ink dark:bg-ink dark:text-white">
       <FaqStructuredData items={faqs as Array<[string, string]>} />
       <PublicNav />
       <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-        <h1 className="text-4xl font-semibold">FAQ</h1>
+        <h1 className="text-4xl font-semibold text-ink dark:text-white">FAQ</h1>
         <div className="mt-8 grid gap-3">
           {faqs.map(([question, answer]) => (
             <Card key={question}>
-              <h2 className="font-semibold">{question}</h2>
-              <p className="mt-2 text-sm leading-6 text-white/65">{answer}</p>
+              <h2 className="font-semibold text-ink dark:text-white">{question}</h2>
+              <p className="mt-2 text-sm leading-6 text-graphite/75 dark:text-white/65">{answer}</p>
             </Card>
           ))}
         </div>
       </section>
+      <AutoSiteFooter />
     </main>
   );
 }

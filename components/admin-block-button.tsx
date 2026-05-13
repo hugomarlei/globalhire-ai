@@ -23,7 +23,7 @@ export function AdminBlockButton({ userId, blocked }: { userId: string; blocked:
       type="button"
       onClick={toggle}
       disabled={loading}
-      className="focus-ring rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10 disabled:opacity-50"
+      className="focus-ring rounded-md border border-graphite/20 px-3 py-2 text-sm text-graphite/80 hover:bg-graphite/10 disabled:opacity-50 dark:border-white/10 dark:text-white/80 dark:hover:bg-white/10"
     >
       {blocked ? "Desbloquear" : "Bloquear"}
     </button>

@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { AnalyticsScripts } from "@/components/analytics-scripts";
 import { CookieConsent } from "@/components/cookie-consent";
 import { LanguageProvider } from "@/components/language-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import { GlobalStructuredData } from "@/components/structured-data";
 import { getAppUrl } from "@/lib/app-url";
 import "./globals.css";
@@ -52,9 +53,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className="dark">
-      <body>
-        <LanguageProvider>{children}</LanguageProvider>
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className="min-h-screen bg-paper text-ink antialiased transition-colors dark:bg-ink dark:text-white">
+        <LanguageProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </LanguageProvider>
         <GlobalStructuredData />
         <CookieConsent />
         <AnalyticsScripts />

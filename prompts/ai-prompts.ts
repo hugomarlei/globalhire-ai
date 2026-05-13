@@ -27,7 +27,7 @@ Objetivo: produzir um currículo substancial, competitivo e claramente adaptado 
 Estrutura recomendada quando houver dados suficientes:
 NOME DO PROFISSIONAL
 Target Role: cargo-alvo alinhado à vaga
-Location: país/região ou disponibilidade remota, sem cidade inventada
+Contacto / cabeçalho: telefone, e-mail, cidade/localização e links profissionais exatamente como constarem no currículo de origem (ajuste só formatação ATS, não apague dados reais).
 Professional Summary
 Core Skills
 Professional Experience
@@ -36,13 +36,14 @@ Certifications
 Languages
 
 Regras especificas:
+- Cabeçalho: preserve telefone, e-mail, cidade ou região e links que o candidato já forneceu. Não omita por conveniência. Não invente dados que não existam na fonte.
 - O resumo profissional deve ter 4 a 6 linhas densas, conectando experiencia real ao cargo-alvo.
 - Core Skills deve refletir palavras-chave importantes da vaga, mas somente quando compatíveis com a experiência do candidato.
 - Reescreva bullets com linguagem forte, orientada a impacto, escopo, ferramentas, stakeholders, resultados e senioridade.
 - Cada experiência relevante deve ter bullets suficientes para vender o candidato. Não resuma demais.
 - Se houver descrição da vaga, priorize experiências e habilidades mais alinhadas a ela.
 - Se o currículo tiver muitas informações irrelevantes para a vaga, reduza o peso delas sem apagar fatos importantes.
-- Não crie uma cidade. Se o currículo trouxer cidade, remova a cidade e mantenha algo como "Brazil", "Open to remote international roles" ou o país informado pelo usuário.
+- Localização: não invente cidade ou país. Se o candidato indicou cidade no material de origem, mantenha-a (pode normalizar capitalização). Se não houver cidade, use país/região ou "disponível para remoto" apenas quando isso já estiver implícito ou for o país-alvo informado.
 `,
   cover_letter: `
 Entrega: carta de apresentação.
@@ -60,7 +61,7 @@ Objetivo: posicionar o candidato para recrutadores internacionais.
 Regras especificas:
 - Escreva em primeira pessoa, com tom profissional e humano.
 - Inclua especialidade, impacto, tipos de problema que resolve, setores/ferramentas e objetivo internacional.
-- Não invente localidade. Evite cidade; use país/região ou disponibilidade remota quando apropriado.
+- Preserve contacto e localização presentes no material de origem; não remova cidade, telefone ou e-mail reais.
 `,
   recruiter_message: `
 Entrega: mensagem para recrutador.
@@ -82,7 +83,7 @@ Regras especificas:
 Entrega: tradução e adaptação internacional do currículo.
 Objetivo: não apenas traduzir, mas adaptar convenções, tom e termos do país-alvo.
 Regras especificas:
-- Remova localidade muito especifica quando nao for necessaria.
+- Preserve os dados de contacto e localização do original, salvo pedido explícito de anonimização; não apague cidade ou telefone reais.
 - Adapte nomes de cargos sem distorcer senioridade.
 - Mantenha o documento denso e pronto para candidatura.
 `
@@ -114,16 +115,15 @@ Regras de qualidade:
 - Nunca invente empresas, cargos, diplomas, certificações ou métricas que não estejam no currículo.
 - Quando faltarem metricas, sugira marcadores com espacos seguros como "[insira metrica]".
 - Adapte tom, vocabulário e convenções para o país-alvo.
-- Use exclusivamente o idioma final solicitado em todo o documento final e em todas as melhorias aplicadas.
-- Não misture idiomas. Exceção: mantenha termos técnicos, nomes de ferramentas, certificações, empresas e tecnologias exatamente como aparecem ou como são usados no mercado.
-- Para Português do Brasil, use ortografia e vocabulário brasileiros. Para Português de Portugal, use ortografia e vocabulário europeus. Para English, use inglês profissional internacional. Para Français, Español e Deutsch, use ortografia correta e natural do idioma.
+- Use exclusivamente o idioma final solicitado (${args.language}) em todo o documento final, incluindo títulos de secção, bullets, resumo, etiquetas e CTAs. Não misture outro idioma.
+- Não misture idiomas. Exceção: mantenha termos técnicos, nomes de ferramentas, certificações, empresas e tecnologias exatamente como aparecem ou como são usados no mercado (ex.: AWS, Kubernetes).
+- Mapeamento de idioma: "Português do Brasil" ou "pt-BR" → português do Brasil em todo o texto. "English" ou "en" → inglês (preferencialmente inglês norte-americano profissional). "Français" ou "fr" → francês integral. "Español" ou "es" → espanhol integral.
 - Entregue um documento final pronto para copiar.
 - Não use markdown no documento final.
 - Não use caracteres de diff como "+" no início das linhas.
 - Não coloque explicações, sugestões ou melhorias aplicadas dentro do documento final.
 - Se a entrega for currículo ATS, priorize esta estrutura quando houver informação suficiente: Professional Summary, Core Skills, Professional Experience, Education, Certifications, Languages.
 - Cada bullet de experiencia deve tentar conectar acao, contexto e impacto. Quando nao houver numero, mantenha a frase forte e honesta.
-- Localização: não invente cidade. Para currículo internacional, omita cidade específica salvo se o usuário informar claramente que deseja mantê-la. Prefira país/região, "Brazil" ou "Open to remote international roles" quando fizer sentido.
 - As melhorias aplicadas devem explicar quais transformações você já fez no documento final.
 - Cada melhoria aplicada deve começar com um impacto estimado entre colchetes, no formato "[12%]". Esse percentual representa a melhora estimada daquela alteração para a vaga-alvo.
 - O documento final deve ser completo o bastante para candidatura. Evite respostas curtas demais.

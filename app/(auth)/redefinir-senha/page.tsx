@@ -70,10 +70,10 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-ink px-4">
+    <main className="grid flex-1 place-items-center px-4 py-10">
       <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-semibold">Criar nova senha</h1>
-        <p className="mt-2 text-sm text-white/60">Defina uma senha segura para voltar ao dashboard.</p>
+        <h1 className="text-2xl font-semibold text-ink dark:text-white">Criar nova senha</h1>
+        <p className="mt-2 text-sm text-graphite/70 dark:text-white/60">Defina uma senha segura para voltar ao dashboard.</p>
         {!checkingSession && !hasRecoverySession ? (
           <div className="mt-5 rounded-md bg-coral/15 p-4 text-sm leading-6 text-coral">
             Este link expirou ou não abriu corretamente. Solicite um novo link de recuperação.
@@ -87,12 +87,17 @@ export default function ResetPasswordPage() {
           <Field label="Confirmar senha">
             <input className={inputClass} type="password" value={confirm} onChange={(event) => setConfirm(event.target.value)} required />
           </Field>
-          {message ? <p className="text-sm text-white/65">{message}</p> : null}
-          <Button type="submit" className="bg-brand-500 text-white hover:bg-brand-600" disabled={loading || checkingSession || !hasRecoverySession}>
+          {message ? <p className="text-sm text-graphite/75 dark:text-white/65">{message}</p> : null}
+          <Button type="submit" className="bg-brand-500 text-ink hover:bg-brand-200" disabled={loading || checkingSession || !hasRecoverySession}>
             {checkingSession ? "Validando link..." : loading ? "Salvando..." : "Salvar nova senha"}
           </Button>
         </form>
-        <Link href="/login" className="mt-5 inline-block text-sm text-white/60 hover:text-white">Voltar ao login</Link>
+        <Link
+          href="/login"
+          className="mt-5 inline-block text-sm font-medium text-brand-700 hover:underline dark:text-brand-200 dark:hover:text-white"
+        >
+          Voltar ao login
+        </Link>
       </Card>
     </main>
   );

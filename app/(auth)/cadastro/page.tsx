@@ -61,15 +61,15 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-ink px-4">
+    <main className="grid flex-1 place-items-center px-4 py-10">
       <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-semibold">Criar conta grátis</h1>
-        <p className="mt-2 text-sm text-white/60">Comece com uma geração teste.</p>
+        <h1 className="text-2xl font-semibold text-ink dark:text-white">Criar conta grátis</h1>
+        <p className="mt-2 text-sm text-graphite/70 dark:text-white/60">Comece com uma geração teste.</p>
         <div className="mt-6">
           <SocialAuthButtons mode="signup" />
         </div>
         <form onSubmit={submit} className="mt-6 grid gap-4" aria-label="Continuar com e-mail">
-          <p className="text-sm font-semibold text-white">Continuar com e-mail</p>
+          <p className="text-sm font-semibold text-ink dark:text-white">Continuar com e-mail</p>
           <Field label="Nome">
             <input data-clarity-mask="true" className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} required />
           </Field>
@@ -80,18 +80,31 @@ export default function SignupPage() {
             <input data-clarity-mask="true" className={inputClass} type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
           </Field>
           <TurnstileWidget action="signup" onVerify={setTurnstileToken} resetSignal={captchaReset} />
-          {message ? <p className="text-sm text-white/70">{message}</p> : null}
-          <Button type="submit" className="bg-brand-500 text-white hover:bg-brand-600">
+          {message ? <p className="text-sm text-graphite/75 dark:text-white/70">{message}</p> : null}
+          <Button type="submit" className="bg-brand-500 text-ink hover:bg-brand-200">
             {loading ? "Criando..." : "Criar meu currículo grátis"}
           </Button>
         </form>
-        <p className="mt-5 text-sm text-white/60">
-          Já tem conta? <Link href="/login" className="text-white">Entrar</Link>
+        <p className="mt-5 text-sm text-graphite/70 dark:text-white/60">
+          Já tem conta?{" "}
+          <Link href="/login" className="font-medium text-brand-700 hover:underline dark:text-brand-200 dark:hover:text-white">
+            Entrar
+          </Link>
         </p>
-        <p className="mt-4 text-xs leading-5 text-white/45">
-          Ao criar conta, você concorda com os <Link href="/termos" className="text-white/70 hover:text-white">Termos de Uso</Link>, a{" "}
-          <Link href="/privacidade" className="text-white/70 hover:text-white">Política de Privacidade</Link> e a{" "}
-          <Link href="/cookies" className="text-white/70 hover:text-white">Política de Cookies</Link>.
+        <p className="mt-4 text-xs leading-5 text-graphite/60 dark:text-white/45">
+          Ao criar conta, você concorda com os{" "}
+          <Link href="/termos" className="font-medium text-brand-700 underline-offset-2 hover:underline dark:text-brand-200 dark:hover:text-white">
+            Termos de Uso
+          </Link>
+          , a{" "}
+          <Link href="/privacidade" className="font-medium text-brand-700 underline-offset-2 hover:underline dark:text-brand-200 dark:hover:text-white">
+            Política de Privacidade
+          </Link>{" "}
+          e a{" "}
+          <Link href="/cookies" className="font-medium text-brand-700 underline-offset-2 hover:underline dark:text-brand-200 dark:hover:text-white">
+            Política de Cookies
+          </Link>
+          .
         </p>
       </Card>
     </main>

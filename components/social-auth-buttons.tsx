@@ -17,12 +17,12 @@ const providers: Array<{ id: Provider; label: string; icon: React.ReactNode }> =
   {
     id: "linkedin_oidc",
     label: "Continuar com LinkedIn",
-    icon: <Linkedin size={18} />
+    icon: <Linkedin size={18} className="shrink-0 text-ink dark:text-white" aria-hidden />
   },
   {
     id: "facebook",
     label: "Continuar com Facebook",
-    icon: <Facebook size={18} />
+    icon: <Facebook size={18} className="shrink-0 text-ink dark:text-white" aria-hidden />
   }
 ];
 
@@ -55,10 +55,10 @@ export function SocialAuthButtons({ mode }: { mode: "login" | "signup" }) {
 
   return (
     <div className="grid gap-3">
-      <div className="flex items-center gap-3 text-xs text-white/40">
-        <span className="h-px flex-1 bg-white/10" />
+      <div className="flex items-center gap-3 text-xs text-graphite/50 dark:text-white/40">
+        <span className="h-px flex-1 bg-graphite/15 dark:bg-white/10" />
         {mode === "login" ? "ou entre com" : "ou cadastre-se com"}
-        <span className="h-px flex-1 bg-white/10" />
+        <span className="h-px flex-1 bg-graphite/15 dark:bg-white/10" />
       </div>
       <div className="grid gap-2">
         {providers.map((provider) => (
@@ -67,9 +67,13 @@ export function SocialAuthButtons({ mode }: { mode: "login" | "signup" }) {
             type="button"
             onClick={() => signIn(provider.id)}
             disabled={Boolean(loadingProvider)}
-            className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/7 px-4 text-sm font-semibold text-white transition hover:bg-white/12 disabled:cursor-not-allowed disabled:opacity-60"
+            className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md border border-graphite/20 bg-white px-4 text-sm font-semibold text-ink shadow-sm transition hover:bg-graphite/[0.04] disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/12 dark:bg-[#1a222d] dark:text-white dark:shadow-none dark:hover:border-white/22 dark:hover:bg-[#222c38]"
           >
-            {loadingProvider === provider.id ? <Loader2 className="animate-spin" size={18} /> : provider.icon}
+            {loadingProvider === provider.id ? (
+              <Loader2 className="animate-spin text-ink dark:text-white" size={18} aria-hidden />
+            ) : (
+              provider.icon
+            )}
             {provider.label}
           </button>
         ))}

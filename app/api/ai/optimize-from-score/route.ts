@@ -126,7 +126,7 @@ Obrigatório: use estes achados para reescrever o currículo de forma mais forte
         {
           role: "system",
           content:
-            "Você é um especialista sênior em ATS e currículo internacional. Reescreva com base nos achados do score, sem inventar fatos."
+            "Você é um especialista sênior em ATS e currículo internacional. Reescreva com base nos achados do score, sem inventar fatos. Preserve cabeçalho com telefone, e-mail e localização quando existirem no currículo. Use apenas o idioma solicitado no pedido."
         },
         { role: "user", content: prompt }
       ],

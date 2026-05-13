@@ -25,8 +25,8 @@ export default async function SubscriptionPage() {
       />
       <section id="planos" className="scroll-mt-28 grid gap-3">
         <div>
-          <h2 className="text-2xl font-semibold">Comparar planos</h2>
-          <p className="mt-2 text-sm text-white/60">Escolha o plano ideal sem perder seu histórico ou configurações.</p>
+          <h2 className="text-2xl font-semibold text-ink dark:text-white">Comparar planos</h2>
+          <p className="mt-2 text-sm text-graphite/65 dark:text-white/60">Escolha o plano ideal sem perder seu histórico ou configurações.</p>
         </div>
         <UpgradePlans currentPlan={plan.id} />
       </section>

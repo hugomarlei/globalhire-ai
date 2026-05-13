@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 function safeOrigin(value: string | undefined) {
   if (!value) return null;
@@ -25,6 +26,7 @@ const cspDirectives = [
     "https://js.stripe.com",
     "https://checkout.stripe.com",
     "https://challenges.cloudflare.com",
+    "https://*.cloudflare.com",
     "https://www.googletagmanager.com",
     "https://www.google-analytics.com",
     "https://www.clarity.ms",
@@ -33,6 +35,7 @@ const cspDirectives = [
     "https://app.posthog.com",
     "https://us.i.posthog.com",
     "https://eu.i.posthog.com"
+
   ].join(" "),
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
@@ -48,6 +51,7 @@ const cspDirectives = [
     "https://checkout.stripe.com",
     "https://billing.stripe.com",
     "https://challenges.cloudflare.com",
+    "https://*.cloudflare.com",
     "https://www.google-analytics.com",
     "https://region1.google-analytics.com",
     "https://*.google-analytics.com",
@@ -58,7 +62,7 @@ const cspDirectives = [
     "https://us.i.posthog.com",
     "https://eu.i.posthog.com"
   ].join(" "),
-  "frame-src 'self' https://js.stripe.com https://checkout.stripe.com https://billing.stripe.com https://challenges.cloudflare.com",
+  "frame-src 'self' https://js.stripe.com https://checkout.stripe.com https://billing.stripe.com https://challenges.cloudflare.com https://*.cloudflare.com",
   "worker-src 'self' blob:",
   "manifest-src 'self'"
 ];
@@ -68,6 +72,12 @@ if (process.env.NODE_ENV === "production") {
 }
 
 const csp = cspDirectives.join("; ");
+
+/** Source maps / release upload só quando as três variáveis existem (evita custo e chamadas à API Sentry no build). */
+const sentryReleaseUploadReady =
+  Boolean(process.env.SENTRY_AUTH_TOKEN?.trim()) &&
+  Boolean(process.env.SENTRY_ORG?.trim()) &&
+  Boolean(process.env.SENTRY_PROJECT?.trim());
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: process.cwd(),
@@ -111,4 +121,20 @@ const nextConfig: NextConfig = {
   }
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: sentryReleaseUploadReady ? process.env.SENTRY_ORG : undefined,
+  project: sentryReleaseUploadReady ? process.env.SENTRY_PROJECT : undefined,
+  authToken: sentryReleaseUploadReady ? process.env.SENTRY_AUTH_TOKEN : undefined,
+  sourcemaps: {
+    disable: !sentryReleaseUploadReady
+  },
+  telemetry: false,
+  silent: !process.env.CI,
+  tunnelRoute: "/monitoring",
+  disableLogger: true,
+  widenClientFileUpload: false,
+  suppressOnRouterTransitionStartWarning: true,
+  errorHandler: (err: Error) => {
+    console.warn("[sentry] build step:", err.message);
+  }
+});

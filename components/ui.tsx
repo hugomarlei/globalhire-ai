@@ -41,8 +41,11 @@ export function Button({
   );
 }
 
+const cardSurface =
+  "rounded-lg border p-5 shadow-soft transition duration-200 border-graphite/15 bg-white text-ink shadow-[0_24px_80px_rgba(0,0,0,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-graphite/90 dark:text-white dark:shadow-soft dark:backdrop-blur-xl";
+
 export function Card({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("glass rounded-lg p-5 shadow-soft transition duration-200", className)}>{children}</div>;
+  return <div className={cn(cardSurface, className)}>{children}</div>;
 }
 
 export function Field({
@@ -53,15 +56,28 @@ export function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="grid min-w-0 gap-2 text-sm font-medium text-white/80">
+    <label className="grid min-w-0 gap-2 text-sm font-medium text-graphite/85 dark:text-white/80">
       <span>{label}</span>
       {children}
     </label>
   );
 }
 
-export const inputClass =
-  "focus-ring min-h-11 w-full min-w-0 rounded-md border border-white/10 bg-white/7 px-3 py-2 text-sm text-white placeholder:text-white/35 transition hover:border-white/18";
+/** Inputs and selects: readable on light surfaces (marketing/legal light) and on dark app shell. */
+export const inputClass = cn(
+  "focus-ring min-h-11 w-full min-w-0 rounded-md border px-3 py-2 text-sm transition",
+  "border-graphite/25 bg-white text-ink shadow-inner caret-ink placeholder:text-graphite/50",
+  "hover:border-graphite/45",
+  "selection:bg-brand-100 selection:text-ink",
+  "disabled:cursor-not-allowed disabled:border-graphite/15 disabled:bg-graphite/[0.06] disabled:text-graphite/45",
+  "dark:border-white/12 dark:bg-[#1a222d] dark:text-white dark:caret-white dark:shadow-none dark:placeholder:text-white/45 dark:hover:border-white/22",
+  "dark:selection:bg-brand-700/45 dark:selection:text-white",
+  "dark:disabled:border-white/8 dark:disabled:bg-white/[0.06] dark:disabled:text-white/35",
+  "[&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_rgb(255_255_255)] [&:-webkit-autofill]:[-webkit-text-fill-color:#070A0D]",
+  "dark:[&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_rgb(26_34_45)] dark:[&:-webkit-autofill]:[-webkit-text-fill-color:#f7f8fa]"
+);
 
-export const textareaClass =
-  "focus-ring min-h-40 w-full min-w-0 rounded-md border border-white/10 bg-white/7 px-3 py-2 text-sm leading-6 text-white placeholder:text-white/35 transition hover:border-white/18";
+export const textareaClass = cn(
+  inputClass,
+  "min-h-40 leading-6"
+);

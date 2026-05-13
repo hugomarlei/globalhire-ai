@@ -42,7 +42,9 @@ Implementado:
 - `Permissions-Policy`.
 - CSP compatível com Vercel, Supabase, Stripe, Groq, GA4, Clarity, PostHog e Turnstile.
 
-CORS: APIs são same-origin por padrão no App Router. Não há CORS aberto explícito.
+CORS: APIs são same-origin por padrão no App Router. Não há `Access-Control-Allow-*` definido no código-fonte da aplicação (ausência confirmada por busca no repositório).
+
+**Produção (verificação externa):** respostas do documento HTML em `https://www.globalhireai.com.br` têm sido observadas com `Access-Control-Allow-Origin: *`. Isso **não** é emitido por `next.config.ts`. Tratar como item de **infra** (Vercel headers, Cloudflare, ou comportamento da CDN) e registrar origem em [`../PRODUCTION_VERIFICATION_LOG.md`](../PRODUCTION_VERIFICATION_LOG.md).
 
 ## Rate limiting
 

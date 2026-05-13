@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: "Você regenera documentos profissionais mantendo contexto, fatos verdadeiros e melhorando a versão anterior."
+          content: "Você regenera documentos profissionais mantendo contexto, fatos verdadeiros e melhorando a versão anterior. Preserve telefone, e-mail e cidade/localização quando constarem no documento de origem. Mantenha um único idioma, o mesmo do pedido."
         },
         { role: "user", content: prompt }
       ],
