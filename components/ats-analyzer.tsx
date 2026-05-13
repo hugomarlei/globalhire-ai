@@ -143,19 +143,19 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
 
   return (
     <div className="grid gap-6">
-      <div className="rounded-lg border border-white/10 bg-white/5 p-4">
+      <div className="rounded-lg border border-graphite/15 bg-graphite/[0.05] p-4 dark:border-white/10 dark:bg-white/5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-3xl font-semibold">{isKeywordMode ? "Análise de Palavras-chave" : "ATS Score"}</h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
+            <h1 className="text-3xl font-semibold text-ink dark:text-white">{isKeywordMode ? "Análise de Palavras-chave" : "ATS Score"}</h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-graphite/65 dark:text-white/60">
               {isKeywordMode
                 ? "Veja quais termos da vaga já aparecem no currículo e quais lacunas podem reduzir sua compatibilidade."
                 : "Compare seu currículo com uma vaga, veja compatibilidade, palavras-chave e gere uma versão otimizada na própria tela."}
             </p>
           </div>
           <div className="flex gap-2">
-            <Link href="/ats-score" className={`focus-ring rounded-md px-3 py-2 text-sm font-semibold ${!isKeywordMode ? "bg-brand-500 text-ink" : "border border-white/10 text-white/70"}`}>ATS Score</Link>
-            <Link href="/ats-score?modo=keywords#keywords" className={`focus-ring rounded-md px-3 py-2 text-sm font-semibold ${isKeywordMode ? "bg-brand-500 text-ink" : "border border-white/10 text-white/70"}`}>Palavras-chave</Link>
+            <Link href="/ats-score" className={`focus-ring rounded-md px-3 py-2 text-sm font-semibold ${!isKeywordMode ? "bg-brand-500 text-ink" : "border border-graphite/20 text-graphite/75 hover:bg-graphite/10 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/8"}`}>ATS Score</Link>
+            <Link href="/ats-score?modo=keywords#keywords" className={`focus-ring rounded-md px-3 py-2 text-sm font-semibold ${isKeywordMode ? "bg-brand-500 text-ink" : "border border-graphite/20 text-graphite/75 hover:bg-graphite/10 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/8"}`}>Palavras-chave</Link>
           </div>
         </div>
       </div>
@@ -164,20 +164,20 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
         <Card>
           <div className="flex items-center gap-2">
             <SearchCheck className="text-brand-500" size={22} />
-            <h2 className="text-2xl font-semibold">{isKeywordMode ? "Comparador de keywords" : "Analisador ATS"}</h2>
+            <h2 className="text-2xl font-semibold text-ink dark:text-white">{isKeywordMode ? "Comparador de keywords" : "Analisador ATS"}</h2>
           </div>
-          <p className="mt-3 rounded-md border border-white/10 bg-white/5 p-3 text-xs leading-5 text-white/50">
+          <p className="mt-3 rounded-md border border-graphite/15 bg-graphite/[0.05] p-3 text-xs leading-5 text-graphite/55 dark:border-white/10 dark:bg-white/5 dark:text-white/50">
             O ATS Score é uma estimativa para orientar melhorias. Ele não garante aprovação, entrevista ou resposta de recrutadores.
           </p>
           <div className="mt-6 grid gap-4">
             <Field label="Upload PDF ou DOCX">
-              <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-brand-500/40 bg-brand-500/10 p-4 text-sm text-brand-50 hover:bg-brand-500/15">
+              <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-brand-500/40 bg-brand-500/10 p-4 text-sm text-brand-800 hover:bg-brand-500/15 dark:text-brand-50">
                 {loadingUpload ? <Loader2 className="animate-spin" size={18} /> : <FileUp size={18} />}
                 {loadingUpload ? "Lendo arquivo..." : "Selecionar currículo"}
                 <input data-clarity-mask="true" className="hidden" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => upload(event.target.files?.[0] || null)} />
               </label>
             </Field>
-            {uploadMessage ? <p className="text-sm text-white/60">{uploadMessage}</p> : null}
+            {uploadMessage ? <p className="text-sm text-graphite/65 dark:text-white/60">{uploadMessage}</p> : null}
             <Field label="Ou cole o currículo">
               <textarea data-clarity-mask="true" className={textareaClass} value={resume} onChange={(event) => setResume(event.target.value)} placeholder="Cole seu currículo completo aqui." />
             </Field>
@@ -189,43 +189,43 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
 
         <Card>
           <div className="grid gap-5 md:grid-cols-[220px_1fr]">
-            <div className="grid place-items-center rounded-lg border border-white/10 bg-black/25 p-6">
+            <div className="grid place-items-center rounded-lg border border-graphite/15 bg-graphite/[0.06] p-6 dark:border-white/10 dark:bg-black/25">
               <div className="grid size-40 place-items-center rounded-full border-[10px] border-brand-500/25 bg-brand-500/10">
                 <div className="text-center">
                   <p className="text-5xl font-semibold text-brand-500">{analysis.score}</p>
-                  <p className="text-sm text-white/55">ATS Score</p>
+                  <p className="text-sm text-graphite/55 dark:text-white/55">ATS Score</p>
                 </div>
               </div>
             </div>
             <div className="grid gap-4">
               <div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-white/60">Match com a vaga</span>
+                  <span className="text-graphite/65 dark:text-white/60">Match com a vaga</span>
                   <span className="font-semibold text-brand-500">{analysis.match}%</span>
                 </div>
-                <div className="mt-2 h-2 rounded-full bg-white/10">
+                <div className="mt-2 h-2 rounded-full bg-graphite/15 dark:bg-white/10">
                   <div className="h-2 rounded-full bg-brand-500" style={{ width: `${analysis.match}%` }} />
                 </div>
               </div>
               <div id="keywords" className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-md border border-white/10 bg-white/5 p-4">
-                  <h2 className="font-semibold">Keywords encontradas</h2>
+                <div className="rounded-md border border-graphite/15 bg-graphite/[0.05] p-4 dark:border-white/10 dark:bg-white/5">
+                  <h2 className="font-semibold text-ink dark:text-white">Keywords encontradas</h2>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {analysis.found.slice(0, 12).map((keyword) => <span key={keyword} className="rounded-md bg-brand-500/15 px-2 py-1 text-xs text-brand-50">{keyword}</span>)}
-                    {!analysis.found.length ? <p className="text-sm text-white/50">Cole uma vaga para analisar.</p> : null}
+                    {analysis.found.slice(0, 12).map((keyword) => <span key={keyword} className="rounded-md bg-brand-500/15 px-2 py-1 text-xs text-brand-800 dark:text-brand-50">{keyword}</span>)}
+                    {!analysis.found.length ? <p className="text-sm text-graphite/55 dark:text-white/50">Cole uma vaga para analisar.</p> : null}
                   </div>
                 </div>
-                <div className="rounded-md border border-white/10 bg-white/5 p-4">
-                  <h2 className="font-semibold">Keywords ausentes</h2>
+                <div className="rounded-md border border-graphite/15 bg-graphite/[0.05] p-4 dark:border-white/10 dark:bg-white/5">
+                  <h2 className="font-semibold text-ink dark:text-white">Keywords ausentes</h2>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {analysis.missing.slice(0, 12).map((keyword) => <span key={keyword} className="rounded-md bg-coral/15 px-2 py-1 text-xs text-coral">{keyword}</span>)}
-                    {!analysis.missing.length ? <p className="text-sm text-white/50">Nenhuma lacuna crítica detectada.</p> : null}
+                    {!analysis.missing.length ? <p className="text-sm text-graphite/55 dark:text-white/50">Nenhuma lacuna crítica detectada.</p> : null}
                   </div>
                 </div>
               </div>
-              <div className="rounded-md border border-white/10 bg-white/5 p-4">
-                <h2 className="flex items-center gap-2 font-semibold"><Sparkles className="text-brand-500" size={18} /> Recomendações</h2>
-                <ul className="mt-3 grid gap-2 text-sm leading-6 text-white/70">
+              <div className="rounded-md border border-graphite/15 bg-graphite/[0.05] p-4 dark:border-white/10 dark:bg-white/5">
+                <h2 className="flex items-center gap-2 font-semibold text-ink dark:text-white"><Sparkles className="text-brand-500" size={18} /> Recomendações</h2>
+                <ul className="mt-3 grid gap-2 text-sm leading-6 text-graphite/75 dark:text-white/70">
                   {analysis.recommendations.map((item) => <li key={item} className="flex gap-2"><CheckCircle2 className="mt-1 shrink-0 text-brand-500" size={15} /> {item}</li>)}
                 </ul>
               </div>
@@ -248,25 +248,25 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
       <Card>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold">Currículo otimizado pelo ATS Score</h2>
-            <p className="mt-1 text-sm text-white/55">A versão gerada aqui é salva automaticamente no histórico.</p>
+            <h2 className="text-xl font-semibold text-ink dark:text-white">Currículo otimizado pelo ATS Score</h2>
+            <p className="mt-1 text-sm text-graphite/55 dark:text-white/55">A versão gerada aqui é salva automaticamente no histórico.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button onClick={copyOutput} disabled={!optimizedOutput} className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 disabled:opacity-40">
+            <button onClick={copyOutput} disabled={!optimizedOutput} className="focus-ring inline-flex items-center gap-2 rounded-md border border-graphite/20 px-3 py-2 text-sm text-graphite/80 hover:bg-graphite/[0.06] disabled:opacity-40 dark:border-white/10 dark:text-white/80 dark:hover:bg-white/10">
               <Copy size={16} />
               {copied ? "Copiado" : "Copiar"}
             </button>
-            <button onClick={optimizeFromScore} disabled={optimizing || resume.length < 100 || jobDescription.length < 40} className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 disabled:opacity-40">
+            <button onClick={optimizeFromScore} disabled={optimizing || resume.length < 100 || jobDescription.length < 40} className="focus-ring inline-flex items-center gap-2 rounded-md border border-graphite/20 px-3 py-2 text-sm text-graphite/80 hover:bg-graphite/[0.06] disabled:opacity-40 dark:border-white/10 dark:text-white/80 dark:hover:bg-white/10">
               <RefreshCw size={16} />
               Gerar novamente
             </button>
-            <Link href="/historico" className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10">
+            <Link href="/historico" className="focus-ring inline-flex items-center gap-2 rounded-md border border-graphite/20 px-3 py-2 text-sm text-graphite/80 hover:bg-graphite/[0.06] dark:border-white/10 dark:text-white/80 dark:hover:bg-white/10">
               <FileClock size={16} />
               Salvo no histórico
             </Link>
           </div>
         </div>
-        <pre data-clarity-mask="true" className="mt-5 min-h-72 whitespace-pre-wrap rounded-md border border-white/10 bg-black/25 p-4 text-sm leading-6 text-white/82">
+        <pre data-clarity-mask="true" className="mt-5 min-h-72 whitespace-pre-wrap rounded-md border border-graphite/15 bg-graphite/[0.06] p-4 text-sm leading-6 text-graphite/90 dark:border-white/10 dark:bg-black/25 dark:text-white/82">
           {optimizing ? "Gerando uma versão otimizada com base no score, keywords e recomendações..." : optimizedOutput || "Depois da análise, clique em Criar versão otimizada para ver o currículo reescrito aqui."}
         </pre>
       </Card>

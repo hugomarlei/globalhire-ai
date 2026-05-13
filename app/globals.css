@@ -149,3 +149,38 @@ html:not(.dark) .brand-shell .hover\:bg-white\/12:hover {
 html:not(.dark) .brand-shell .hover\:border-white\/20:hover {
   border-color: rgba(7, 10, 13, 0.16);
 }
+
+/* Text selection: visible in inputs and body copy */
+::selection {
+  background-color: rgba(47, 191, 143, 0.38);
+  color: var(--gh-ink);
+}
+
+html.dark ::selection {
+  background-color: rgba(47, 191, 143, 0.35);
+  color: #f4f7f5;
+}
+
+/* WebKit autofill on textarea/select (matches inputClass surfaces) */
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--gh-ink);
+  caret-color: var(--gh-ink);
+  box-shadow: inset 0 0 0 1000px #ffffff;
+  transition: background-color 99999s ease-out 0s;
+}
+
+html.dark textarea:-webkit-autofill,
+html.dark textarea:-webkit-autofill:hover,
+html.dark textarea:-webkit-autofill:focus,
+html.dark select:-webkit-autofill,
+html.dark select:-webkit-autofill:hover,
+html.dark select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #f7f8fa;
+  caret-color: #f7f8fa;
+  box-shadow: inset 0 0 0 1000px #1a222d;
+}

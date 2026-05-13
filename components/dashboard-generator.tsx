@@ -306,20 +306,20 @@ export function DashboardGenerator({
         <div className="flex items-center gap-2">
           <Sparkles className="text-brand-500" size={22} />
           <div>
-            <h1 className="text-2xl font-semibold">{context.title}</h1>
-            <p className="mt-1 text-sm leading-6 text-white/60">{context.subtitle}</p>
+            <h1 className="text-2xl font-semibold text-ink dark:text-white">{context.title}</h1>
+            <p className="mt-1 text-sm leading-6 text-graphite/65 dark:text-white/60">{context.subtitle}</p>
           </div>
         </div>
         <div className="mt-6 grid gap-4">
           <Field label="Upload PDF/DOCX">
-            <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-brand-500/40 bg-brand-500/10 p-3 text-sm text-brand-50 hover:bg-brand-500/15">
+            <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-brand-500/40 bg-brand-500/10 p-3 text-sm text-brand-800 hover:bg-brand-500/15 dark:text-brand-50">
               {loadingUpload ? <Loader2 className="animate-spin" size={18} /> : <FileUp size={18} />}
               {loadingUpload ? "Lendo arquivo..." : "Importar currículo"}
               <input data-clarity-mask="true" className="hidden" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => upload(event.target.files?.[0] || null)} />
             </label>
           </Field>
-          {uploadMessage ? <p className="text-sm text-white/60">{uploadMessage}</p> : null}
-          <p className="rounded-md border border-white/10 bg-white/5 p-3 text-xs leading-5 text-white/50">
+          {uploadMessage ? <p className="text-sm text-graphite/65 dark:text-white/60">{uploadMessage}</p> : null}
+          <p className="rounded-md border border-graphite/15 bg-graphite/[0.05] p-3 text-xs leading-5 text-graphite/55 dark:border-white/10 dark:bg-white/5 dark:text-white/50">
             Aceitamos PDF e DOCX com texto real, até 5 MB. Se o arquivo for uma imagem ou PDF escaneado, a leitura automática pode não funcionar; nesse caso, cole o texto manualmente abaixo.
           </p>
           <Field label={context.resumeLabel}>
@@ -364,17 +364,17 @@ export function DashboardGenerator({
             </div>
           ) : null}
           <TurnstileWidget action="generation" onVerify={setTurnstileToken} resetSignal={captchaReset} />
-          <Button type="button" className="bg-brand-500 text-white hover:bg-brand-600" onClick={generate} disabled={loading}>
+          <Button type="button" className="bg-brand-500 text-ink hover:bg-brand-600" onClick={generate} disabled={loading}>
             {loading ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
             {loading ? copy.generating : context.cta}
           </Button>
           {loading ? (
             <div className="rounded-md border border-brand-500/20 bg-brand-500/10 p-4">
-              <div className="flex items-center gap-2 text-sm font-semibold text-brand-50">
+              <div className="flex items-center gap-2 text-sm font-semibold text-brand-800 dark:text-brand-50">
                 <Loader2 className="animate-spin" size={17} />
                 {steps[generationStep]}
               </div>
-              <div className="mt-3 h-2 rounded-full bg-white/10">
+              <div className="mt-3 h-2 rounded-full bg-graphite/15 dark:bg-white/10">
                 <div className="h-2 rounded-full bg-brand-500 transition-all duration-500" style={{ width: `${((generationStep + 1) / steps.length) * 100}%` }} />
               </div>
             </div>
@@ -384,13 +384,13 @@ export function DashboardGenerator({
 
       <Card className="min-h-[620px]">
         <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
-          <h2 className="text-xl font-semibold">{copy.finalDocument}</h2>
+          <h2 className="text-xl font-semibold text-ink dark:text-white">{copy.finalDocument}</h2>
           <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end">
             <button
               type="button"
               onClick={copyOutput}
               disabled={!output}
-              className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/10 px-3 text-sm text-white/80 disabled:opacity-40"
+              className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-md border border-graphite/20 px-3 text-sm text-graphite/80 hover:bg-graphite/[0.06] disabled:opacity-40 dark:border-white/10 dark:text-white/80 dark:hover:bg-white/8"
             >
               <Copy size={17} />
               {copied ? "Copiado" : "Copiar"}
@@ -399,7 +399,7 @@ export function DashboardGenerator({
               type="button"
               onClick={generate}
               disabled={loading || !resume}
-              className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/10 px-3 text-sm text-white/80 disabled:opacity-40"
+              className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-md border border-graphite/20 px-3 text-sm text-graphite/80 hover:bg-graphite/[0.06] disabled:opacity-40 dark:border-white/10 dark:text-white/80 dark:hover:bg-white/8"
             >
               <RefreshCw size={17} />
               Gerar novamente
@@ -415,25 +415,25 @@ export function DashboardGenerator({
               type="button"
               onClick={exportPdf}
               disabled={!output}
-              className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-md border border-white/10 px-3 text-sm text-white/80 disabled:opacity-40"
+              className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-md border border-graphite/20 px-3 text-sm text-graphite/80 hover:bg-graphite/[0.06] disabled:opacity-40 dark:border-white/10 dark:text-white/80 dark:hover:bg-white/8"
             >
               <Download size={17} />
               {copy.pdf}
             </button>
           </div>
         </div>
-        <pre data-clarity-mask="true" className="mt-5 min-h-[520px] whitespace-pre-wrap rounded-md border border-white/10 bg-black/25 p-4 text-sm leading-6 text-white/82">
+        <pre data-clarity-mask="true" className="mt-5 min-h-[520px] whitespace-pre-wrap rounded-md border border-graphite/15 bg-graphite/[0.06] p-4 text-sm leading-6 text-graphite/90 dark:border-white/10 dark:bg-black/25 dark:text-white/82">
           {loading ? "Preparando resultado premium..." : output || context.empty}
         </pre>
-        <div className="mt-4 rounded-md border border-white/10 bg-white/5 p-4">
+        <div className="mt-4 rounded-md border border-graphite/15 bg-graphite/[0.05] p-4 dark:border-white/10 dark:bg-white/5">
           <div className="flex items-center gap-2">
             <FileText className="text-mint" size={18} />
-            <h3 className="font-semibold">{copy.appliedImprovements}</h3>
+            <h3 className="font-semibold text-ink dark:text-white">{copy.appliedImprovements}</h3>
           </div>
           {appliedImprovements.length ? (
-            <ul data-clarity-mask="true" className="mt-3 grid gap-2 text-sm leading-6 text-white/72">
+            <ul data-clarity-mask="true" className="mt-3 grid gap-2 text-sm leading-6 text-graphite/80 dark:text-white/72">
               {appliedImprovements.map((improvement) => (
-                <li key={`${improvement.score}-${improvement.text}`} className="flex gap-3 rounded-md bg-black/20 p-3">
+                <li key={`${improvement.score}-${improvement.text}`} className="flex gap-3 rounded-md bg-graphite/[0.06] p-3 dark:bg-black/20">
                   <span className="grid h-8 min-w-14 place-items-center rounded-md bg-brand-500/15 text-sm font-semibold text-brand-500">
                     +{improvement.score}%
                   </span>
@@ -442,11 +442,11 @@ export function DashboardGenerator({
               ))}
             </ul>
           ) : (
-            <p className="mt-3 text-sm text-white/50">{copy.emptyImprovements}</p>
+            <p className="mt-3 text-sm text-graphite/55 dark:text-white/50">{copy.emptyImprovements}</p>
           )}
         </div>
         {!hasPaidPlan ? (
-          <p className="mt-3 text-sm text-white/50">{copy.watermarkNotice}</p>
+          <p className="mt-3 text-sm text-graphite/55 dark:text-white/50">{copy.watermarkNotice}</p>
         ) : null}
       </Card>
     </div>
