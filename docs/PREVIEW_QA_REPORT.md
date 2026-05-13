@@ -87,13 +87,54 @@
 
 **Pronto para QA final na Preview** neste escopo (UI dark/light, expansão independente de cards no histórico, toggle de tema, footer social). Sentry, merge para `main` e produção permanecem fora desta entrega, conforme plano RC.
 
+## Rodada RC — last blockers antes do Sentry
+
+### Bugs / inconsistências tratados
+
+1. **Contraste**: botão **Entrar** (`PublicNav`) e chrome de conta/menu mobile com halos `white/7` no dark; card **ATS simulado** na landing com hierarquia fraca e faixa final branca pura.
+2. **Histórico / documentos**: grelha com **stretch** padrão + `flex flex-col` no `Card` fazia vizinhos na mesma linha acompanharem a altura do card expandido.
+3. **Theme toggle / footer social**: resíduos claros no dark.
+4. **Configurações**: notificações pareciam configuráveis sem backend; template de exportação não aplicava ao Gerador; faltava **Brasil** no país-alvo.
+
+### Causa raiz
+
+- **CSS Grid**: `align-items: stretch` (default) iguala a altura de todos os itens da linha à célula mais alta.
+- **Preferências**: `globalhire-preferences` era salvo nas Configurações, mas o Gerador não hidratava `language` / `targetCountry` / `template` na montagem.
+
+### Solução
+
+- **nav.tsx**, **theme-toggle.tsx**, **site-footer.tsx**: superfícies graphite no dark, sem `bg-white/7` nos CTAs secundários.
+- **history-list.tsx**: `items-start`, cards `h-fit self-start min-h-0`, sem `flex-1` no corpo; preview `max-h-72` + `min-h-0` + overflow.
+- **app/page.tsx**: texto explícito no mock ATS; dica em faixa mint/ink menos gritante.
+- **settings-panel.tsx**: notificações **“Em breve”**; Brasil no select; copy MVP para template e tipo de entrega.
+- **dashboard-generator.tsx**: Brasil na lista; `useEffect` hidrata idioma, país e template de PDF a partir do `localStorage` (whitelist).
+
+### O que permanece “em breve”
+
+- Notificações por e-mail (marketing / frequência): sem implementação.
+- Tipo de entrega padrão nas Configurações → ainda não sincroniza o seletor do Gerador (documentado no painel).
+
+### Template de exportação — status
+
+- **Funcional para PDF no Gerador**: ao abrir `/gerador`, o template salvo nas Configurações define o **`pdfTemplate`** inicial (pode ser alterado na tela antes de exportar).
+
+### Validação de build (esta rodada)
+
+- `npm run typecheck` — **OK**
+- `npm run lint` — **OK**
+- `npm run build` — **OK**
+
+### Recomendação — Sentry
+
+Após smoke na Preview nestes pontos: **pronto para integrar Sentry** (quando você autorizar o escopo).
+
 ## Smoke manual sugerido na Preview
 
 1. Home: idioma ×3; tema ×3; scroll até footer (redes + CNPJ).
 2. `/login`, `/cadastro`, `/recuperar-senha`: tema claro e escuro; preencher e-mail (autofill se possível); botões sociais com **rótulo e ícones** visíveis.
 3. Logado — **tema claro e escuro**: `/dashboard`, `/gerador`, `/ats-score`, `/historico`, `/configuracoes`, `/assinatura`, `/conta`; **AppNav** (desktop + mobile), seletor de idioma, toggles de filtro no histórico.
 4. `/faq`, `/pricing`: tema + footer.
-5. Logado: `/historico` → download `.txt`; **Meus documentos** → “Abrir documento” em **vários** cards: só o card clicado expande; `<pre>` legível em dark/light.
+5. Logado: `/historico` → download `.txt`; **Meus documentos** → “Abrir documento” em **vários** cards: só o card clicado expande; **vizinhos na mesma linha não crescem de altura**; `<pre>` legível em dark/light.
 6. **Preview — APIs:** `/gerador` (gerar), `/ats-score` (analisar + otimizar), `/assinatura#planos` (checkout / portal) — **sem** mensagem de origem inválida; rede 200 nas rotas `/api/ai/*` e `/api/stripe/*` (exceto erros de negócio esperados, ex. cartão teste).
 7. Consola: sem spam repetido de Turnstile “Cannot find Widget…” ao navegar / trocar tema.
 8. CSP/Turnstile: sem regressão óbvia.

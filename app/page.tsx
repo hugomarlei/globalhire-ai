@@ -80,33 +80,33 @@ export default function Home() {
 
         <Card className="relative overflow-hidden p-4">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-500 to-transparent" />
-          <div className="rounded-lg border border-white/10 bg-ink/85 p-4">
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-white/50">{copy.scoreMockLabel}</p>
-                <p className="mt-1 text-xl font-semibold">{copy.scoreMockSubtitle}</p>
+          <div className="rounded-lg border border-white/10 bg-ink/90 p-4 text-white">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm text-white/60">{copy.scoreMockLabel}</p>
+                <p className="mt-1 text-xl font-semibold text-white">{copy.scoreMockSubtitle}</p>
               </div>
-              <Gauge className="text-brand-500" size={28} />
+              <Gauge className="shrink-0 text-brand-500" size={28} />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-md border border-white/10 bg-white/5 p-4">
-                <p className="text-sm text-white/55">{copy.scoreBefore}</p>
-                <p className="mt-3 text-4xl font-semibold text-white/70">42%</p>
-                <div className="mt-4 h-2 rounded-full bg-white/10">
-                  <div className="h-2 w-[42%] rounded-full bg-white/35" />
+              <div className="rounded-md border border-white/12 bg-black/20 p-4">
+                <p className="text-sm text-white/70">{copy.scoreBefore}</p>
+                <p className="mt-3 text-4xl font-semibold text-white/85">42%</p>
+                <div className="mt-4 h-2 rounded-full bg-white/12">
+                  <div className="h-2 w-[42%] rounded-full bg-white/40" />
                 </div>
               </div>
-              <div className="rounded-md border border-brand-500/30 bg-brand-500/10 p-4">
+              <div className="rounded-md border border-brand-500/35 bg-brand-500/12 p-4">
                 <p className="text-sm text-brand-50">{copy.scoreAfter}</p>
                 <p className="mt-3 text-4xl font-semibold text-brand-500">91%</p>
-                <div className="mt-4 h-2 rounded-full bg-white/10">
+                <div className="mt-4 h-2 rounded-full bg-white/12">
                   <div className="h-2 w-[91%] rounded-full bg-brand-500" />
                 </div>
               </div>
             </div>
-            <div className="mt-4 rounded-md border border-brand-500/20 bg-white p-4 text-ink">
-              <p className="text-xs font-semibold uppercase text-brand-700">{copy.scoreHintTitle}</p>
-              <p className="mt-2 text-sm leading-6">{copy.scoreHintBody}</p>
+            <div className="mt-4 rounded-md border border-brand-500/25 bg-[#e8f0eb] p-4 text-ink dark:border-brand-500/30 dark:bg-[#dfe8e2]">
+              <p className="text-xs font-semibold uppercase text-brand-800">{copy.scoreHintTitle}</p>
+              <p className="mt-2 text-sm leading-6 text-graphite/90">{copy.scoreHintBody}</p>
             </div>
           </div>
         </Card>

@@ -159,10 +159,10 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
       </Card>
       {notice ? <p className="rounded-md border border-graphite/15 bg-graphite/[0.06] p-3 text-sm text-graphite/80 dark:border-white/10 dark:bg-graphite/30 dark:text-white/75">{notice}</p> : null}
 
-      <div className={mode === "documents" ? "grid gap-3 md:grid-cols-2 xl:grid-cols-3" : "grid gap-3"}>
+      <div className={mode === "documents" ? "grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3" : "grid gap-3"}>
         {filtered.map((item) => (
-          <Card key={item.id} className={`p-0 ${mode === "history" ? "" : "flex flex-col"}`}>
-            <div className={mode === "history" ? "grid gap-4 p-4 lg:grid-cols-[1fr_auto] lg:items-start" : "grid flex-1 gap-4 p-4"}>
+          <Card key={item.id} className={`h-fit min-h-0 w-full min-w-0 self-start p-0`}>
+            <div className={mode === "history" ? "grid gap-4 p-4 lg:grid-cols-[1fr_auto] lg:items-start" : "grid gap-4 p-4"}>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-semibold text-ink dark:text-white">{typeLabels[item.type] || item.type}</h2>
@@ -208,7 +208,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                 </button>
               </div>
             </div>
-            <div className="border-t border-graphite/15 px-4 py-3 dark:border-white/10">
+            <div className="min-h-0 border-t border-graphite/15 px-4 py-3 dark:border-white/10">
               <button
                 type="button"
                 className="focus-ring inline-flex w-full cursor-pointer items-center gap-2 rounded-md px-1 py-2 text-left text-sm font-semibold text-graphite/80 hover:bg-graphite/10 hover:text-ink dark:text-white/80 dark:hover:bg-white/[0.06] dark:hover:text-white"
@@ -226,7 +226,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
               {docOpenById[item.id] ? (
                 <pre
                   data-clarity-mask="true"
-                  className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap rounded-md border border-graphite/20 bg-[#eef2ef] p-4 text-sm leading-6 text-ink dark:border-white/10 dark:bg-[#0b100e] dark:text-white/90"
+                  className="mt-3 max-h-72 min-h-0 overflow-y-auto overflow-x-auto whitespace-pre-wrap rounded-md border border-graphite/20 bg-[#eef2ef] p-4 text-sm leading-6 text-ink dark:border-white/10 dark:bg-[#0b100e] dark:text-white/90"
                 >
                   {item.output}
                 </pre>

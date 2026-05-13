@@ -13,7 +13,6 @@ type Preferences = {
   language: string;
   deliveryType: string;
   targetCountry: string;
-  notifications: string;
   template: string;
 };
 
@@ -21,11 +20,22 @@ const defaultPreferences: Preferences = {
   language: locales[0].outputLabel,
   deliveryType: "Currículo ATS",
   targetCountry: "Estados Unidos",
-  notifications: "Resumo semanal",
   template: "Executivo ATS"
 };
 
 const allowedOutputLanguages = new Set(locales.map((item) => item.outputLabel));
+
+const allowedTargetCountries = new Set([
+  "Brasil",
+  "Estados Unidos",
+  "Canadá",
+  "Reino Unido",
+  "Portugal",
+  "Alemanha",
+  "Europa"
+]);
+
+const allowedTemplates = new Set(["Executivo ATS", "Moderno internacional", "Compacto premium"]);
 
 export function SettingsPanel() {
   const { locale } = useLanguage();
@@ -38,11 +48,18 @@ export function SettingsPanel() {
     const stored = window.localStorage.getItem(storageKey);
     if (stored) {
       try {
-        const parsed = { ...defaultPreferences, ...JSON.parse(stored) } as Preferences;
+        const parsed = { ...defaultPreferences, ...JSON.parse(stored) } as Preferences & { notifications?: string };
         if (!allowedOutputLanguages.has(parsed.language)) {
           parsed.language = defaultPreferences.language;
         }
-        setPreferences(parsed);
+        if (!allowedTargetCountries.has(parsed.targetCountry)) {
+          parsed.targetCountry = defaultPreferences.targetCountry;
+        }
+        if (!allowedTemplates.has(parsed.template)) {
+          parsed.template = defaultPreferences.template;
+        }
+        const { language, deliveryType, targetCountry, template } = parsed;
+        setPreferences({ language, deliveryType, targetCountry, template });
       } catch {
         window.localStorage.removeItem(storageKey);
       }
@@ -95,6 +112,7 @@ export function SettingsPanel() {
             <Field label="País-alvo padrão">
               <select className={inputClass} value={preferences.targetCountry} onChange={(event) => updatePreference("targetCountry", event.target.value)}>
                 <option>Estados Unidos</option>
+                <option>Brasil</option>
                 <option>Canadá</option>
                 <option>Reino Unido</option>
                 <option>Portugal</option>
@@ -102,7 +120,7 @@ export function SettingsPanel() {
                 <option>Europa</option>
               </select>
             </Field>
-            <Field label="Template padrão">
+            <Field label="Template de exportação PDF (padrão no Gerador)">
               <select className={inputClass} value={preferences.template} onChange={(event) => updatePreference("template", event.target.value)}>
                 <option>Executivo ATS</option>
                 <option>Moderno internacional</option>
@@ -114,7 +132,9 @@ export function SettingsPanel() {
             <Save size={17} />
             {saved ? "Preferências salvas" : "Salvar preferências"}
           </Button>
-          <p className="mt-3 text-xs text-graphite/50 dark:text-white/45">Nesta versão MVP, as preferências ficam salvas neste navegador. Sincronização no perfil entrará em uma próxima versão.</p>
+          <p className="mt-3 text-xs text-graphite/50 dark:text-white/45">
+            Nesta versão MVP, as preferências ficam salvas neste navegador. Ao abrir o Gerador, idioma, país-alvo e template de PDF são aplicados automaticamente a partir daqui. O tipo de entrega padrão ainda será unificado com o Gerador em uma próxima versão. Sincronização no perfil virá depois.
+          </p>
         </Card>
 
         <div className="grid gap-5">
@@ -128,16 +148,11 @@ export function SettingsPanel() {
           <Card>
             <div className="flex items-center gap-2">
               <Bell className="text-brand-500" size={22} />
-              <h2 className="text-xl font-semibold text-ink dark:text-white">Notificações</h2>
+              <h2 className="text-xl font-semibold text-ink dark:text-white">Notificações por e-mail</h2>
             </div>
-            <Field label="Preferência">
-              <select className={`${inputClass} mt-4`} value={preferences.notifications} onChange={(event) => updatePreference("notifications", event.target.value)}>
-                <option>Resumo semanal</option>
-                <option>Apenas alertas importantes</option>
-                <option>Desativadas</option>
-              </select>
-            </Field>
-            <p className="mt-3 text-sm text-graphite/60 dark:text-white/55">Envio de e-mails transacionais e lembretes ainda está em preparação.</p>
+            <p className="mt-3 rounded-md border border-graphite/15 bg-graphite/[0.06] p-3 text-sm leading-6 text-graphite/70 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/60">
+              <span className="font-semibold text-ink dark:text-white/85">Em breve.</span> Não enviamos newsletters nem lembretes agendados nesta versão. Você continua recebendo apenas e-mails transacionais essenciais da conta (ex.: confirmação de cadastro), quando aplicável.
+            </p>
           </Card>
           <Card>
             <div className="flex items-center gap-2">
@@ -145,7 +160,7 @@ export function SettingsPanel() {
               <h2 className="text-xl font-semibold text-ink dark:text-white">Templates</h2>
             </div>
             <p className="mt-3 text-sm leading-6 text-graphite/65 dark:text-white/60">
-              A seleção acima prepara o padrão de exportação. Novos templates premium por país entrarão após validação com usuários reais.
+              Os três templates de PDF disponíveis no Gerador correspondem às opções acima. Novos layouts premium por país serão adicionados após validação com usuários reais.
             </p>
           </Card>
         </div>

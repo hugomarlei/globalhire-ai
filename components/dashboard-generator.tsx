@@ -32,6 +32,22 @@ const pdfTemplates: Array<{ value: PdfTemplate; label: string }> = [
   { value: "compact", label: "Compacto premium" }
 ];
 
+const settingsTemplateToPdf: Record<string, PdfTemplate> = {
+  "Executivo ATS": "executive",
+  "Moderno internacional": "modern",
+  "Compacto premium": "compact"
+};
+
+const allowedTargetCountries = new Set([
+  "Brasil",
+  "Estados Unidos",
+  "Canadá",
+  "Reino Unido",
+  "Portugal",
+  "Alemanha",
+  "Europa"
+]);
+
 const generatedEventByType: Record<GenerationType, string> = {
   ats_resume: "resume_generated",
   cover_letter: "cover_letter_generated",
@@ -179,6 +195,28 @@ export function DashboardGenerator({
   const steps = ["Analisando currículo", "Lendo descrição da vaga", "Comparando ATS", "Gerando documento", "Finalizando resultado"];
   const context = generatorContext[type];
   const visibleTypes = allowedTypes?.length ? types.filter((item) => allowedTypes.includes(item.value)) : types;
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("globalhire-preferences");
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      const lang = parsed.language;
+      if (typeof lang === "string" && locales.some((l) => l.outputLabel === lang)) {
+        setLanguage(lang);
+      }
+      const tc = parsed.targetCountry;
+      if (typeof tc === "string" && allowedTargetCountries.has(tc)) {
+        setTargetCountry(tc);
+      }
+      const tpl = parsed.template;
+      if (typeof tpl === "string" && settingsTemplateToPdf[tpl]) {
+        setPdfTemplate(settingsTemplateToPdf[tpl]);
+      }
+    } catch {
+      /* ignore corrupt prefs */
+    }
+  }, []);
 
   useEffect(() => {
     if (!loading) {
@@ -339,6 +377,7 @@ export function DashboardGenerator({
             <Field label={copy.targetCountry}>
               <select className={inputClass} value={targetCountry} onChange={(e) => setTargetCountry(e.target.value)}>
                 <option>Estados Unidos</option>
+                <option>Brasil</option>
                 <option>Canadá</option>
                 <option>Reino Unido</option>
                 <option>Portugal</option>

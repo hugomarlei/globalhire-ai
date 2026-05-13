@@ -48,7 +48,7 @@ export function PublicNav() {
       <nav className="flex shrink-0 items-center gap-2 text-sm text-graphite/75 dark:text-white/70 sm:gap-3">
         <Link
           href="/login"
-          className="focus-ring inline-flex h-10 items-center justify-center rounded-md border border-graphite/20 bg-white/90 px-3 font-semibold text-ink shadow-sm hover:bg-white dark:border-white/12 dark:bg-white/7 dark:text-white dark:shadow-none dark:hover:bg-white/12 sm:px-4"
+          className="focus-ring inline-flex h-10 items-center justify-center rounded-md border border-graphite/20 bg-white/90 px-3 font-semibold text-ink shadow-sm hover:bg-white dark:border-white/10 dark:bg-[#141d18] dark:text-white dark:shadow-none dark:hover:bg-[#1c2821] dark:hover:text-white sm:px-4"
         >
           {copy.login === "Login" ? "Entrar" : copy.login}
         </Link>
@@ -150,7 +150,7 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
           <ThemeToggle labels={themeLabels} />
           <LanguageSelector />
           <div className="group relative">
-            <button className="focus-ring inline-flex items-center gap-2 rounded-full border border-graphite/20 bg-graphite/[0.06] py-1 pl-1 pr-3 text-sm text-graphite/85 hover:bg-graphite/10 dark:border-white/10 dark:bg-white/7 dark:text-white/80 dark:hover:bg-white/12">
+            <button className="focus-ring inline-flex items-center gap-2 rounded-full border border-graphite/20 bg-graphite/[0.06] py-1 pl-1 pr-3 text-sm text-graphite/85 hover:bg-graphite/10 dark:border-white/10 dark:bg-[#141d18] dark:text-white/80 dark:hover:bg-[#1c2821]">
               <span className="grid size-8 place-items-center rounded-full bg-brand-500 text-xs font-bold text-ink">{initials(email)}</span>
               Conta
               <ChevronDown size={15} />
@@ -173,7 +173,7 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
           </div>
         </div>
         <details className="group relative lg:hidden">
-          <summary className="focus-ring flex list-none items-center gap-2 rounded-md border border-graphite/20 bg-graphite/[0.06] px-3 py-2 text-sm text-graphite/85 dark:border-white/10 dark:bg-white/7 dark:text-white/80">
+          <summary className="focus-ring flex list-none items-center gap-2 rounded-md border border-graphite/20 bg-graphite/[0.06] px-3 py-2 text-sm text-graphite/85 dark:border-white/10 dark:bg-[#141d18] dark:text-white/80 dark:hover:bg-[#1c2821]">
             <Menu size={18} />
             Menu
           </summary>
