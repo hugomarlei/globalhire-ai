@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 function safeOrigin(value: string | undefined) {
   if (!value) return null;
@@ -114,4 +115,16 @@ const nextConfig: NextConfig = {
   }
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  tunnelRoute: "/monitoring",
+  disableLogger: true,
+  widenClientFileUpload: false,
+  suppressOnRouterTransitionStartWarning: true,
+  errorHandler: (err: Error) => {
+    console.warn("[sentry] build step:", err.message);
+  }
+});

@@ -133,7 +133,7 @@ export function SettingsPanel() {
             {saved ? "Preferências salvas" : "Salvar preferências"}
           </Button>
           <p className="mt-3 text-xs text-graphite/50 dark:text-white/45">
-            Nesta versão MVP, as preferências ficam salvas neste navegador. Ao abrir o Gerador, idioma, país-alvo e template de PDF são aplicados automaticamente a partir daqui. O tipo de entrega padrão ainda será unificado com o Gerador em uma próxima versão. Sincronização no perfil virá depois.
+            As preferências desta área personalizam automaticamente sua experiência no Gerador (idioma de saída, país-alvo e template de PDF ao abrir a ferramenta). Os valores ficam armazenados neste navegador neste dispositivo.
           </p>
         </Card>
 
@@ -148,10 +148,10 @@ export function SettingsPanel() {
           <Card>
             <div className="flex items-center gap-2">
               <Bell className="text-brand-500" size={22} />
-              <h2 className="text-xl font-semibold text-ink dark:text-white">Notificações por e-mail</h2>
+              <h2 className="text-xl font-semibold text-ink dark:text-white">Comunicações da conta</h2>
             </div>
             <p className="mt-3 rounded-md border border-graphite/15 bg-graphite/[0.06] p-3 text-sm leading-6 text-graphite/70 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/60">
-              <span className="font-semibold text-ink dark:text-white/85">Em breve.</span> Não enviamos newsletters nem lembretes agendados nesta versão. Você continua recebendo apenas e-mails transacionais essenciais da conta (ex.: confirmação de cadastro), quando aplicável.
+              Preferências de comunicação associadas à sua conta. Quando necessário para segurança ou conformidade, enviamos e-mails transacionais (por exemplo, confirmações de acesso). Para pedidos relacionados a mensagens institucionais, utilize o canal de suporte indicado no site.
             </p>
           </Card>
           <Card>
@@ -160,7 +160,7 @@ export function SettingsPanel() {
               <h2 className="text-xl font-semibold text-ink dark:text-white">Templates</h2>
             </div>
             <p className="mt-3 text-sm leading-6 text-graphite/65 dark:text-white/60">
-              Os três templates de PDF disponíveis no Gerador correspondem às opções acima. Novos layouts premium por país serão adicionados após validação com usuários reais.
+              Três modelos de PDF no Gerador — Executivo ATS, Moderno internacional e Compacto premium — definem tipografia, margens e estilo da página exportada. O padrão escolhido na lista ao lado é aplicado ao abrir o Gerador; você pode alterar o modelo na própria tela antes de exportar.
             </p>
           </Card>
         </div>

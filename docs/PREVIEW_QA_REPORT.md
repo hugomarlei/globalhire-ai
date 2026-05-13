@@ -85,7 +85,7 @@
 
 ### Status final (RC polish)
 
-**Pronto para QA final na Preview** neste escopo (UI dark/light, expansão independente de cards no histórico, toggle de tema, footer social). Sentry, merge para `main` e produção permanecem fora desta entrega, conforme plano RC.
+**Pronto para QA final na Preview** neste escopo (UI dark/light, expansão independente de cards no histórico, toggle de tema, footer social). **Sentry** foi integrado numa rodada posterior; merge para `main`/produção segue o fluxo de release da equipa.
 
 ## Rodada RC — last blockers antes do Sentry
 
@@ -106,13 +106,13 @@
 - **nav.tsx**, **theme-toggle.tsx**, **site-footer.tsx**: superfícies graphite no dark, sem `bg-white/7` nos CTAs secundários.
 - **history-list.tsx**: `items-start`, cards `h-fit self-start min-h-0`, sem `flex-1` no corpo; preview `max-h-72` + `min-h-0` + overflow.
 - **app/page.tsx**: texto explícito no mock ATS; dica em faixa mint/ink menos gritante.
-- **settings-panel.tsx**: notificações **“Em breve”**; Brasil no select; copy MVP para template e tipo de entrega.
+- **settings-panel.tsx**: copy de Configurações (notificações, templates, preferências); Brasil no select; texto profissional.
 - **dashboard-generator.tsx**: Brasil na lista; `useEffect` hidrata idioma, país e template de PDF a partir do `localStorage` (whitelist).
 
 ### O que permanece “em breve”
 
-- Notificações por e-mail (marketing / frequência): sem implementação.
-- Tipo de entrega padrão nas Configurações → ainda não sincroniza o seletor do Gerador (documentado no painel).
+- Notificações de marketing / frequência personalizada: **sem** painel de subscrição além do texto de **Comunicações da conta** (honesto e sem roadmap).
+- **Tipo de entrega padrão** nas Configurações: guardado localmente; o seletor do Gerador é a escolha ativa em cada sessão.
 
 ### Template de exportação — status
 
@@ -124,9 +124,47 @@
 - `npm run lint` — **OK**
 - `npm run build` — **OK**
 
-### Recomendação — Sentry
+### Recomendação — Sentry (histórico)
 
-Após smoke na Preview nestes pontos: **pronto para integrar Sentry** (quando você autorizar o escopo).
+Integração técnica concluída na rodada **Sentry + copy**; ver secção abaixo. Pendente apenas definir **DSN** e ambiente na Vercel.
+
+## Rodada RC — Sentry + copy de Configurações
+
+### Estado anterior (Sentry)
+
+- Sem SDK; só variáveis em `.env.example` e documentação.
+
+### Configuração aplicada
+
+- **`@sentry/nextjs` (v9)**; **`withSentryConfig`**: túnel `/monitoring`, source maps opcionais, `errorHandler` para builds sem token.
+- **`instrumentation.ts`** (Node + Edge, `onRequestError`), **`instrumentation-client.ts`**, **`sentry.server.config.ts`**, **`sentry.edge.config.ts`**.
+- **`app/global-error.tsx`**.
+- **`lib/sentry-privacy.ts`**: `sendDefaultPii: false`, `beforeSend` / `beforeSendTransaction`, redação agressiva, breadcrumbs `fetch` para `/api/ai`, `/api/upload`, `/api/stripe` removidos; sem Replay nem widget de feedback.
+- **`middleware.ts`**: exclusão de `/monitoring`.
+
+### Env vars (definir na Vercel)
+
+| Variável | Função |
+|----------|--------|
+| `NEXT_PUBLIC_SENTRY_DSN` | Ativa o SDK quando preenchida. |
+| `SENTRY_ENVIRONMENT` | Nome do ambiente no Sentry (ex.: `production`, `preview`). |
+| `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | Source maps em CI (opcional). |
+
+Guia: **`docs/SENTRY_SETUP.md`**.
+
+### Copy — Configurações
+
+- Removidos MVP, “em breve”, roadmap e linguagem de produto incompleto (`components/settings-panel.tsx`).
+
+### Validação de build (pós-Sentry)
+
+- `npm run typecheck` — **OK**
+- `npm run lint` — **OK**
+- `npm run build` — **OK**
+
+### Readiness — QA final → PR → merge → produção
+
+**Pronto** após configurar o DSN, validar um evento de teste **sem PII** no Sentry e repetir smoke curto nas rotas críticas.
 
 ## Smoke manual sugerido na Preview
 
