@@ -2,6 +2,36 @@ const CANONICAL_PRODUCTION_URL = "https://www.globalhireai.com.br";
 const LOCAL_URL = "http://localhost:3000";
 const OLD_VERCEL_HOST = ["globalhire-ai", "vercel", "app"].join(".");
 
+/** Host part only (no path, no protocol). */
+export function normalizeVercelHost(raw?: string | null): string | null {
+  if (!raw?.trim()) return null;
+  const trimmed = raw.trim();
+  try {
+    if (trimmed.includes("://")) {
+      const host = new URL(trimmed).hostname;
+      return host || null;
+    }
+  } catch {
+    return null;
+  }
+  const host = trimmed.replace(/^https?:\/\//i, "").split("/")[0]?.trim();
+  return host || null;
+}
+
+/**
+ * Public https origins for the current Vercel Preview deployment only
+ * (browser Origin must match one of these on preview).
+ */
+export function listVercelPreviewPublicOrigins(): string[] {
+  if (process.env.VERCEL_ENV !== "preview") return [];
+  const hosts = new Set<string>();
+  for (const key of ["VERCEL_URL", "VERCEL_BRANCH_URL"] as const) {
+    const host = normalizeVercelHost(process.env[key]);
+    if (host) hosts.add(host);
+  }
+  return [...hosts].map((host) => `https://${host}`);
+}
+
 function normalizeUrl(value: string) {
   return value.trim().replace(/\/+$/, "");
 }
@@ -29,6 +59,14 @@ function canonicalizeProductionDomain(value: string) {
 }
 
 export function getAppUrl() {
+  // Vercel Preview: canonical base URL for this deployment (CSRF, redirects, metadata).
+  if (process.env.VERCEL_ENV === "preview") {
+    const previewOrigins = listVercelPreviewPublicOrigins();
+    if (previewOrigins[0]) {
+      return normalizeUrl(previewOrigins[0]);
+    }
+  }
+
   const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
 
   if (configuredUrl && !isOldVercelDomain(configuredUrl)) {
