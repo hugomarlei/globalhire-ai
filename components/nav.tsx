@@ -5,7 +5,6 @@ import Image from "next/image";
 import { BarChart3, BookOpenText, BriefcaseBusiness, ChevronDown, FileClock, Gauge, Globe2, Languages, LayoutDashboard, LifeBuoy, Linkedin, LogOut, MailPlus, Menu, MessageSquareText, MessagesSquare, Settings, ShieldCheck, UserCircle, Video } from "lucide-react";
 import { Button, inputClass } from "@/components/ui";
 import { useLanguage } from "@/components/language-provider";
-import { useTheme } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { dashboardCopy, locales, navCopy, type Locale } from "@/lib/i18n";
 
@@ -13,7 +12,7 @@ function LanguageSelector() {
   const { locale, setLocale } = useLanguage();
 
   return (
-    <label className="flex min-w-0 items-center gap-2 text-white/70">
+    <label className="flex min-w-0 items-center gap-2 text-graphite/70 dark:text-white/70">
       <Globe2 size={17} className="shrink-0" />
       <select
         aria-label="Language"
@@ -33,22 +32,24 @@ function LanguageSelector() {
 
 export function PublicNav() {
   const { locale } = useLanguage();
-  const { resolvedDark } = useTheme();
   const copy = navCopy[locale];
   const dash = dashboardCopy[locale];
   const themeLabels = { light: dash.themeLight, dark: dash.themeDark, system: dash.themeSystem };
 
   return (
-    <header className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:flex-nowrap sm:px-6 sm:py-5">
-      <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold text-white">
+    <header className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 text-ink dark:text-white sm:flex-nowrap sm:px-6 sm:py-5">
+      <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold text-ink dark:text-white">
         <Image src="/branding/logo-symbol.svg" alt="" width={36} height={36} className="size-9 rounded-md shadow-glow" priority />
         <span className="min-w-0">
           <span className="block truncate leading-5">GlobalHire AI</span>
-          <span className="hidden text-[11px] font-medium text-white/45 sm:block">Get Hired Smarter.</span>
+          <span className="hidden text-[11px] font-medium text-graphite/55 dark:text-white/45 sm:block">Get Hired Smarter.</span>
         </span>
       </Link>
-      <nav className="flex shrink-0 items-center gap-2 text-sm text-white/70 sm:gap-3">
-        <Link href="/login" className="focus-ring inline-flex h-10 items-center justify-center rounded-md border border-white/12 bg-white/7 px-3 font-semibold text-white hover:bg-white/12 sm:px-4">
+      <nav className="flex shrink-0 items-center gap-2 text-sm text-graphite/75 dark:text-white/70 sm:gap-3">
+        <Link
+          href="/login"
+          className="focus-ring inline-flex h-10 items-center justify-center rounded-md border border-graphite/20 bg-white/90 px-3 font-semibold text-ink shadow-sm hover:bg-white dark:border-white/12 dark:bg-white/7 dark:text-white dark:shadow-none dark:hover:bg-white/12 sm:px-4"
+        >
           {copy.login === "Login" ? "Entrar" : copy.login}
         </Link>
         <Button href="/cadastro" className="h-10 px-3 sm:px-4">
@@ -56,11 +57,7 @@ export function PublicNav() {
         </Button>
       </nav>
       <div className="order-3 flex w-full flex-wrap items-center justify-end gap-2 sm:order-none sm:w-auto sm:justify-end">
-        <ThemeToggle
-          labels={themeLabels}
-          palette={resolvedDark ? "ink" : "paper"}
-          className={resolvedDark ? "border-white/10 bg-white/6" : "border-graphite/15 bg-white/90 shadow-sm"}
-        />
+        <ThemeToggle labels={themeLabels} />
         <LanguageSelector />
       </div>
     </header>
@@ -115,7 +112,7 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-ink/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+        <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-white">
           <Image src="/branding/logo-symbol.svg" alt="" width={36} height={36} className="size-9 rounded-md shadow-glow" priority />
           <span>
             <span className="block leading-5">GlobalHire AI</span>

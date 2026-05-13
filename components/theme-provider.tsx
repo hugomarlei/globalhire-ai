@@ -6,7 +6,7 @@ import { readStoredTheme, resolveTheme, themeStorageKey, type ThemePreference } 
 type ThemeContextValue = {
   preference: ThemePreference;
   setPreference: (value: ThemePreference) => void;
-  /** True when Tailwind `dark` class should apply to document root (marketing shell). */
+  /** Resolved palette: follows `document.documentElement` class `dark` (ThemeProvider). */
   resolvedDark: boolean;
 };
 

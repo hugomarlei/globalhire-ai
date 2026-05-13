@@ -11,15 +11,7 @@ const options: Array<{ value: ThemePreference; Icon: typeof Sun }> = [
   { value: "system", Icon: Monitor }
 ];
 
-export function ThemeToggle({
-  labels,
-  className,
-  palette = "ink"
-}: {
-  labels: { light: string; dark: string; system: string };
-  className?: string;
-  palette?: "ink" | "paper";
-}) {
+export function ThemeToggle({ labels, className }: { labels: { light: string; dark: string; system: string }; className?: string }) {
   const { preference, setPreference } = useTheme();
   const labelMap: Record<ThemePreference, string> = {
     light: labels.light,
@@ -27,13 +19,16 @@ export function ThemeToggle({
     system: labels.system
   };
 
-  const inactive =
-    palette === "paper"
-      ? "text-graphite/75 hover:bg-graphite/10 hover:text-ink"
-      : "text-white/70 hover:bg-white/10 hover:text-white";
-
   return (
-    <div className={cn("inline-flex rounded-md border border-white/10 bg-white/6 p-0.5", className)} role="group" aria-label="Theme">
+    <div
+      className={cn(
+        "inline-flex shrink-0 rounded-md border p-0.5",
+        "border-graphite/20 bg-white/90 dark:border-white/10 dark:bg-white/6",
+        className
+      )}
+      role="group"
+      aria-label="Theme"
+    >
       {options.map(({ value, Icon }) => (
         <button
           key={value}
@@ -41,7 +36,9 @@ export function ThemeToggle({
           onClick={() => setPreference(value)}
           className={cn(
             "focus-ring inline-flex size-9 items-center justify-center rounded-md transition",
-            preference === value ? "bg-brand-500 text-ink" : inactive
+            preference === value
+              ? "bg-brand-500 text-ink"
+              : "text-graphite/70 hover:bg-graphite/10 hover:text-ink dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white"
           )}
           title={labelMap[value]}
           aria-pressed={preference === value}

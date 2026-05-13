@@ -32,6 +32,8 @@ export const dashboardCopy: Record<Locale, {
   themeLight: string;
   themeDark: string;
   themeSystem: string;
+  historyDownloadText: string;
+  historyExportUnavailable: string;
 }> = {
   "pt-BR": {
     generatorTitle: "Gerador GlobalHire AI",
@@ -64,7 +66,9 @@ export const dashboardCopy: Record<Locale, {
     themeTitle: "Aparência",
     themeLight: "Claro",
     themeDark: "Escuro",
-    themeSystem: "Sistema (dispositivo)"
+    themeSystem: "Sistema (dispositivo)",
+    historyDownloadText: "Baixar texto (.txt)",
+    historyExportUnavailable: "Não há texto salvo para exportar."
   },
   en: {
     generatorTitle: "GlobalHire AI Generator",
@@ -97,7 +101,9 @@ export const dashboardCopy: Record<Locale, {
     themeTitle: "Appearance",
     themeLight: "Light",
     themeDark: "Dark",
-    themeSystem: "System"
+    themeSystem: "System",
+    historyDownloadText: "Download text (.txt)",
+    historyExportUnavailable: "No saved text to export."
   },
   es: {
     generatorTitle: "Generador GlobalHire AI",
@@ -130,7 +136,9 @@ export const dashboardCopy: Record<Locale, {
     themeTitle: "Apariencia",
     themeLight: "Claro",
     themeDark: "Oscuro",
-    themeSystem: "Sistema (dispositivo)"
+    themeSystem: "Sistema (dispositivo)",
+    historyDownloadText: "Descargar texto (.txt)",
+    historyExportUnavailable: "No hay texto guardado para exportar."
   },
   fr: {
     generatorTitle: "Générateur GlobalHire AI",
@@ -163,7 +171,9 @@ export const dashboardCopy: Record<Locale, {
     themeTitle: "Apparence",
     themeLight: "Clair",
     themeDark: "Sombre",
-    themeSystem: "Système (appareil)"
+    themeSystem: "Système (appareil)",
+    historyDownloadText: "Télécharger le texte (.txt)",
+    historyExportUnavailable: "Aucun texte enregistré à exporter."
   }
 };
 

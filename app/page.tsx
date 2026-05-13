@@ -5,8 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { PublicNav } from "@/components/nav";
 import { SiteFooter } from "@/components/site-footer";
 import { useLanguage } from "@/components/language-provider";
-import { useTheme } from "@/components/theme-provider";
-import { Button, Card, cn } from "@/components/ui";
+import { Button, Card } from "@/components/ui";
 import { getAppUrl } from "@/lib/app-url";
 import { landingCopy } from "@/lib/i18n";
 import { getLocalizedPlans } from "@/lib/plan-copy";
@@ -15,7 +14,6 @@ const howIcons = [FileText, Target, Wand2] as const;
 
 export default function Home() {
   const { locale } = useLanguage();
-  const { resolvedDark } = useTheme();
   const copy = landingCopy[locale];
   const { free, paid } = useMemo(() => getLocalizedPlans(locale), [locale]);
   const [showLogoutBanner, setShowLogoutBanner] = useState(false);
@@ -30,12 +28,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main
-      className={cn(
-        "brand-shell relative min-h-screen overflow-hidden",
-        resolvedDark ? "text-white" : "marketing-theme-light"
-      )}
-    >
+    <main className="brand-shell relative min-h-screen overflow-hidden text-white">
       <div className="brand-grid pointer-events-none absolute inset-0" />
       <PublicNav />
       {showLogoutBanner ? (

@@ -26,6 +26,9 @@
 - [ ] CSP sem erros no console.
 - [ ] Analytics sem PII.
 - [ ] Políticas legais acessíveis.
+- [ ] Tema claro/escuro/sistema: landing, login, legal e páginas marketing secundárias sem texto invisível.
+- [ ] Footer com LinkedIn / Instagram / TikTok (URLs oficiais em `lib/social.ts` ou envs `NEXT_PUBLIC_SOCIAL_*`).
+- [ ] Histórico: export `.txt` autenticado; rótulo honesto (não prometer PDF/DOCX do histórico).
 
 ### Painéis (sem versionar secrets)
 

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Clock, Copy, Download, Eye, FilePlus2, FolderOpen, RefreshCw, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button, Card, inputClass } from "@/components/ui";
+import { useLanguage } from "@/components/language-provider";
+import { dashboardCopy } from "@/lib/i18n";
 import { trackEvent } from "@/lib/analytics";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 
@@ -26,6 +28,8 @@ const typeLabels: Record<string, string> = {
 };
 
 export function HistoryList({ items, mode = "history" }: { items: HistoryItem[]; mode?: "history" | "documents" }) {
+  const { locale } = useLanguage();
+  const copy = dashboardCopy[locale];
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [copied, setCopied] = useState("");
@@ -175,10 +179,11 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                   <button
                     type="button"
                     disabled
+                    title={copy.historyExportUnavailable}
                     className="focus-ring inline-flex cursor-not-allowed items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/40"
                   >
                     <Download size={16} />
-                    Baixar
+                    {copy.historyDownloadText}
                   </button>
                 ) : (
                   <a
@@ -188,7 +193,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                     className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10"
                   >
                     <Download size={16} />
-                    Baixar
+                    {copy.historyDownloadText}
                   </a>
                 )}
                 <button onClick={() => regenerate(item.id)} disabled={regenerating === item.id} className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10 disabled:opacity-50">

@@ -32,6 +32,9 @@ Marque após verificar:
 - [ ] Não confundir com **Production**: o domínio deve ser o de **preview** (ex.: `…-git-staging-…vercel.app` ou alias de preview).
 - [ ] Login / signup (se testar): usar **conta de teste**; preferir Supabase **dev** se o projeto Preview apontar para envs de desenvolvimento. Se Preview usar as **mesmas** envs de produção, tenha cuidado com dados reais.
 - [ ] Fluxo crítico mínimo: homepage, `/login`, `/cadastro` carregam.
+- [ ] Tema: alternar claro/escuro/sistema na home e em `/login`; inputs e cards legíveis.
+- [ ] Footer: ícones LinkedIn, Instagram, TikTok visíveis; CNPJ no rodapé.
+- [ ] Histórico: botão de download `.txt` com sessão válida.
 - [ ] Consola do browser: sem erros graves de CSP (avisos de terceiros podem existir).
 - [ ] Confirmar em **Vercel → Deployment → Environment** que este build usou **Preview** envs (se configurou variáveis diferentes por ambiente).
 
