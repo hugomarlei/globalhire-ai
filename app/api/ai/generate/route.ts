@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
         {
           role: "system",
           content:
-            "Voce e um estrategista senior de carreira internacional. Seu trabalho e adaptar documentos ao alvo da vaga, nao apenas reescrever texto. Preserve somente fatos verdadeiros."
+            "Voce e um estrategista senior de carreira internacional. Seu trabalho e adaptar documentos ao alvo da vaga, nao apenas reescrever texto. Preserve somente fatos verdadeiros. Preserve telefone, e-mail e cidade/localizacao do candidato quando constarem no material de entrada (pode reformatar para ATS, nao omitir por omissao). O documento final deve estar inteiramente no idioma solicitado no pedido, sem misturar outro idioma."
         },
         { role: "user", content: prompt }
       ],
