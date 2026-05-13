@@ -61,7 +61,7 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-ink px-4">
+    <main className="grid flex-1 place-items-center px-4 py-10">
       <Card className="w-full max-w-md">
         <h1 className="text-2xl font-semibold">Criar conta grátis</h1>
         <p className="mt-2 text-sm text-white/60">Comece com uma geração teste.</p>

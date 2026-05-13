@@ -2,7 +2,10 @@
 
 import { Bell, FileText, Save, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/components/language-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button, Card, Field, inputClass } from "@/components/ui";
+import { dashboardCopy, locales } from "@/lib/i18n";
 
 const storageKey = "globalhire-preferences";
 
@@ -15,14 +18,19 @@ type Preferences = {
 };
 
 const defaultPreferences: Preferences = {
-  language: "Português do Brasil",
+  language: locales[0].outputLabel,
   deliveryType: "Currículo ATS",
   targetCountry: "Estados Unidos",
   notifications: "Resumo semanal",
   template: "Executivo ATS"
 };
 
+const allowedOutputLanguages = new Set(locales.map((item) => item.outputLabel));
+
 export function SettingsPanel() {
+  const { locale } = useLanguage();
+  const dash = dashboardCopy[locale];
+  const themeLabels = { light: dash.themeLight, dark: dash.themeDark, system: dash.themeSystem };
   const [preferences, setPreferences] = useState(defaultPreferences);
   const [saved, setSaved] = useState(false);
 
@@ -30,7 +38,11 @@ export function SettingsPanel() {
     const stored = window.localStorage.getItem(storageKey);
     if (stored) {
       try {
-        setPreferences({ ...defaultPreferences, ...JSON.parse(stored) });
+        const parsed = { ...defaultPreferences, ...JSON.parse(stored) } as Preferences;
+        if (!allowedOutputLanguages.has(parsed.language)) {
+          parsed.language = defaultPreferences.language;
+        }
+        setPreferences(parsed);
       } catch {
         window.localStorage.removeItem(storageKey);
       }
@@ -63,12 +75,11 @@ export function SettingsPanel() {
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <Field label="Idioma padrão">
               <select className={inputClass} value={preferences.language} onChange={(event) => updatePreference("language", event.target.value)}>
-                <option>Português do Brasil</option>
-                <option>Português de Portugal</option>
-                <option>English</option>
-                <option>Français</option>
-                <option>Español</option>
-                <option>Deutsch</option>
+                {locales.map((item) => (
+                  <option key={item.value} value={item.outputLabel}>
+                    {item.label}
+                  </option>
+                ))}
               </select>
             </Field>
             <Field label="Tipo de entrega padrão">
@@ -107,6 +118,13 @@ export function SettingsPanel() {
         </Card>
 
         <div className="grid gap-5">
+          <Card>
+            <h2 className="text-xl font-semibold">{dash.themeTitle}</h2>
+            <p className="mt-2 text-sm text-white/55">Claro, escuro ou seguir o dispositivo. A preferência fica neste navegador.</p>
+            <div className="mt-4">
+              <ThemeToggle labels={themeLabels} />
+            </div>
+          </Card>
           <Card>
             <div className="flex items-center gap-2">
               <Bell className="text-brand-500" size={22} />

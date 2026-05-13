@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AutoSiteFooter } from "@/components/site-footer";
 import { PublicNav } from "@/components/nav";
 import { Card } from "@/components/ui";
 
@@ -63,6 +64,7 @@ export function LegalPage({
           </nav>
         </Card>
       </article>
+      <AutoSiteFooter />
     </main>
   );
 }

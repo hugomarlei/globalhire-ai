@@ -20,7 +20,7 @@ export default function RecoverPasswordPage() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-ink px-4">
+    <main className="grid flex-1 place-items-center px-4 py-10">
       <Card className="w-full max-w-md">
         <h1 className="text-2xl font-semibold">Recuperar senha</h1>
         <form onSubmit={submit} className="mt-6 grid gap-4">

@@ -25,16 +25,6 @@ const typeLabels: Record<string, string> = {
   translate_resume: "Tradução"
 };
 
-function downloadText(item: HistoryItem) {
-  const blob = new Blob([item.output], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `globalhire-${item.type}-${item.id}.txt`;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
 export function HistoryList({ items, mode = "history" }: { items: HistoryItem[]; mode?: "history" | "documents" }) {
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
@@ -181,10 +171,26 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                   <Copy size={16} />
                   {copied === item.id ? "Copiado" : "Copiar"}
                 </button>
-                <button onClick={() => downloadText(item)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10">
-                  <Download size={16} />
-                  Baixar
-                </button>
+                {!(item.output || "").trim() ? (
+                  <button
+                    type="button"
+                    disabled
+                    className="focus-ring inline-flex cursor-not-allowed items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/40"
+                  >
+                    <Download size={16} />
+                    Baixar
+                  </button>
+                ) : (
+                  <a
+                    href={`/api/history/${item.id}/export`}
+                    download
+                    rel="noopener noreferrer"
+                    className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10"
+                  >
+                    <Download size={16} />
+                    Baixar
+                  </a>
+                )}
                 <button onClick={() => regenerate(item.id)} disabled={regenerating === item.id} className="focus-ring inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-white/80 hover:bg-white/10 disabled:opacity-50">
                   <RefreshCw className={regenerating === item.id ? "animate-spin" : ""} size={16} />
                   {regenerating === item.id ? "Regenerando..." : "Regenerar"}

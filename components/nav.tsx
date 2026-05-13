@@ -5,17 +5,19 @@ import Image from "next/image";
 import { BarChart3, BookOpenText, BriefcaseBusiness, ChevronDown, FileClock, Gauge, Globe2, Languages, LayoutDashboard, LifeBuoy, Linkedin, LogOut, MailPlus, Menu, MessageSquareText, MessagesSquare, Settings, ShieldCheck, UserCircle, Video } from "lucide-react";
 import { Button, inputClass } from "@/components/ui";
 import { useLanguage } from "@/components/language-provider";
-import { locales, navCopy, type Locale } from "@/lib/i18n";
+import { useTheme } from "@/components/theme-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { dashboardCopy, locales, navCopy, type Locale } from "@/lib/i18n";
 
 function LanguageSelector() {
   const { locale, setLocale } = useLanguage();
 
   return (
-    <label className="flex items-center gap-2 text-white/70">
-      <Globe2 size={17} />
+    <label className="flex min-w-0 items-center gap-2 text-white/70">
+      <Globe2 size={17} className="shrink-0" />
       <select
         aria-label="Language"
-        className={`${inputClass} h-10 min-h-10 w-[132px] py-1 text-xs`}
+        className={`${inputClass} h-10 min-h-10 w-full min-w-[11rem] max-w-[15rem] py-1 text-xs sm:w-44`}
         value={locale}
         onChange={(event) => setLocale(event.target.value as Locale)}
       >
@@ -31,7 +33,10 @@ function LanguageSelector() {
 
 export function PublicNav() {
   const { locale } = useLanguage();
+  const { resolvedDark } = useTheme();
   const copy = navCopy[locale];
+  const dash = dashboardCopy[locale];
+  const themeLabels = { light: dash.themeLight, dark: dash.themeDark, system: dash.themeSystem };
 
   return (
     <header className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:flex-nowrap sm:px-6 sm:py-5">
@@ -50,7 +55,12 @@ export function PublicNav() {
           {copy.signup}
         </Button>
       </nav>
-      <div className="order-3 w-full sm:order-none sm:w-auto">
+      <div className="order-3 flex w-full flex-wrap items-center justify-end gap-2 sm:order-none sm:w-auto sm:justify-end">
+        <ThemeToggle
+          labels={themeLabels}
+          palette={resolvedDark ? "ink" : "paper"}
+          className={resolvedDark ? "border-white/10 bg-white/6" : "border-graphite/15 bg-white/90 shadow-sm"}
+        />
         <LanguageSelector />
       </div>
     </header>
@@ -64,6 +74,8 @@ function initials(email?: string) {
 export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; email?: string }) {
   const { locale } = useLanguage();
   const copy = navCopy[locale];
+  const dash = dashboardCopy[locale];
+  const themeLabels = { light: dash.themeLight, dark: dash.themeDark, system: dash.themeSystem };
   const groups = [
     {
       label: "Ferramentas",
@@ -138,6 +150,7 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
           ) : null}
         </nav>
         <div className="hidden items-center gap-3 lg:flex">
+          <ThemeToggle labels={themeLabels} />
           <LanguageSelector />
           <div className="group relative">
             <button className="focus-ring inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/7 py-1 pl-1 pr-3 text-sm text-white/80 hover:bg-white/12">
@@ -168,7 +181,10 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
             Menu
           </summary>
           <div className="absolute right-0 top-full mt-2 max-h-[78vh] w-[min(92vw,360px)] overflow-auto rounded-lg border border-white/10 bg-[#07120E] p-3 shadow-soft">
-            <div className="mb-3"><LanguageSelector /></div>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <ThemeToggle labels={themeLabels} />
+              <LanguageSelector />
+            </div>
             <Link href="/dashboard" className="flex items-center gap-3 rounded-md px-3 py-3 text-white/75 hover:bg-white/8 hover:text-white">
               <LayoutDashboard size={17} className="text-brand-500" />
               {copy.dashboard}
