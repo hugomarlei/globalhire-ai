@@ -164,7 +164,26 @@ Guia: **`docs/SENTRY_SETUP.md`**.
 
 ### Readiness — QA final → PR → merge → produção
 
-**Pronto** após configurar o DSN, validar um evento de teste **sem PII** no Sentry e repetir smoke curto nas rotas críticas.
+**Pronto** para QA final → PR → merge → produção: **Sentry pode permanecer em standby** (sem `NEXT_PUBLIC_SENTRY_DSN`). Quando for ativar erros em produção, definir DSN + validar evento sem PII; PostHog/Clarity/GA4 não dependem do Sentry.
+
+## Auditoria RC — Sentry standby (100% opcional)
+
+### Ficheiros revistos
+
+`next.config.ts`, `instrumentation.ts`, `instrumentation-client.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`, `lib/sentry-privacy.ts`, `app/global-error.tsx`, `.env.example`, `docs/SENTRY_SETUP.md`.
+
+### Garantias
+
+- **Sem DSN** (ou só espaços): `getSentryInitOptions()` usa `enabled: false` e **não envia eventos**; app funciona em modo normal.
+- **Sem trio de source maps** (`SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`): `sourcemaps.disable: true` e **não** passamos `authToken`/`org`/`project` ao plugin — **sem upload** no build; build não exige estas envs.
+- **Privacidade:** mantidos `sendDefaultPii: false`, `beforeSend`, `beforeSendTransaction`, `beforeBreadcrumb` e redações em `lib/sentry-privacy.ts`.
+- **PostHog / Clarity / GA4:** nenhum ficheiro destes serviços foi alterado; `next.config.ts` CSP `connect-src` inalterado relativamente a esses hosts.
+
+### Validação de build (auditoria standby)
+
+- `npm run typecheck` — **OK**
+- `npm run lint` — **OK**
+- `npm run build` — **OK**
 
 ## Smoke manual sugerido na Preview
 

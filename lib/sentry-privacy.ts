@@ -98,7 +98,7 @@ const ignoreErrors = [
 ];
 
 export function getSentryInitOptions() {
-  const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+  const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN?.trim() || undefined;
   const environment =
     process.env.SENTRY_ENVIRONMENT || process.env.VERCEL_ENV || process.env.NODE_ENV || "development";
   const release =

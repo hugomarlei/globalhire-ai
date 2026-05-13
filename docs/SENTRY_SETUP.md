@@ -1,41 +1,49 @@
 # Sentry — configuração e operação
 
-Integração mínima com **`@sentry/nextjs`** (cliente, servidor Node, runtime Edge, rotas API e Server Components). O SDK fica **desligado** até existir `NEXT_PUBLIC_SENTRY_DSN`.
+## Modo standby (pré-monetização)
+
+A integração **`@sentry/nextjs`** está **no repositório e pronta a ativar**, mas a decisão operacional atual é **não incorrer em custo fixo** nem tráfego de erros até haver monetização ou volume que o justifique.
+
+- **Sem `NEXT_PUBLIC_SENTRY_DSN`** (ou DSN vazio / só espaços): o SDK fica **`enabled: false`** — **nenhum evento** é enviado; a aplicação comporta-se como sem Sentry.
+- **Sem `SENTRY_AUTH_TOKEN` + `SENTRY_ORG` + `SENTRY_PROJECT`**: o **build não falha**; o upload de **source maps fica desligado** (`sourcemaps.disable` no `next.config.ts`).
+- **Observabilidade de produto/UX/funil** continua a cargo de **PostHog**, **Microsoft Clarity** e **GA4** (variáveis em `.env.example` — **não alteradas** por esta integração).
+
+**Ativação futura:** definir `NEXT_PUBLIC_SENTRY_DSN` (e opcionalmente `SENTRY_ENVIRONMENT` + trio de source maps) na Vercel e validar um evento de teste conforme a secção “Teste manual” abaixo.
+
+---
+
+Integração mínima com **`@sentry/nextjs`** (cliente, servidor Node, runtime Edge, rotas API e Server Components). O SDK fica **desligado** até existir um DSN válido em `NEXT_PUBLIC_SENTRY_DSN`.
 
 ## Estado no repositório
 
 | Ficheiro | Função |
 |----------|--------|
-| `next.config.ts` | `withSentryConfig` — túnel `/monitoring`, upload opcional de source maps em CI. |
+| `next.config.ts` | `withSentryConfig` — túnel `/monitoring`; upload de source maps **apenas** se `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` e `SENTRY_PROJECT` estiverem definidos; `telemetry: false` no passo de build do plugin. |
 | `instrumentation.ts` | Carrega `sentry.server.config` / `sentry.edge.config`; exporta `onRequestError`. |
-| `instrumentation-client.ts` | Inicialização no browser. |
+| `instrumentation-client.ts` | Inicialização no browser (`enabled` conforme DSN). |
 | `sentry.server.config.ts` | Node (SSR, rotas API, server actions). |
 | `sentry.edge.config.ts` | Middleware / Edge. |
-| `lib/sentry-privacy.ts` | `beforeSend`, `beforeSendTransaction`, `beforeBreadcrumb`, `sendDefaultPii: false`, lista de chaves sensíveis. |
-| `app/global-error.tsx` | Captura erros não tratados na árvore App Router. |
+| `lib/sentry-privacy.ts` | `sendDefaultPii: false`, `beforeSend` / `beforeSendTransaction`, `beforeBreadcrumb`, redação de PII/conteúdo sensível. |
+| `app/global-error.tsx` | Reporta erros globais da App Router (sem envio se o SDK estiver inativo). |
 | `middleware.ts` | Exclui o path `/monitoring` do matcher (túnel Sentry). |
 
-## Criar projeto no Sentry
+## Criar projeto no Sentry (quando for ativar)
 
 1. Em [sentry.io](https://sentry.io), crie uma organização (se ainda não existir).
 2. **Projects → Create project → Plataforma “Next.js”**.
 3. Copie o **DSN** do projeto (aparece nas definições do cliente).
 
-## Variáveis na Vercel
+## Variáveis na Vercel (todas opcionais até ativação)
 
-Defina no projeto Vercel (Preview + Production, ou por ambiente):
-
-| Variável | Obrigatório | Notas |
-|----------|-------------|--------|
-| `NEXT_PUBLIC_SENTRY_DSN` | Sim, para ativar | Pública; só o DSN, sem segredos. |
-| `SENTRY_ENVIRONMENT` | Recomendado | Ex.: `production`, `preview`, `development`. Se vazio, usa-se `VERCEL_ENV` ou `NODE_ENV`. |
-| `SENTRY_ORG` | Para source maps em CI | Slug da organização. |
-| `SENTRY_PROJECT` | Para source maps em CI | Slug do projeto. |
-| `SENTRY_AUTH_TOKEN` | Para source maps em CI | Token com scope `project:releases` (não commitar). |
+| Variável | Quando usar |
+|----------|-------------|
+| `NEXT_PUBLIC_SENTRY_DSN` | **Obrigatória apenas para enviar eventos.** Sem ela, custo Sentry ≈ 0. |
+| `SENTRY_ENVIRONMENT` | Recomendada após ativar (`production`, `preview`, `development`). Se vazio, usa-se `VERCEL_ENV` ou `NODE_ENV`. |
+| `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | **Opcionais**; só necessárias em conjunto para **upload de source maps** no build (CI ou Vercel com secrets). |
 
 A Vercel injeta `VERCEL_GIT_COMMIT_SHA` (e a variante `NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA` quando aplicável) — usada como **`release`** no SDK para correlacionar erros com commits.
 
-**Preview vs Production:** use `SENTRY_ENVIRONMENT=preview` nos deployments de preview e `SENTRY_ENVIRONMENT=production` em produção, ou deixe apenas `VERCEL_ENV` (`preview` / `production`) para o SDK inferir.
+**Preview vs Production:** após ativar, use `SENTRY_ENVIRONMENT=preview` nos deployments de preview e `SENTRY_ENVIRONMENT=production` em produção, ou deixe apenas `VERCEL_ENV` (`preview` / `production`).
 
 ## Privacidade (PII e conteúdo)
 
@@ -64,15 +72,16 @@ Os eventos do browser são enviados para **`/monitoring`** no mesmo origin e ree
 
 Não commite erros de teste nem deixe scripts permanentes na aplicação.
 
-## Rollback / desativação
+## Rollback / desativação (standby)
 
 1. Remova ou esvazie `NEXT_PUBLIC_SENTRY_DSN` no ambiente Vercel e redeploy.
-2. O SDK trata `enabled: false` quando o DSN está vazio — deixa de enviar eventos.
-3. Opcional: remover dependência `@sentry/nextjs` e ficheiros listados acima (reverter commit).
+2. O SDK usa `enabled: false` quando o DSN está ausente — **nenhum evento** é enviado.
+3. Não é necessário remover o código `@sentry/nextjs` do repositório.
 
-## Build local sem org Sentry
+## Build sem credenciais Sentry
 
-Se `SENTRY_ORG` / `SENTRY_PROJECT` / `SENTRY_AUTH_TOKEN` não estiverem definidos, o plugin de build pode emitir avisos; o `errorHandler` em `next.config.ts` regista o aviso e o build continua. Para source maps legíveis em produção, configure os três em CI (por exemplo GitHub Actions com secrets).
+- **DSN:** não é necessário para o build.
+- **Source maps:** sem `SENTRY_AUTH_TOKEN` + `SENTRY_ORG` + `SENTRY_PROJECT`, o upload fica **desativado** (`sourcemaps.disable: true`). O `errorHandler` em `next.config.ts` continua a impedir que falhas residuais do plugin interrompam o build.
 
 ## Referências
 
