@@ -266,7 +266,7 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
             </Link>
           </div>
         </div>
-        <pre data-clarity-mask="true" className="mt-5 min-h-72 whitespace-pre-wrap rounded-md border border-graphite/15 bg-graphite/[0.06] p-4 text-sm leading-6 text-graphite/90 dark:border-white/10 dark:bg-black/25 dark:text-white/82">
+        <pre data-clarity-mask="true" className="mt-5 min-h-72 whitespace-pre-wrap rounded-md border border-graphite/20 bg-[#eef2ef] p-4 text-sm leading-6 text-ink dark:border-white/10 dark:bg-[#0b100e] dark:text-white/90">
           {optimizing ? "Gerando uma versão otimizada com base no score, keywords e recomendações..." : optimizedOutput || "Depois da análise, clique em Criar versão otimizada para ver o currículo reescrito aqui."}
         </pre>
       </Card>

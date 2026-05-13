@@ -39,6 +39,8 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
   const [deleting, setDeleting] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
   const [captchaReset, setCaptchaReset] = useState(0);
+  /** Per-item expansion (avoids native <details name> mutual-exclusion quirks in grids). */
+  const [docOpenById, setDocOpenById] = useState<Record<string, boolean>>({});
   const visibleItems = useMemo(() => items.filter((item) => !deletedIds.includes(item.id)), [deletedIds, items]);
   const types = useMemo(() => Array.from(new Set(visibleItems.map((item) => item.type))), [visibleItems]);
   const filtered = useMemo(() => {
@@ -103,7 +105,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
 
   return (
     <div className="grid gap-5">
-      <div className="flex flex-col gap-4 rounded-lg border border-graphite/15 bg-graphite/[0.05] p-4 dark:border-white/10 dark:bg-white/5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-lg border border-graphite/15 bg-graphite/[0.05] p-4 dark:border-white/10 dark:bg-graphite/35 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-3xl font-semibold text-ink dark:text-white">{mode === "history" ? "Histórico" : "Meus documentos"}</h1>
           <p className="mt-1 text-sm text-graphite/60 dark:text-white/55">
@@ -155,7 +157,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
           <TurnstileWidget action="regenerate" onVerify={setTurnstileToken} resetSignal={captchaReset} />
         </div>
       </Card>
-      {notice ? <p className="rounded-md border border-graphite/15 bg-graphite/[0.05] p-3 text-sm text-graphite/75 dark:border-white/10 dark:bg-white/5 dark:text-white/70">{notice}</p> : null}
+      {notice ? <p className="rounded-md border border-graphite/15 bg-graphite/[0.06] p-3 text-sm text-graphite/80 dark:border-white/10 dark:bg-graphite/30 dark:text-white/75">{notice}</p> : null}
 
       <div className={mode === "documents" ? "grid gap-3 md:grid-cols-2 xl:grid-cols-3" : "grid gap-3"}>
         {filtered.map((item) => (
@@ -206,13 +208,30 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                 </button>
               </div>
             </div>
-            <details className="border-t border-graphite/15 px-4 py-3 dark:border-white/10">
-              <summary className="focus-ring inline-flex cursor-pointer list-none items-center gap-2 rounded-md px-1 py-1 text-sm font-semibold text-graphite/80 hover:text-ink dark:text-white/75 dark:hover:text-white">
-                <Eye size={16} />
+            <div className="border-t border-graphite/15 px-4 py-3 dark:border-white/10">
+              <button
+                type="button"
+                className="focus-ring inline-flex w-full cursor-pointer items-center gap-2 rounded-md px-1 py-2 text-left text-sm font-semibold text-graphite/80 hover:bg-graphite/10 hover:text-ink dark:text-white/80 dark:hover:bg-white/[0.06] dark:hover:text-white"
+                aria-expanded={Boolean(docOpenById[item.id])}
+                onClick={() =>
+                  setDocOpenById((prev) => ({
+                    ...prev,
+                    [item.id]: !prev[item.id]
+                  }))
+                }
+              >
+                <Eye size={16} className="shrink-0 opacity-90" aria-hidden />
                 Abrir documento
-              </summary>
-              <pre data-clarity-mask="true" className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap rounded-md bg-graphite/[0.06] p-4 text-sm leading-6 text-graphite/90 dark:bg-black/25 dark:text-white/78">{item.output}</pre>
-            </details>
+              </button>
+              {docOpenById[item.id] ? (
+                <pre
+                  data-clarity-mask="true"
+                  className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap rounded-md border border-graphite/20 bg-[#eef2ef] p-4 text-sm leading-6 text-ink dark:border-white/10 dark:bg-[#0b100e] dark:text-white/90"
+                >
+                  {item.output}
+                </pre>
+              ) : null}
+            </div>
           </Card>
         ))}
       </div>

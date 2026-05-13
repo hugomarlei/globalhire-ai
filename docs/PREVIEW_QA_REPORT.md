@@ -58,13 +58,42 @@
 - OAuth / redirect URLs: no Preview, `getAppUrl()` passa a ser o host do deployment; é preciso autorizar esse URL nos provedores (ex.: Supabase) se testar login social no Preview.
 - `VERCEL_PREVIEW_PROJECT_HOST_SUFFIX`, se usado, amplia origens a **todos** os subdomínios daquele sufixo no ambiente preview — use apenas sufixo do **seu** projeto Vercel.
 
+## Rodada RC — polish final (histórico, tema, footer)
+
+### Bugs (QA manual / Preview)
+
+1. **Contraste residual no dark** em `<pre>` e previews (histórico, gerador, ATS): superfícies sem contraste explícito vs. texto.
+2. **“Abrir documento” expandia vários cards** na grelha de documentos: `<details>` em lista pode acoplar comportamento de **acordeão exclusivo** entre itens (especificação HTML / browser).
+3. **Theme toggle**: `dark:bg-white/6` e hovers claros geravam **halos** no modo escuro.
+4. **Ícones sociais (footer)**: fundos `white/6` no dark desalinhados do restante do chrome.
+
+### Solução
+
+- **Histórico**: `<details>` → **estado** `docOpenById[item.id]` com botão + `aria-expanded`; cada card expande **só o seu** conteúdo.
+- **`<pre>`** (histórico, gerador, ATS): fundo `#eef2ef` + `text-ink` (light); dark `#0b100e` + `text-white/90` + borda explícita.
+- **ThemeToggle** / **socialBtn**: superfícies escuras `#121a16` / hover `#1a2520` no dark (sem `bg-white/6` no track dos ícones de tema ou nos sociais).
+
+### Componentes tocados
+
+`components/history-list.tsx`, `components/dashboard-generator.tsx`, `components/ats-analyzer.tsx`, `components/theme-toggle.tsx`, `components/site-footer.tsx`.
+
+### Validação de build (pós-polish)
+
+- `npm run typecheck` — **OK**
+- `npm run lint` — **OK** (sem warnings)
+- `npm run build` — **OK** (Next.js 15.5.18)
+
+### Status final (RC polish)
+
+**Pronto para QA final na Preview** neste escopo (UI dark/light, expansão independente de cards no histórico, toggle de tema, footer social). Sentry, merge para `main` e produção permanecem fora desta entrega, conforme plano RC.
+
 ## Smoke manual sugerido na Preview
 
 1. Home: idioma ×3; tema ×3; scroll até footer (redes + CNPJ).
 2. `/login`, `/cadastro`, `/recuperar-senha`: tema claro e escuro; preencher e-mail (autofill se possível); botões sociais com **rótulo e ícones** visíveis.
 3. Logado — **tema claro e escuro**: `/dashboard`, `/gerador`, `/ats-score`, `/historico`, `/configuracoes`, `/assinatura`, `/conta`; **AppNav** (desktop + mobile), seletor de idioma, toggles de filtro no histórico.
 4. `/faq`, `/pricing`: tema + footer.
-5. Logado: `/historico` → download `.txt`.
+5. Logado: `/historico` → download `.txt`; **Meus documentos** → “Abrir documento” em **vários** cards: só o card clicado expande; `<pre>` legível em dark/light.
 6. **Preview — APIs:** `/gerador` (gerar), `/ats-score` (analisar + otimizar), `/assinatura#planos` (checkout / portal) — **sem** mensagem de origem inválida; rede 200 nas rotas `/api/ai/*` e `/api/stripe/*` (exceto erros de negócio esperados, ex. cartão teste).
 7. Consola: sem spam repetido de Turnstile “Cannot find Widget…” ao navegar / trocar tema.
 8. CSP/Turnstile: sem regressão óbvia.

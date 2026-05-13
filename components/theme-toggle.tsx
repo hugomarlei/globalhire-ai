@@ -22,8 +22,8 @@ export function ThemeToggle({ labels, className }: { labels: { light: string; da
   return (
     <div
       className={cn(
-        "inline-flex shrink-0 rounded-md border p-0.5",
-        "border-graphite/20 bg-white/90 dark:border-white/10 dark:bg-white/6",
+        "inline-flex shrink-0 rounded-md border p-0.5 shadow-sm",
+        "border-graphite/20 bg-white/90 dark:border-white/10 dark:bg-[#121a16] dark:shadow-none",
         className
       )}
       role="group"
@@ -38,7 +38,7 @@ export function ThemeToggle({ labels, className }: { labels: { light: string; da
             "focus-ring inline-flex size-9 items-center justify-center rounded-md transition",
             preference === value
               ? "bg-brand-500 text-ink"
-              : "text-graphite/70 hover:bg-graphite/10 hover:text-ink dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white"
+              : "text-graphite/70 hover:bg-graphite/12 hover:text-ink dark:text-white/75 dark:hover:bg-white/[0.07] dark:hover:text-white"
           )}
           title={labelMap[value]}
           aria-pressed={preference === value}

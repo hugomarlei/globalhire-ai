@@ -422,7 +422,7 @@ export function DashboardGenerator({
             </button>
           </div>
         </div>
-        <pre data-clarity-mask="true" className="mt-5 min-h-[520px] whitespace-pre-wrap rounded-md border border-graphite/15 bg-graphite/[0.06] p-4 text-sm leading-6 text-graphite/90 dark:border-white/10 dark:bg-black/25 dark:text-white/82">
+        <pre data-clarity-mask="true" className="mt-5 min-h-[520px] whitespace-pre-wrap rounded-md border border-graphite/20 bg-[#eef2ef] p-4 text-sm leading-6 text-ink dark:border-white/10 dark:bg-[#0b100e] dark:text-white/90">
           {loading ? "Preparando resultado premium..." : output || context.empty}
         </pre>
         <div className="mt-4 rounded-md border border-graphite/15 bg-graphite/[0.05] p-4 dark:border-white/10 dark:bg-white/5">
