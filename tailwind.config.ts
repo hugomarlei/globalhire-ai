@@ -15,7 +15,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
-        display: ["var(--font-display)", "ui-serif", "Georgia", "Cambria", "Times New Roman", "serif"]
+        display: ["var(--font-sans)", "ui-sans-serif", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"]
       },
       borderRadius: {
         lg: "10px",
@@ -55,24 +55,27 @@ const config: Config = {
         slate: "#151B22",
         paper: "#F4F7F5",
         brand: {
-          50: "#E9F5F0",
-          100: "#C8E9DD",
-          200: "#95D4C2",
-          500: "#2A9B76",
-          600: "#1F7F5F",
-          700: "#17664C",
-          800: "#125542",
-          900: "#0A3428"
+          50: "#ecfdf5",
+          100: "#d1fae5",
+          200: "#a7f3d0",
+          300: "#5eead4",
+          400: "#2dd4bf",
+          500: "#14b8a6",
+          600: "#0d9488",
+          700: "#0f766e",
+          800: "#115e59",
+          900: "#134e4a"
         },
-        mint: "#2A9B76",
+        mint: "#14b8a6",
         cyber: "#5BA9BC",
         violet: "#7168D4",
         amber: "#C8943A",
         coral: "#D96B6B"
       },
       boxShadow: {
-        soft: "0 22px 70px rgba(0, 0, 0, 0.16)",
-        glow: "0 0 0 1px rgba(42, 155, 118, 0.14), 0 20px 56px rgba(42, 155, 118, 0.06)"
+        soft: "0 24px 80px rgba(0, 0, 0, 0.12)",
+        glow: "0 0 0 1px rgba(13, 148, 136, 0.12), 0 24px 64px rgba(13, 148, 136, 0.08)",
+        "glow-dark": "0 0 0 1px rgba(45, 212, 191, 0.14), 0 28px 80px rgba(0, 0, 0, 0.45)"
       }
     }
   },

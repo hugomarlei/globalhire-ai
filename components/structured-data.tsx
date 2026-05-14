@@ -1,3 +1,4 @@
+import { brandIcon } from "@/lib/brand-assets";
 import { getAppUrl } from "@/lib/app-url";
 
 function JsonLd({ data, id }: { data: Record<string, unknown>; id: string }) {
@@ -18,6 +19,7 @@ export function GlobalStructuredData() {
     "@type": "Organization",
     name: "GlobalHire AI",
     url: baseUrl,
+    logo: `${baseUrl}${brandIcon.mark512}`,
     email: "contato@globalhireai.com.br",
     contactPoint: [
       {

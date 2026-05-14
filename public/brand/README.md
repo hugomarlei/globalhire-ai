@@ -1,15 +1,15 @@
-# Brand assets
+# GlobalHire AI — public brand assets
 
-Coloque aqui os arquivos públicos da marca GlobalHire AI.
+Canonical **Orbital Case** raster set consumed by the app and metadata (`app/layout.tsx`, `lib/brand-assets.ts`, `app/icon.png`).
 
-Arquivos esperados:
+| File | Role |
+|------|------|
+| `icon-mark-1024.png` | Master mark (source for other sizes). |
+| `icon-mark-512.png` | OG / JSON-LD logo URL, large placements. |
+| `icon-mark-192.png` | Navigation + compact UI (`next/image`). |
+| `og-image.png` | Open Graph + Twitter card (1200×630). |
+| `favicon-16.png` / `favicon-32.png` | Browser tab icons. |
+| `apple-touch-icon.png` | iOS home screen (180×180). |
+| `favicon.svg` / `og-image.svg` | Legacy vector fallbacks if PNG missing. |
 
-- `logo.png`: logo horizontal para páginas e materiais.
-- `icon.png`: ícone quadrado para avatar, cards e atalhos.
-- `favicon.ico`: favicon do navegador.
-- `og-image.png`: imagem 1200x630 para LinkedIn, WhatsApp e redes sociais.
-- `favicon.svg`: fallback vetorial já incluído no MVP.
-- `og-image.svg`: fallback social já incluído no MVP.
-- `linkedin-banner.png`: banner para página da empresa no LinkedIn.
-
-Se algum arquivo ainda não existir, o app continua funcionando. Antes do lançamento público, gere ou exporte os assets finais e mantenha estes nomes para aproveitar a metadata já configurada.
+Marketing-only exports (LinkedIn banner, IG templates, etc.) live under `docs/brand/exports/`. Regenerate those from **`icon-mark-1024.png`** when updating campaigns so everything stays visually unified.

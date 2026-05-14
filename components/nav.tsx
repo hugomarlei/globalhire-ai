@@ -3,11 +3,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { BarChart3, BookOpenText, BriefcaseBusiness, ChevronDown, FileClock, Gauge, Globe2, Languages, LayoutDashboard, LifeBuoy, Linkedin, LogOut, MailPlus, Menu, MessageSquareText, MessagesSquare, Settings, ShieldCheck, UserCircle, Video } from "lucide-react";
-import { Button, inputClass } from "@/components/ui";
-import { useLanguage } from "@/components/language-provider";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { brandIcon } from "@/lib/brand-assets";
 import { dashboardCopy, locales, navCopy, type Locale } from "@/lib/i18n";
 import { appNavStrings } from "@/lib/i18n-app-wide";
+import { useLanguage } from "@/components/language-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button, inputClass } from "@/components/ui";
 
 function LanguageSelector() {
   const { locale, setLocale } = useLanguage();
@@ -38,14 +39,14 @@ export function PublicNav() {
   const themeLabels = { light: dash.themeLight, dark: dash.themeDark, system: dash.themeSystem };
 
   return (
-    <header className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-foreground sm:flex-nowrap sm:px-6 sm:py-6">
+    <header className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 border-b border-border/60 px-4 py-5 text-foreground backdrop-blur-xl sm:flex-nowrap sm:border-0 sm:px-6 sm:py-6">
       <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold text-foreground">
         <Image
-          src="/branding/logo-symbol.svg"
+          src={brandIcon.nav}
           alt=""
           width={36}
           height={36}
-          className="size-9 rounded-lg shadow-[0_0_0_1px_rgb(var(--primary)/0.2)]"
+          className="size-9 rounded-2xl bg-card/40 shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_8px_28px_rgba(0,0,0,0.12)] ring-1 ring-black/5 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_12px_40px_rgba(0,0,0,0.35)] dark:ring-white/10"
           priority
         />
         <span className="min-w-0">
@@ -125,15 +126,15 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
     "flex items-center gap-3 rounded-lg px-3 py-3 text-muted-foreground transition hover:bg-muted hover:text-foreground";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/95 text-foreground backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-border/80 bg-background/80 text-foreground shadow-[0_1px_0_rgba(0,0,0,0.04)] backdrop-blur-xl dark:bg-background/70 dark:shadow-[0_1px_0_rgba(255,255,255,0.04)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-foreground">
           <Image
-            src="/branding/logo-symbol.svg"
+            src={brandIcon.nav}
             alt=""
             width={36}
             height={36}
-            className="size-9 rounded-lg shadow-[0_0_0_1px_rgb(var(--primary)/0.2)]"
+            className="size-9 rounded-2xl bg-card/40 shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_8px_28px_rgba(0,0,0,0.12)] ring-1 ring-black/5 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_12px_40px_rgba(0,0,0,0.35)] dark:ring-white/10"
             priority
           />
           <span>

@@ -22,7 +22,7 @@ export function Button({
   disabled?: boolean;
 }) {
   const classes = cn(
-    "focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-glow transition duration-200 hover:brightness-[1.06] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:brightness-100",
+    "focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-glow transition duration-200 hover:brightness-[1.05] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:brightness-100 dark:shadow-glow-dark",
     className
   );
 
@@ -42,7 +42,7 @@ export function Button({
 }
 
 const cardSurface =
-  "rounded-xl border border-border bg-card p-5 text-card-foreground shadow-soft transition duration-200 backdrop-blur-md dark:shadow-[0_20px_50px_rgba(0,0,0,0.28)]";
+  "rounded-2xl border border-border/90 bg-card/85 p-5 text-card-foreground shadow-soft backdrop-blur-xl transition duration-200 dark:border-border/80 dark:bg-card/75 dark:shadow-[0_24px_80px_rgba(0,0,0,0.35)]";
 
 export function Card({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn(cardSurface, className)}>{children}</div>;
@@ -65,7 +65,7 @@ export function Field({
 
 /** Inputs: sempre par surface/border/foreground definido em tokens (:root / dark). */
 export const inputClass = cn(
-  "focus-ring min-h-11 w-full min-w-0 rounded-xl border border-input bg-card px-3 py-2 text-sm text-card-foreground shadow-inner caret-foreground transition",
+  "focus-ring min-h-11 w-full min-w-0 rounded-xl border border-input bg-card/90 px-3 py-2 text-sm text-card-foreground shadow-inner caret-foreground backdrop-blur-sm transition",
   "placeholder:text-muted-foreground",
   "hover:border-border",
   "selection:bg-primary/15 selection:text-foreground",

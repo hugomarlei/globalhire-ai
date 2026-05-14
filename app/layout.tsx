@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { Fraunces, Inter } from "next/font/google";
+import { Inter } from "next/font/google";
 import { AnalyticsScripts } from "@/components/analytics-scripts";
 import { CookieConsent } from "@/components/cookie-consent";
 import { LanguageProvider } from "@/components/language-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { GlobalStructuredData } from "@/components/structured-data";
+import { brandIcon } from "@/lib/brand-assets";
 import { getAppUrl } from "@/lib/app-url";
 import "./globals.css";
 
@@ -16,18 +17,20 @@ const inter = Inter({
   display: "swap"
 });
 
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap"
-});
-
 const brandDir = join(process.cwd(), "public", "brand");
 const hasOgImage = existsSync(join(brandDir, "og-image.png"));
 const hasSvgOgImage = existsSync(join(brandDir, "og-image.svg"));
+const hasFaviconPng = existsSync(join(brandDir, "favicon-32.png"));
 const hasFavicon = existsSync(join(brandDir, "favicon.ico"));
 const hasSvgFavicon = existsSync(join(brandDir, "favicon.svg"));
 const ogImagePath = hasOgImage ? "/brand/og-image.png" : hasSvgOgImage ? "/brand/og-image.svg" : undefined;
+const faviconDescriptors =
+  hasFaviconPng && existsSync(join(brandDir, "favicon-16.png"))
+    ? [
+        { url: "/brand/favicon-16.png" as const, sizes: "16x16" as const, type: "image/png" as const },
+        { url: "/brand/favicon-32.png" as const, sizes: "32x32" as const, type: "image/png" as const }
+      ]
+    : null;
 const faviconPath = hasFavicon ? "/brand/favicon.ico" : hasSvgFavicon ? "/brand/favicon.svg" : undefined;
 
 export const metadata: Metadata = {
@@ -61,13 +64,20 @@ export const metadata: Metadata = {
       "Crie currículos otimizados para ATS, cartas de apresentação e LinkedIn para vagas internacionais com inteligência artificial.",
     images: ogImagePath ? [ogImagePath] : undefined
   },
-  icons: faviconPath ? { icon: faviconPath, shortcut: faviconPath } : undefined
+  icons: faviconDescriptors
+    ? {
+        icon: faviconDescriptors,
+        apple: brandIcon.appleTouch
+      }
+    : faviconPath
+      ? { icon: faviconPath, shortcut: faviconPath }
+      : undefined
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${fraunces.variable}`} suppressHydrationWarning>
-      <body className="min-h-screen bg-background font-sans text-foreground antialiased transition-colors">
+    <html lang="pt-BR" className={`${inter.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen bg-background font-sans text-foreground antialiased transition-colors duration-300">
         <LanguageProvider>
           <ThemeProvider>
             {children}
