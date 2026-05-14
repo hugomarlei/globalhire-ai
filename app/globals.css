@@ -3,91 +3,91 @@
 @tailwind utilities;
 
 /**
- * Design system — valores RGB separados por espaço (Tailwind: rgb(var(--x) / <alpha-value>)).
- * :root / html.dark = app + marketing fora de .brand-shell
- * .brand-shell = overrides só na landing (mesmos nomes → classes iguais, contraste garantido por par).
+ * GlobalHire AI — premium brand tokens (void + teal emerald).
+ * RGB triplets for Tailwind: rgb(var(--x) / <alpha-value>).
  */
 :root {
-  --background: 244 247 245;
-  --foreground: 7 10 13;
+  --background: 250 250 252;
+  --foreground: 9 11 15;
   --card: 255 255 255;
-  --card-foreground: 7 10 13;
-  --muted: 232 238 234;
-  --muted-foreground: 76 90 84;
-  --surface-muted: 236 241 237;
-  --surface-elevated: 252 253 252;
-  --border: 198 208 201;
-  --input: 198 208 201;
-  --ring: 42 155 118;
-  --primary: 42 155 118;
-  --primary-foreground: 6 28 20;
-  --accent: 88 158 172;
-  --accent-foreground: 6 28 20;
-  --success: 42 155 118;
+  --card-foreground: 9 11 15;
+  --muted: 244 244 247;
+  --muted-foreground: 100 106 120;
+  --surface-muted: 241 242 246;
+  --surface-elevated: 252 252 254;
+  --border: 228 230 236;
+  --input: 220 223 230;
+  --ring: 13 148 136;
+  --primary: 13 148 136;
+  --primary-foreground: 255 255 255;
+  --accent: 14 165 233;
+  --accent-foreground: 9 11 15;
+  --success: 13 148 136;
   --warning: 212 160 42;
-  --danger: 210 88 88;
-  --gh-ink: #070a0d;
-  --gh-graphite: #101418;
-  --gh-brand: #2a9b76;
-  --gh-cyber: #5ba9bc;
+  --danger: 220 90 90;
+  --gh-ink: #090b0f;
+  --gh-graphite: #12141a;
+  --gh-brand: #0d9488;
+  --gh-cyber: #0ea5e9;
 }
 
 html.dark {
-  --background: 7 10 13;
-  --foreground: 244 247 245;
-  --card: 20 28 24;
-  --card-foreground: 244 247 245;
-  --muted: 24 32 28;
-  --muted-foreground: 166 178 172;
-  --surface-muted: 18 24 21;
-  --surface-elevated: 30 40 35;
-  --border: 55 68 62;
-  --input: 55 68 62;
-  --ring: 47 191 143;
-  --primary: 47 191 143;
-  --primary-foreground: 6 28 20;
-  --accent: 91 169 188;
-  --accent-foreground: 6 28 20;
-  --success: 47 191 143;
+  --background: 3 3 4;
+  --foreground: 244 244 247;
+  --card: 17 18 21;
+  --card-foreground: 244 244 247;
+  --muted: 24 25 30;
+  --muted-foreground: 156 160 172;
+  --surface-muted: 14 15 18;
+  --surface-elevated: 26 27 32;
+  --border: 48 50 58;
+  --input: 52 54 62;
+  --ring: 45 212 191;
+  --primary: 45 212 191;
+  --primary-foreground: 3 3 4;
+  --accent: 56 189 248;
+  --accent-foreground: 3 3 4;
+  --success: 45 212 191;
   --warning: 212 160 42;
-  --danger: 220 100 100;
+  --danger: 248 113 113;
 }
 
-/* Landing: mesmos tokens semânticos, valores ajustados ao gradiente marketing */
+/* Landing shell — light: airy neutral (reference: brand light deck) */
 html:not(.dark) .brand-shell {
-  --background: 241 245 242;
-  --foreground: 7 10 13;
+  --background: 250 250 252;
+  --foreground: 9 11 15;
   --card: 255 255 255;
-  --card-foreground: 7 10 13;
-  --muted: 228 234 230;
-  --muted-foreground: 72 86 80;
-  --surface-muted: 234 240 236;
-  --surface-elevated: 252 253 252;
-  --border: 190 202 195;
-  --input: 190 202 195;
-  --ring: 42 155 118;
-  --primary: 42 155 118;
-  --primary-foreground: 6 28 20;
-  --accent: 88 158 172;
-  --accent-foreground: 6 28 20;
+  --card-foreground: 9 11 15;
+  --muted: 242 242 246;
+  --muted-foreground: 88 94 108;
+  --surface-muted: 238 239 244;
+  --surface-elevated: 255 255 255;
+  --border: 226 228 234;
+  --input: 218 221 228;
+  --ring: 13 148 136;
+  --primary: 13 148 136;
+  --primary-foreground: 255 255 255;
+  --accent: 14 165 233;
+  --accent-foreground: 9 11 15;
 }
 
+/* Landing shell — dark: cinematic void + restrained emerald haze */
 html.dark .brand-shell {
-  --background: 5 8 7;
-  --foreground: 246 248 247;
-  --card: 18 26 22;
-  --card-foreground: 246 248 247;
-  --muted: 22 30 26;
-  --muted-foreground: 168 180 174;
-  --surface-muted: 16 22 19;
-  --surface-elevated: 28 38 33;
-  --border: 60 74 68;
-  --input: 60 74 68;
-  --ring: 47 191 143;
-  --primary: 47 191 143;
-  --primary-foreground: 6 28 20;
-  --accent: 91 169 188;
-  --accent-foreground: 246 248 247;
+  --background: 2 3 4;
+  --foreground: 246 247 250;
+  --card: 16 17 20;
+  --card-foreground: 246 247 250;
+  --muted: 22 23 28;
+  --muted-foreground: 158 162 174;
+  --surface-muted: 12 13 16;
+  --surface-elevated: 24 25 30;
+  --border: 44 46 54;
+  --input: 48 50 58;
+  --ring: 45 212 191;
+  --primary: 45 212 191;
+  --primary-foreground: 3 3 4;
+  --accent: 56 189 248;
+  --accent-foreground: 246 247 250;
 }
 
 html {
@@ -119,51 +119,51 @@ body {
 
 .brand-grid {
   background-image:
-    linear-gradient(rgba(42, 155, 118, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(42, 155, 118, 0.045) 1px, transparent 1px);
-  background-size: 72px 72px;
-  opacity: 0.48;
-  mask-image: linear-gradient(to bottom, black, transparent 78%);
+    linear-gradient(rgba(13, 148, 136, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13, 148, 136, 0.035) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.42;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
 }
 
 html.dark .brand-grid {
   background-image:
-    linear-gradient(rgba(236, 252, 244, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(236, 252, 244, 0.035) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
 }
 
 html.dark .brand-shell {
   background:
-    radial-gradient(circle at 14% 10%, rgba(47, 191, 143, 0.1), transparent 34%),
-    radial-gradient(circle at 86% 14%, rgba(91, 169, 188, 0.06), transparent 32%),
-    linear-gradient(180deg, #050a08 0%, #081210 52%, #0c1612 100%);
+    radial-gradient(ellipse 90% 55% at 12% -8%, rgba(45, 212, 191, 0.09), transparent 52%),
+    radial-gradient(ellipse 70% 50% at 92% 4%, rgba(56, 189, 248, 0.05), transparent 48%),
+    linear-gradient(180deg, #020203 0%, #060708 48%, #0a0b0e 100%);
 }
 
 html:not(.dark) .brand-shell {
   background:
-    radial-gradient(circle at 14% 10%, rgba(42, 155, 118, 0.11), transparent 34%),
-    radial-gradient(circle at 84% 14%, rgba(91, 169, 188, 0.07), transparent 32%),
-    linear-gradient(180deg, #f4f7f5 0%, #eef3f0 52%, #e6ece8 100%);
+    radial-gradient(ellipse 85% 50% at 10% -6%, rgba(13, 148, 136, 0.08), transparent 50%),
+    radial-gradient(ellipse 65% 45% at 88% 6%, rgba(14, 165, 233, 0.05), transparent 46%),
+    linear-gradient(180deg, #fafafc 0%, #f4f5f8 52%, #eef0f4 100%);
 }
 
 html:not(.dark) .brand-shell .brand-grid {
   background-image:
-    linear-gradient(rgba(7, 10, 13, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(7, 10, 13, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(9, 11, 15, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(9, 11, 15, 0.04) 1px, transparent 1px);
 }
 
 html:not(.dark) .brand-shell .text-brand-50 {
-  color: rgb(23 107 77);
+  color: rgb(15 118 110);
 }
 
 ::selection {
-  background-color: rgba(42, 155, 118, 0.32);
+  background-color: rgba(13, 148, 136, 0.28);
   color: var(--gh-ink);
 }
 
 html.dark ::selection {
-  background-color: rgba(47, 191, 143, 0.28);
-  color: #f4f7f5;
+  background-color: rgba(45, 212, 191, 0.22);
+  color: #f4f4f5;
 }
 
 textarea:-webkit-autofill,
@@ -186,5 +186,5 @@ html.dark select:-webkit-autofill:hover,
 html.dark select:-webkit-autofill:focus {
   -webkit-text-fill-color: #f7f8fa;
   caret-color: #f7f8fa;
-  box-shadow: inset 0 0 0 1000px #1a222d;
+  box-shadow: inset 0 0 0 1000px rgb(22 23 28);
 }
