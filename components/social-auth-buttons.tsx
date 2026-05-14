@@ -1,32 +1,40 @@
 "use client";
 
 import { Facebook, Linkedin, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { getAuthCallbackUrl } from "@/lib/app-url";
 import { trackEvent } from "@/lib/analytics";
+import { useLanguage } from "@/components/language-provider";
+import { socialAuthCopy } from "@/lib/i18n-app-wide";
 
 type Provider = "google" | "linkedin_oidc" | "facebook";
 
-const providers: Array<{ id: Provider; label: string; icon: React.ReactNode }> = [
-  {
-    id: "google",
-    label: "Continuar com Google",
-    icon: <span className="grid size-5 place-items-center rounded-full bg-muted text-xs font-bold text-foreground">G</span>
-  },
-  {
-    id: "linkedin_oidc",
-    label: "Continuar com LinkedIn",
-    icon: <Linkedin size={18} className="shrink-0 text-foreground" aria-hidden />
-  },
-  {
-    id: "facebook",
-    label: "Continuar com Facebook",
-    icon: <Facebook size={18} className="shrink-0 text-foreground" aria-hidden />
-  }
-];
-
 export function SocialAuthButtons({ mode }: { mode: "login" | "signup" }) {
+  const { locale } = useLanguage();
+  const s = socialAuthCopy[locale];
+  const providers = useMemo(
+    () =>
+      [
+        {
+          id: "google" as const,
+          label: s.googleLabel,
+          icon: <span className="grid size-5 place-items-center rounded-full bg-muted text-xs font-bold text-foreground">G</span>
+        },
+        {
+          id: "linkedin_oidc" as const,
+          label: s.linkedinLabel,
+          icon: <Linkedin size={18} className="shrink-0 text-foreground" aria-hidden />
+        },
+        {
+          id: "facebook" as const,
+          label: s.facebookLabel,
+          icon: <Facebook size={18} className="shrink-0 text-foreground" aria-hidden />
+        }
+      ] satisfies Array<{ id: Provider; label: string; icon: React.ReactNode }>,
+    [s.facebookLabel, s.googleLabel, s.linkedinLabel]
+  );
+
   const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null);
   const [error, setError] = useState("");
 
@@ -49,7 +57,7 @@ export function SocialAuthButtons({ mode }: { mode: "login" | "signup" }) {
 
     if (authError) {
       setLoadingProvider(null);
-      setError("Login social ainda não configurado. Use e-mail e senha por enquanto.");
+      setError(s.error);
     }
   }
 
@@ -57,7 +65,7 @@ export function SocialAuthButtons({ mode }: { mode: "login" | "signup" }) {
     <div className="grid gap-3">
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <span className="h-px flex-1 bg-muted" />
-        {mode === "login" ? "ou entre com" : "ou cadastre-se com"}
+        {mode === "login" ? s.orLogin : s.orSignup}
         <span className="h-px flex-1 bg-muted" />
       </div>
       <div className="grid gap-2">

@@ -95,23 +95,23 @@ export default function Home() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-lg border border-white/15 bg-black/30 p-4">
-                <p className="text-sm text-white/75">{copy.scoreBefore}</p>
-                <p className="mt-3 text-4xl font-semibold tracking-tight text-white/95">42%</p>
+                <p className="text-sm font-medium text-white/90">{copy.scoreBefore}</p>
+                <p className="mt-3 text-4xl font-semibold tabular-nums tracking-tight text-white">42%</p>
                 <div className="mt-4 h-2 rounded-full bg-white/15">
-                  <div className="h-2 w-[42%] rounded-full bg-white/40" />
+                  <div className="h-2 w-[42%] rounded-full bg-white/55" />
                 </div>
               </div>
-              <div className="rounded-lg border border-primary/40 bg-primary/15 p-4">
-                <p className="text-sm text-brand-50">{copy.scoreAfter}</p>
-                <p className="mt-3 text-4xl font-semibold tracking-tight text-brand-100">91%</p>
-                <div className="mt-4 h-2 rounded-full bg-white/15">
-                  <div className="h-2 w-[91%] rounded-full bg-primary" />
+              <div className="rounded-lg border border-emerald-300/45 bg-gradient-to-br from-emerald-700 via-emerald-800 to-emerald-950 p-4 shadow-inner">
+                <p className="text-sm font-semibold text-white">{copy.scoreAfter}</p>
+                <p className="mt-3 text-4xl font-semibold tabular-nums tracking-tight text-white">91%</p>
+                <div className="mt-4 h-2 rounded-full bg-black/30">
+                  <div className="h-2 w-[91%] rounded-full bg-emerald-200" />
                 </div>
               </div>
             </div>
-            <div className="mt-4 rounded-lg border border-primary/25 bg-brand-50/95 p-4 text-foreground dark:border-primary/30 dark:bg-card dark:text-card-foreground">
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-800 dark:text-primary">{copy.scoreHintTitle}</p>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground dark:text-muted-foreground">{copy.scoreHintBody}</p>
+            <div className="mt-4 rounded-lg border border-white/25 bg-white p-4 text-zinc-900 shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
+              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-800">{copy.scoreHintTitle}</p>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-700">{copy.scoreHintBody}</p>
             </div>
           </div>
         </Card>

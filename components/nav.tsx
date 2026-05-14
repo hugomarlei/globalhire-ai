@@ -7,6 +7,7 @@ import { Button, inputClass } from "@/components/ui";
 import { useLanguage } from "@/components/language-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { dashboardCopy, locales, navCopy, type Locale } from "@/lib/i18n";
+import { appNavStrings } from "@/lib/i18n-app-wide";
 
 function LanguageSelector() {
   const { locale, setLocale } = useLanguage();
@@ -15,7 +16,7 @@ function LanguageSelector() {
     <label className="flex min-w-0 items-center gap-2 text-muted-foreground">
       <Globe2 size={17} className="shrink-0 text-foreground/80" />
       <select
-        aria-label="Language"
+        aria-label={appNavStrings[locale].languageAria}
         className={`${inputClass} h-10 min-h-10 w-full min-w-[11rem] max-w-[15rem] py-1 text-xs sm:w-44`}
         value={locale}
         onChange={(event) => setLocale(event.target.value as Locale)}
@@ -49,7 +50,7 @@ export function PublicNav() {
         />
         <span className="min-w-0">
           <span className="block truncate leading-5">GlobalHire AI</span>
-          <span className="hidden text-[11px] font-medium text-muted-foreground sm:block">Get Hired Smarter.</span>
+          <span className="hidden text-[11px] font-medium text-muted-foreground sm:block">{appNavStrings[locale].tagline}</span>
         </span>
       </Link>
       <nav className="flex shrink-0 items-center gap-2 text-sm text-muted-foreground sm:gap-3">
@@ -57,7 +58,7 @@ export function PublicNav() {
           href="/login"
           className="focus-ring inline-flex h-10 items-center justify-center rounded-xl border border-border bg-card/90 px-3 font-semibold text-card-foreground shadow-sm transition hover:bg-muted dark:bg-card/95 sm:px-4"
         >
-          {copy.login === "Login" ? "Entrar" : copy.login}
+          {copy.login}
         </Link>
         <Button href="/cadastro" className="h-10 rounded-xl px-3 sm:px-4">
           {copy.signup}
@@ -78,42 +79,43 @@ function initials(email?: string) {
 export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; email?: string }) {
   const { locale } = useLanguage();
   const copy = navCopy[locale];
+  const n = appNavStrings[locale];
   const dash = dashboardCopy[locale];
   const themeLabels = { light: dash.themeLight, dark: dash.themeDark, system: dash.themeSystem };
   const groups = [
     {
-      label: "Ferramentas",
+      label: n.tools,
       items: [
-        { href: "/gerador", label: "Currículo ATS", Icon: BriefcaseBusiness },
-        { href: "/gerador?tipo=cover_letter", label: "Carta de apresentação", Icon: MailPlus },
-        { href: "/gerador?tipo=linkedin_summary", label: "Resumo LinkedIn", Icon: Linkedin },
-        { href: "/gerador?tipo=recruiter_message", label: "Mensagem para recrutador", Icon: MessagesSquare },
-        { href: "/gerador?tipo=interview_prep", label: "Simular entrevista", Icon: Video },
-        { href: "/gerador?tipo=translate_resume", label: "Traduzir currículo", Icon: Languages }
+        { href: "/gerador", label: n.toolAts, Icon: BriefcaseBusiness },
+        { href: "/gerador?tipo=cover_letter", label: n.toolCover, Icon: MailPlus },
+        { href: "/gerador?tipo=linkedin_summary", label: n.toolLinkedin, Icon: Linkedin },
+        { href: "/gerador?tipo=recruiter_message", label: n.toolRecruiter, Icon: MessagesSquare },
+        { href: "/gerador?tipo=interview_prep", label: n.toolInterview, Icon: Video },
+        { href: "/gerador?tipo=translate_resume", label: n.toolTranslate, Icon: Languages }
       ]
     },
     {
-      label: "Analisar",
+      label: n.analyze,
       items: [
-        { href: "/ats-score", label: "ATS Score", Icon: Gauge },
-        { href: "/ats-score?modo=keywords#keywords", label: "Palavras-chave", Icon: BookOpenText }
+        { href: "/ats-score", label: n.atsScore, Icon: Gauge },
+        { href: "/ats-score?modo=keywords#keywords", label: n.keywords, Icon: BookOpenText }
       ]
     },
     {
-      label: "Documentos",
+      label: n.documents,
       items: [
-        { href: "/historico", label: "Histórico", Icon: FileClock },
-        { href: "/historico?tab=documentos", label: "Meus documentos", Icon: MessageSquareText }
+        { href: "/historico", label: n.history, Icon: FileClock },
+        { href: "/historico?tab=documentos", label: n.myDocuments, Icon: MessageSquareText }
       ]
     }
   ];
   const accountLinks = [
-    { href: "/conta", label: "Minha conta", Icon: UserCircle },
-    { href: "/assinatura", label: "Assinatura", Icon: BarChart3 },
-    { href: "/historico", label: "Histórico", Icon: FileClock },
-    { href: "/configuracoes", label: "Configurações", Icon: Settings },
-    { href: "/support", label: "Suporte", Icon: LifeBuoy },
-    { href: "/privacidade", label: "Privacidade", Icon: ShieldCheck }
+    { href: "/conta", label: n.myAccount, Icon: UserCircle },
+    { href: "/assinatura", label: n.subscription, Icon: BarChart3 },
+    { href: "/historico", label: n.history, Icon: FileClock },
+    { href: "/configuracoes", label: n.settings, Icon: Settings },
+    { href: "/support", label: n.support, Icon: LifeBuoy },
+    { href: "/privacidade", label: n.privacy, Icon: ShieldCheck }
   ];
 
   const navItem = "rounded-lg px-3 py-2 text-muted-foreground transition hover:bg-muted hover:text-foreground";
@@ -136,7 +138,7 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
           />
           <span>
             <span className="block leading-5">GlobalHire AI</span>
-            <span className="hidden text-[11px] font-medium text-muted-foreground sm:block">Get Hired Smarter.</span>
+            <span className="hidden text-[11px] font-medium text-muted-foreground sm:block">{n.tagline}</span>
           </span>
         </Link>
         <nav className="hidden items-center gap-1 text-sm lg:flex">
@@ -177,7 +179,7 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
               className="focus-ring inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 py-1 pl-1 pr-3 text-sm text-foreground transition hover:bg-muted"
             >
               <span className="grid size-8 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{initials(email)}</span>
-              Conta
+              {n.account}
               <ChevronDown size={15} />
             </button>
             <div
@@ -202,7 +204,7 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
         <details className="group relative lg:hidden">
           <summary className="focus-ring flex list-none items-center gap-2 rounded-xl border border-border bg-muted/60 px-3 py-2 text-sm text-foreground">
             <Menu size={18} />
-            Menu
+            {n.menu}
           </summary>
           <div className={`absolute right-0 top-full z-50 mt-2 max-h-[78vh] w-[min(92vw,360px)] overflow-auto p-3 ${dropPanel}`}>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -225,7 +227,7 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
               </div>
             ))}
             <div className="mt-2 border-t border-border pt-2">
-              <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Conta</p>
+              <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{n.account}</p>
               {accountLinks.map(({ href, label, Icon }) => (
                 <Link key={href} href={href} className={dropLink}>
                   <Icon size={17} className="text-primary" />

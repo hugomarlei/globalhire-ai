@@ -4,31 +4,30 @@ import { PublicNav } from "@/components/nav";
 import { FaqStructuredData } from "@/components/structured-data";
 import { Card } from "@/components/ui";
 import { getAppUrl } from "@/lib/app-url";
+import { marketingFaqCopy } from "@/lib/i18n-app-wide";
+import { getServerLocale } from "@/lib/server-locale";
 
-const faqs = [
-  ["A análise ATS é garantia de aprovação?", "Não. É uma estimativa automatizada para orientar melhorias."],
-  ["Posso usar para vagas internacionais?", "Sim. O produto permite selecionar idioma, país-alvo e tipo de entrega."],
-  ["Quais formatos de upload são aceitos?", "PDF e DOCX com texto selecionável. PDFs escaneados podem exigir colagem manual."],
-  ["Como cancelo?", "Acesse Assinatura e use o portal seguro de pagamentos Stripe."]
-];
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const t = marketingFaqCopy[locale];
+  return {
+    title: `${t.title} | GlobalHire AI`,
+    description: "Perguntas frequentes sobre GlobalHire AI, ATS Score, currículos internacionais, upload PDF/DOCX e cancelamento de assinatura.",
+    alternates: { canonical: `${getAppUrl()}/faq` }
+  };
+}
 
-export const metadata: Metadata = {
-  title: "FAQ | GlobalHire AI",
-  description: "Perguntas frequentes sobre GlobalHire AI, ATS Score, currículos internacionais, upload PDF/DOCX e cancelamento de assinatura.",
-  alternates: {
-    canonical: `${getAppUrl()}/faq`
-  }
-};
-
-export default function FaqPage() {
+export default async function FaqPage() {
+  const locale = await getServerLocale();
+  const faq = marketingFaqCopy[locale];
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <FaqStructuredData items={faqs as Array<[string, string]>} />
+      <FaqStructuredData items={faq.items} />
       <PublicNav />
       <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-        <h1 className="text-4xl font-semibold text-foreground">FAQ</h1>
+        <h1 className="text-4xl font-semibold text-foreground">{faq.title}</h1>
         <div className="mt-8 grid gap-3">
-          {faqs.map(([question, answer]) => (
+          {faq.items.map(([question, answer]) => (
             <Card key={question}>
               <h2 className="font-semibold text-foreground">{question}</h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">{answer}</p>

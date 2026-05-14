@@ -1,19 +1,33 @@
-import { CheckCircle2 } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 import { AutoSiteFooter } from "@/components/site-footer";
 import { PublicNav } from "@/components/nav";
 import { Button, Card } from "@/components/ui";
+import { getAppUrl } from "@/lib/app-url";
+import { marketingPricingCopy } from "@/lib/i18n-app-wide";
 import { paidPlans, plans } from "@/lib/plans";
+import { getServerLocale } from "@/lib/server-locale";
 
-export default function PricingPage() {
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const t = marketingPricingCopy[locale];
+  return {
+    title: `${t.title} | GlobalHire AI`,
+    description: "Planos GlobalHire AI, gerações com IA, ATS Score e exportação PDF.",
+    alternates: { canonical: `${getAppUrl()}/pricing` }
+  };
+}
+
+export default async function PricingPage() {
+  const locale = await getServerLocale();
+  const t = marketingPricingCopy[locale];
   return (
     <main className="min-h-screen bg-background text-foreground">
       <PublicNav />
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <h1 className="text-4xl font-semibold text-foreground">Planos GlobalHire AI</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-          Escolha entre uma degustação gratuita, uso pontual ou otimização intensiva para candidaturas internacionais.
-        </p>
+        <h1 className="text-4xl font-semibold text-foreground">{t.title}</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">{t.lead}</p>
         <div className="mt-8 grid gap-4 lg:grid-cols-4">
           {[plans.free, ...paidPlans].map((plan) => (
             <Card key={plan.id} className={plan.id === "pro" ? "border-brand-500/60" : ""}>
@@ -28,25 +42,25 @@ export default function PricingPage() {
                 ))}
               </ul>
               <Button href="/cadastro" className="mt-6 w-full">
-                Começar
+                {t.cta}
               </Button>
             </Card>
           ))}
         </div>
         <p className="mt-6 max-w-3xl text-xs leading-5 text-muted-foreground">
-          Planos pagos são processados pelo Stripe. Antes de assinar, leia os{" "}
-          <Link href="/termos" className="font-medium text-brand-700 underline-offset-2 hover:underline dark:text-brand-200 dark:hover:text-white">
-            Termos de Uso
+          {t.stripeNotePrefix}{" "}
+          <Link href="/termos" className="font-medium text-primary underline-offset-2 hover:underline">
+            {t.terms}
           </Link>
-          , a{" "}
-          <Link href="/privacidade" className="font-medium text-brand-700 underline-offset-2 hover:underline dark:text-brand-200 dark:hover:text-white">
-            Política de Privacidade
-          </Link>{" "}
-          e a{" "}
-          <Link href="/refund-policy" className="font-medium text-brand-700 underline-offset-2 hover:underline dark:text-brand-200 dark:hover:text-white">
-            Política de Cancelamento e Reembolso
+          {t.mid}{" "}
+          <Link href="/privacidade" className="font-medium text-primary underline-offset-2 hover:underline">
+            {t.privacy}
           </Link>
-          .
+          {t.mid2}{" "}
+          <Link href="/refund-policy" className="font-medium text-primary underline-offset-2 hover:underline">
+            {t.refund}
+          </Link>
+          {t.suffix}
         </p>
       </section>
       <AutoSiteFooter />

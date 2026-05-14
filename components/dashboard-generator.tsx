@@ -1,11 +1,14 @@
 "use client";
 
 import { AlertTriangle, Copy, Download, FileText, FileUp, Loader2, RefreshCw, Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Field, inputClass, textareaClass } from "@/components/ui";
 import { normalizeDocumentText } from "@/lib/document-format";
 import { useLanguage } from "@/components/language-provider";
 import { TurnstileWidget } from "@/components/turnstile-widget";
+import { getGeneratorUi } from "@/lib/i18n-generator";
+import { legacyTemplateToKey } from "@/lib/i18n-app-wide";
+import { getTargetCountrySelectOptions, targetCountryCanonicalSet } from "@/lib/target-countries";
 import { dashboardCopy, locales } from "@/lib/i18n";
 import { trackEvent } from "@/lib/analytics";
 import type { GenerationType } from "@/lib/types";
@@ -15,38 +18,16 @@ type AppliedImprovement = {
   score: number;
 };
 
-const types: Array<{ value: GenerationType; label: string }> = [
-  { value: "ats_resume", label: "Otimizar currículo ATS" },
-  { value: "cover_letter", label: "Gerar carta de apresentação" },
-  { value: "linkedin_summary", label: "Gerar resumo de LinkedIn" },
-  { value: "recruiter_message", label: "Mensagem para recrutador" },
-  { value: "interview_prep", label: "Simular entrevista" },
-  { value: "translate_resume", label: "Traduzir/adaptar currículo" }
+const ALL_GENERATION_TYPES: GenerationType[] = [
+  "ats_resume",
+  "cover_letter",
+  "linkedin_summary",
+  "recruiter_message",
+  "interview_prep",
+  "translate_resume"
 ];
 
 type PdfTemplate = "executive" | "modern" | "compact";
-
-const pdfTemplates: Array<{ value: PdfTemplate; label: string }> = [
-  { value: "executive", label: "Executivo ATS" },
-  { value: "modern", label: "Moderno internacional" },
-  { value: "compact", label: "Compacto premium" }
-];
-
-const settingsTemplateToPdf: Record<string, PdfTemplate> = {
-  "Executivo ATS": "executive",
-  "Moderno internacional": "modern",
-  "Compacto premium": "compact"
-};
-
-const allowedTargetCountries = new Set([
-  "Brasil",
-  "Estados Unidos",
-  "Canadá",
-  "Reino Unido",
-  "Portugal",
-  "Alemanha",
-  "Europa"
-]);
 
 const generatedEventByType: Record<GenerationType, string> = {
   ats_resume: "resume_generated",
@@ -55,71 +36,6 @@ const generatedEventByType: Record<GenerationType, string> = {
   recruiter_message: "recruiter_message_generated",
   interview_prep: "interview_prep_generated",
   translate_resume: "translation_generated"
-};
-
-const generatorContext: Record<GenerationType, {
-  title: string;
-  subtitle: string;
-  resumeLabel: string;
-  resumePlaceholder: string;
-  jobPlaceholder: string;
-  cta: string;
-  empty: string;
-}> = {
-  ats_resume: {
-    title: "Gerador de Currículo ATS",
-    subtitle: "Transforme seu currículo em uma versão internacional, clara e alinhada à descrição da vaga.",
-    resumeLabel: "Currículo atual",
-    resumePlaceholder: "Cole aqui seu currículo completo. Inclua experiências, formação, ferramentas, idiomas e certificações.",
-    jobPlaceholder: "Cole a descrição da vaga para a IA adaptar o currículo ao cargo, país e palavras-chave.",
-    cta: "Gerar currículo ATS",
-    empty: "Seu currículo otimizado aparecerá aqui, limpo e pronto para exportar."
-  },
-  cover_letter: {
-    title: "Gerador de Carta de Apresentação",
-    subtitle: "Crie uma carta objetiva, persuasiva e conectada à vaga escolhida.",
-    resumeLabel: "Currículo ou base profissional",
-    resumePlaceholder: "Cole seu currículo ou um resumo da sua experiência para sustentar a carta.",
-    jobPlaceholder: "Cole a vaga ou contexto da empresa para personalizar a carta.",
-    cta: "Gerar carta de apresentação",
-    empty: "Sua carta de apresentação aparecerá aqui com tom profissional e pronta para envio."
-  },
-  linkedin_summary: {
-    title: "Gerador de Resumo LinkedIn",
-    subtitle: "Posicione seu perfil para recrutadores internacionais com um resumo forte e humano.",
-    resumeLabel: "Base profissional",
-    resumePlaceholder: "Cole seu currículo ou descreva sua trajetória, especialidade, ferramentas e objetivo profissional.",
-    jobPlaceholder: "Opcional: cole uma vaga ou área-alvo para direcionar o posicionamento do LinkedIn.",
-    cta: "Gerar resumo LinkedIn",
-    empty: "Seu resumo de LinkedIn aparecerá aqui, pronto para colar no perfil."
-  },
-  recruiter_message: {
-    title: "Mensagem para Recrutador",
-    subtitle: "Escreva uma abordagem curta, natural e relevante para iniciar conversa.",
-    resumeLabel: "Base profissional",
-    resumePlaceholder: "Cole seu currículo ou pontos principais da sua experiência.",
-    jobPlaceholder: "Cole a vaga, nome do cargo ou contexto do recrutador.",
-    cta: "Gerar mensagem",
-    empty: "Sua mensagem para recrutador aparecerá aqui."
-  },
-  interview_prep: {
-    title: "Preparação para Entrevista",
-    subtitle: "Prepare respostas, riscos e argumentos com base na vaga e no seu histórico.",
-    resumeLabel: "Currículo ou experiência",
-    resumePlaceholder: "Cole seu currículo ou descreva sua experiência principal.",
-    jobPlaceholder: "Cole a descrição da vaga para gerar perguntas e respostas direcionadas.",
-    cta: "Preparar entrevista",
-    empty: "Seu roteiro de preparação para entrevista aparecerá aqui."
-  },
-  translate_resume: {
-    title: "Tradução e Adaptação Internacional",
-    subtitle: "Adapte o currículo para o idioma, país e convenções do mercado-alvo.",
-    resumeLabel: "Currículo original",
-    resumePlaceholder: "Cole o currículo que deseja traduzir e adaptar.",
-    jobPlaceholder: "Opcional: cole uma vaga para adaptar termos, senioridade e palavras-chave.",
-    cta: "Traduzir e adaptar",
-    empty: "Seu currículo traduzido e adaptado aparecerá aqui."
-  }
 };
 
 function escapeHtml(value: string) {
@@ -192,9 +108,10 @@ export function DashboardGenerator({
   const [turnstileToken, setTurnstileToken] = useState("");
   const [captchaReset, setCaptchaReset] = useState(0);
   const copy = dashboardCopy[locale];
-  const steps = ["Analisando currículo", "Lendo descrição da vaga", "Comparando ATS", "Gerando documento", "Finalizando resultado"];
-  const context = generatorContext[type];
-  const visibleTypes = allowedTypes?.length ? types.filter((item) => allowedTypes.includes(item.value)) : types;
+  const genUi = useMemo(() => getGeneratorUi(locale), [locale]);
+  const steps = genUi.steps;
+  const context = genUi.byType[type];
+  const visibleTypes = allowedTypes?.length ? ALL_GENERATION_TYPES.filter((t) => allowedTypes.includes(t)) : ALL_GENERATION_TYPES;
 
   useEffect(() => {
     try {
@@ -206,12 +123,16 @@ export function DashboardGenerator({
         setLanguage(lang);
       }
       const tc = parsed.targetCountry;
-      if (typeof tc === "string" && allowedTargetCountries.has(tc)) {
+      if (typeof tc === "string" && targetCountryCanonicalSet.has(tc)) {
         setTargetCountry(tc);
       }
       const tpl = parsed.template;
-      if (typeof tpl === "string" && settingsTemplateToPdf[tpl]) {
-        setPdfTemplate(settingsTemplateToPdf[tpl]);
+      if (typeof tpl === "string") {
+        if (tpl === "executive" || tpl === "modern" || tpl === "compact") {
+          setPdfTemplate(tpl);
+        } else if (legacyTemplateToKey[tpl]) {
+          setPdfTemplate(legacyTemplateToKey[tpl] as PdfTemplate);
+        }
       }
     } catch {
       /* ignore corrupt prefs */
@@ -242,19 +163,19 @@ export function DashboardGenerator({
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        setUploadMessage(data.error || "Não consegui extrair o texto deste arquivo. Use PDF ou DOCX com texto selecionável; se for escaneado ou imagem, cole o conteúdo manualmente no campo abaixo.");
+        setUploadMessage(data.error || genUi.uploadErrorGeneric);
         return;
       }
 
       setResume(data.text);
-      setUploadMessage(`Currículo importado com sucesso: ${Math.round(data.text.length / 100) / 10} mil caracteres extraídos.`);
+      setUploadMessage(`${genUi.uploadSuccessIntro} ${Math.round(data.text.length / 100) / 10}k chars.`);
       trackEvent("resume_uploaded", {
         file_type: file.type || file.name.split(".").pop(),
         file_size_kb: Math.round(file.size / 1024),
         extracted_chars: data.text.length
       });
     } catch {
-      setUploadMessage("Não consegui concluir o upload. Tente novamente ou cole o texto manualmente.");
+      setUploadMessage(genUi.uploadErrorNetwork);
     } finally {
       setLoadingUpload(false);
     }
@@ -317,7 +238,7 @@ export function DashboardGenerator({
     if (!printable || !output) return;
     trackEvent("export_pdf_clicked", { type, template: pdfTemplate, paid: hasPaidPlan });
     const cleanOutput = normalizeDocumentText(output);
-    const watermark = hasPaidPlan ? "" : `<div class="watermark">Criado com GlobalHire AI - plano grátis</div>`;
+    const watermark = hasPaidPlan ? "" : `<div class="watermark">${escapeHtml(genUi.pdfFreeWatermark)}</div>`;
     printable.document.write(`
       <html>
         <head>
@@ -349,17 +270,15 @@ export function DashboardGenerator({
           </div>
         </div>
         <div className="mt-6 grid gap-4">
-          <Field label="Upload PDF/DOCX">
+          <Field label={genUi.uploadPdfDocx}>
             <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-brand-500/40 bg-brand-500/10 p-3 text-sm text-brand-800 hover:bg-brand-500/15 dark:text-brand-50">
               {loadingUpload ? <Loader2 className="animate-spin" size={18} /> : <FileUp size={18} />}
-              {loadingUpload ? "Lendo arquivo..." : "Importar currículo"}
+              {loadingUpload ? genUi.readingFile : genUi.importResume}
               <input data-clarity-mask="true" className="hidden" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => upload(event.target.files?.[0] || null)} />
             </label>
           </Field>
           {uploadMessage ? <p className="text-sm text-muted-foreground">{uploadMessage}</p> : null}
-          <p className="rounded-md border border-border bg-card p-3 text-xs leading-5 text-muted-foreground">
-            Aceitamos PDF e DOCX com texto real, até 5 MB. Se o arquivo for uma imagem ou PDF escaneado, a leitura automática pode não funcionar; nesse caso, cole o texto manualmente abaixo.
-          </p>
+          <p className="rounded-md border border-border bg-card p-3 text-xs leading-5 text-muted-foreground">{genUi.uploadHelp}</p>
           <Field label={context.resumeLabel}>
             <textarea data-clarity-mask="true" className={textareaClass} value={resume} onChange={(e) => setResume(e.target.value)} placeholder={context.resumePlaceholder} />
           </Field>
@@ -376,18 +295,20 @@ export function DashboardGenerator({
             </Field>
             <Field label={copy.targetCountry}>
               <select className={inputClass} value={targetCountry} onChange={(e) => setTargetCountry(e.target.value)}>
-                <option>Estados Unidos</option>
-                <option>Brasil</option>
-                <option>Canadá</option>
-                <option>Reino Unido</option>
-                <option>Portugal</option>
-                <option>Alemanha</option>
-                <option>Europa</option>
+                {getTargetCountrySelectOptions(locale).map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
               </select>
             </Field>
             <Field label={copy.deliveryType}>
               <select className={inputClass} value={type} onChange={(e) => setType(e.target.value as GenerationType)}>
-                {visibleTypes.map((item) => <option key={item.value} value={item.value}>{copy.deliveryTypes[item.value]}</option>)}
+                {visibleTypes.map((item) => (
+                  <option key={item} value={item}>
+                    {copy.deliveryTypes[item]}
+                  </option>
+                ))}
               </select>
             </Field>
           </div>
@@ -396,8 +317,10 @@ export function DashboardGenerator({
               <p className="flex items-center gap-2 font-semibold"><AlertTriangle size={16} /> {error}</p>
               {limitReached ? (
                 <div className="mt-3 grid gap-2">
-                  <p className="text-sm text-coral/85">Seu limite mensal renova no início do próximo mês. Para continuar hoje, faça upgrade.</p>
-                  <Button href="/assinatura#planos" className="bg-primary text-primary-foreground hover:brightness-105">Fazer upgrade para continuar</Button>
+                  <p className="text-sm text-coral/85">{genUi.limitRenewNotice}</p>
+                  <Button href="/assinatura#planos" className="bg-primary text-primary-foreground hover:brightness-105">
+                    {genUi.upgradeCta}
+                  </Button>
                 </div>
               ) : null}
             </div>
@@ -432,7 +355,7 @@ export function DashboardGenerator({
               className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm text-foreground hover:bg-muted disabled:opacity-40"
             >
               <Copy size={17} />
-              {copied ? "Copiado" : "Copiar"}
+              {copied ? genUi.copyDone : genUi.copyLabel}
             </button>
             <button
               type="button"
@@ -441,12 +364,14 @@ export function DashboardGenerator({
               className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm text-foreground hover:bg-muted disabled:opacity-40"
             >
               <RefreshCw size={17} />
-              Gerar novamente
+              {genUi.regenerate}
             </button>
             <Field label={copy.pdfTemplate}>
               <select className={`${inputClass} h-10 min-h-10`} value={pdfTemplate} onChange={(event) => setPdfTemplate(event.target.value as PdfTemplate)}>
-                {pdfTemplates.map((template) => (
-                  <option key={template.value} value={template.value}>{template.label}</option>
+                {(Object.keys(genUi.pdfTemplates) as PdfTemplate[]).map((template) => (
+                  <option key={template} value={template}>
+                    {genUi.pdfTemplates[template]}
+                  </option>
                 ))}
               </select>
             </Field>
@@ -462,7 +387,7 @@ export function DashboardGenerator({
           </div>
         </div>
         <pre data-clarity-mask="true" className="mt-5 min-h-[520px] whitespace-pre-wrap rounded-md border border-border bg-muted p-4 text-sm leading-6 text-foreground">
-          {loading ? "Preparando resultado premium..." : output || context.empty}
+          {loading ? genUi.preparingOutput : output || context.empty}
         </pre>
         <div className="mt-4 rounded-md border border-border bg-card p-4">
           <div className="flex items-center gap-2">

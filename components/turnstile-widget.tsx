@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useLanguage } from "@/components/language-provider";
+import { turnstileCopy } from "@/lib/i18n-app-wide";
 
 declare global {
   interface Window {
@@ -67,6 +69,8 @@ export function TurnstileWidget({
   onVerify: (token: string) => void;
   resetSignal?: number;
 }) {
+  const { locale } = useLanguage();
+  const tc = turnstileCopy[locale];
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const widgetIdRef = useRef<string>("");
   const reactId = useId().replace(/:/g, "");
@@ -204,9 +208,7 @@ export function TurnstileWidget({
 
   if (!siteKey) {
     return (
-      <p className="rounded-md border border-border bg-card p-3 text-xs leading-5 text-muted-foreground">
-        Captcha desativado neste ambiente. Em produção, configure Cloudflare Turnstile para proteção anti-bot.
-      </p>
+      <p className="rounded-md border border-border bg-card p-3 text-xs leading-5 text-muted-foreground">{tc.disabled}</p>
     );
   }
 
@@ -214,13 +216,13 @@ export function TurnstileWidget({
     <div className="grid gap-2">
       <div id={containerId} className="min-h-[65px]" />
       {status === "loading" && !widgetMounted ? (
-        <p className="text-xs text-muted-foreground">Carregando verificação de segurança...</p>
+        <p className="text-xs text-muted-foreground">{tc.loading}</p>
       ) : null}
       {status === "error" ? (
         <div className="rounded-md border border-coral/25 bg-coral/10 p-3 text-xs leading-5 text-coral">
-          <p>Não consegui carregar o captcha. Verifique a conexão, desative bloqueadores para este site ou tente recarregar apenas a verificação.</p>
+          <p>{tc.errorBody}</p>
           <button type="button" onClick={retryWidget} className="focus-ring mt-2 rounded-md border border-border bg-card px-3 py-2 font-semibold text-foreground hover:bg-muted">
-            Recarregar captcha
+            {tc.retry}
           </button>
         </div>
       ) : null}
