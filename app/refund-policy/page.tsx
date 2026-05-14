@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 import { getAppUrl } from "@/lib/app-url";
-import { legalUpdatedAt, refundSections } from "@/lib/legal-content";
+import { legalDocTitles, legalPageChrome, legalUpdatedAtByLocale } from "@/lib/i18n-legal-chrome";
+import { legalIntrosByLocale } from "@/lib/i18n-legal-intros";
+import { legalBindingNotice } from "@/lib/i18n-legal-notice";
+import { refundSections } from "@/lib/legal-content";
+import { getServerLocale } from "@/lib/server-locale";
 
 export const metadata: Metadata = {
   title: "Cancelamento e Reembolso | GlobalHire AI",
@@ -15,16 +19,18 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RefundPolicyPage() {
+export default async function RefundPolicyPage() {
+  const locale = await getServerLocale();
+  const chrome = legalPageChrome[locale];
+  const titles = legalDocTitles[locale];
   return (
     <LegalPage
-      title="Cancelamento e Reembolso"
-      updatedAt={legalUpdatedAt}
-      intro={[
-        "Esta política complementa os Termos de Uso e descreve como funcionam cancelamentos, renovações, pedidos de reembolso e suporte de cobrança na GlobalHire AI.",
-        "Pagamentos e gestão de assinatura são processados pelo Stripe, com retorno ao painel da GlobalHire AI quando a operação é concluída."
-      ]}
+      chrome={chrome}
+      title={titles.refund}
+      updatedAt={legalUpdatedAtByLocale[locale]}
+      intro={legalIntrosByLocale[locale].refund}
       sections={refundSections}
+      bindingNotice={legalBindingNotice[locale]}
     />
   );
 }

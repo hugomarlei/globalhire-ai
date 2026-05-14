@@ -2,12 +2,92 @@
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * Design system — valores RGB separados por espaço (Tailwind: rgb(var(--x) / <alpha-value>)).
+ * :root / html.dark = app + marketing fora de .brand-shell
+ * .brand-shell = overrides só na landing (mesmos nomes → classes iguais, contraste garantido por par).
+ */
 :root {
+  --background: 244 247 245;
+  --foreground: 7 10 13;
+  --card: 255 255 255;
+  --card-foreground: 7 10 13;
+  --muted: 232 238 234;
+  --muted-foreground: 76 90 84;
+  --surface-muted: 236 241 237;
+  --surface-elevated: 252 253 252;
+  --border: 198 208 201;
+  --input: 198 208 201;
+  --ring: 42 155 118;
+  --primary: 42 155 118;
+  --primary-foreground: 6 28 20;
+  --accent: 88 158 172;
+  --accent-foreground: 6 28 20;
+  --success: 42 155 118;
+  --warning: 212 160 42;
+  --danger: 210 88 88;
   --gh-ink: #070a0d;
   --gh-graphite: #101418;
-  --gh-border: rgba(244, 247, 245, 0.12);
-  --gh-brand: #2fbf8f;
-  --gh-cyber: #6ec6d9;
+  --gh-brand: #2a9b76;
+  --gh-cyber: #5ba9bc;
+}
+
+html.dark {
+  --background: 7 10 13;
+  --foreground: 244 247 245;
+  --card: 20 28 24;
+  --card-foreground: 244 247 245;
+  --muted: 24 32 28;
+  --muted-foreground: 166 178 172;
+  --surface-muted: 18 24 21;
+  --surface-elevated: 30 40 35;
+  --border: 55 68 62;
+  --input: 55 68 62;
+  --ring: 47 191 143;
+  --primary: 47 191 143;
+  --primary-foreground: 6 28 20;
+  --accent: 91 169 188;
+  --accent-foreground: 6 28 20;
+  --success: 47 191 143;
+  --warning: 212 160 42;
+  --danger: 220 100 100;
+}
+
+/* Landing: mesmos tokens semânticos, valores ajustados ao gradiente marketing */
+html:not(.dark) .brand-shell {
+  --background: 241 245 242;
+  --foreground: 7 10 13;
+  --card: 255 255 255;
+  --card-foreground: 7 10 13;
+  --muted: 228 234 230;
+  --muted-foreground: 72 86 80;
+  --surface-muted: 234 240 236;
+  --surface-elevated: 252 253 252;
+  --border: 190 202 195;
+  --input: 190 202 195;
+  --ring: 42 155 118;
+  --primary: 42 155 118;
+  --primary-foreground: 6 28 20;
+  --accent: 88 158 172;
+  --accent-foreground: 6 28 20;
+}
+
+html.dark .brand-shell {
+  --background: 5 8 7;
+  --foreground: 246 248 247;
+  --card: 18 26 22;
+  --card-foreground: 246 248 247;
+  --muted: 22 30 26;
+  --muted-foreground: 168 180 174;
+  --surface-muted: 16 22 19;
+  --surface-elevated: 28 38 33;
+  --border: 60 74 68;
+  --input: 60 74 68;
+  --ring: 47 191 143;
+  --primary: 47 191 143;
+  --primary-foreground: 6 28 20;
+  --accent: 91 169 188;
+  --accent-foreground: 246 248 247;
 }
 
 html {
@@ -29,148 +109,72 @@ html:not(.dark) {
 
 body {
   margin: 0;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   text-rendering: geometricPrecision;
 }
 
 .focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 focus:ring-offset-paper dark:focus:ring-offset-ink;
+  @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
 }
 
 .brand-grid {
   background-image:
-    linear-gradient(rgba(236, 255, 242, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(236, 255, 242, 0.055) 1px, transparent 1px);
-  background-size: 68px 68px;
-  opacity: 0.55;
-  mask-image: linear-gradient(to bottom, black, transparent 74%);
+    linear-gradient(rgba(42, 155, 118, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(42, 155, 118, 0.045) 1px, transparent 1px);
+  background-size: 72px 72px;
+  opacity: 0.48;
+  mask-image: linear-gradient(to bottom, black, transparent 78%);
+}
+
+html.dark .brand-grid {
+  background-image:
+    linear-gradient(rgba(236, 252, 244, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(236, 252, 244, 0.035) 1px, transparent 1px);
 }
 
 html.dark .brand-shell {
   background:
-    radial-gradient(circle at 16% 8%, rgba(47, 191, 143, 0.15), transparent 31%),
-    radial-gradient(circle at 84% 18%, rgba(110, 198, 217, 0.1), transparent 30%),
-    linear-gradient(180deg, #070a0d 0%, #0b1013 54%, #101418 100%);
+    radial-gradient(circle at 14% 10%, rgba(47, 191, 143, 0.1), transparent 34%),
+    radial-gradient(circle at 86% 14%, rgba(91, 169, 188, 0.06), transparent 32%),
+    linear-gradient(180deg, #050a08 0%, #081210 52%, #0c1612 100%);
 }
 
 html:not(.dark) .brand-shell {
   background:
-    radial-gradient(circle at 16% 8%, rgba(47, 191, 143, 0.22), transparent 32%),
-    radial-gradient(circle at 82% 16%, rgba(110, 198, 217, 0.14), transparent 30%),
-    linear-gradient(180deg, #f4f7f5 0%, #eef3f0 55%, #e6ece8 100%);
+    radial-gradient(circle at 14% 10%, rgba(42, 155, 118, 0.11), transparent 34%),
+    radial-gradient(circle at 84% 14%, rgba(91, 169, 188, 0.07), transparent 32%),
+    linear-gradient(180deg, #f4f7f5 0%, #eef3f0 52%, #e6ece8 100%);
 }
 
 html:not(.dark) .brand-shell .brand-grid {
   background-image:
-    linear-gradient(rgba(7, 10, 13, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(7, 10, 13, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(7, 10, 13, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(7, 10, 13, 0.05) 1px, transparent 1px);
 }
 
 html:not(.dark) .brand-shell .text-brand-50 {
-  color: #197b5d;
+  color: rgb(23 107 77);
 }
 
-html:not(.dark) .brand-shell .text-white {
-  color: #070a0d;
-}
-
-html:not(.dark) .brand-shell .text-white\/50 {
-  color: rgba(7, 10, 13, 0.5);
-}
-
-html:not(.dark) .brand-shell .text-white\/55 {
-  color: rgba(7, 10, 13, 0.55);
-}
-
-html:not(.dark) .brand-shell .text-white\/65 {
-  color: rgba(7, 10, 13, 0.65);
-}
-
-html:not(.dark) .brand-shell .text-white\/68 {
-  color: rgba(7, 10, 13, 0.68);
-}
-
-html:not(.dark) .brand-shell .text-white\/70 {
-  color: rgba(7, 10, 13, 0.7);
-}
-
-html:not(.dark) .brand-shell .text-white\/72 {
-  color: rgba(7, 10, 13, 0.72);
-}
-
-html:not(.dark) .brand-shell .text-white\/78 {
-  color: rgba(7, 10, 13, 0.78);
-}
-
-html:not(.dark) .brand-shell .border-white\/10 {
-  border-color: rgba(7, 10, 13, 0.1);
-}
-
-html:not(.dark) .brand-shell .border-white\/12 {
-  border-color: rgba(7, 10, 13, 0.12);
-}
-
-html:not(.dark) .brand-shell .border-white\/20 {
-  border-color: rgba(7, 10, 13, 0.14);
-}
-
-html:not(.dark) .brand-shell .bg-white\/5 {
-  background-color: rgba(7, 10, 13, 0.05);
-}
-
-html:not(.dark) .brand-shell .bg-white\/6 {
-  background-color: rgba(7, 10, 13, 0.06);
-}
-
-html:not(.dark) .brand-shell .bg-white\/7 {
-  background-color: rgba(7, 10, 13, 0.07);
-}
-
-html:not(.dark) .brand-shell .bg-white\/8 {
-  background-color: rgba(7, 10, 13, 0.08);
-}
-
-html:not(.dark) .brand-shell .bg-white\/\[0\.035\] {
-  background-color: rgba(7, 10, 13, 0.035);
-}
-
-html:not(.dark) .brand-shell .bg-white\/\[0\.045\] {
-  background-color: rgba(7, 10, 13, 0.045);
-}
-
-html:not(.dark) .brand-shell .bg-white\/\[0\.055\] {
-  background-color: rgba(7, 10, 13, 0.055);
-}
-
-html:not(.dark) .brand-shell .hover\:bg-white\/12:hover {
-  background-color: rgba(7, 10, 13, 0.1);
-}
-
-html:not(.dark) .brand-shell .hover\:border-white\/20:hover {
-  border-color: rgba(7, 10, 13, 0.16);
-}
-
-/* Text selection: visible in inputs and body copy */
 ::selection {
-  background-color: rgba(47, 191, 143, 0.38);
+  background-color: rgba(42, 155, 118, 0.32);
   color: var(--gh-ink);
 }
 
 html.dark ::selection {
-  background-color: rgba(47, 191, 143, 0.35);
+  background-color: rgba(47, 191, 143, 0.28);
   color: #f4f7f5;
 }
 
-/* WebKit autofill on textarea/select (matches inputClass surfaces) */
 textarea:-webkit-autofill,
 textarea:-webkit-autofill:hover,
 textarea:-webkit-autofill:focus,
 select:-webkit-autofill,
 select:-webkit-autofill:hover,
 select:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--gh-ink);
-  caret-color: var(--gh-ink);
-  box-shadow: inset 0 0 0 1000px #ffffff;
+  -webkit-text-fill-color: rgb(var(--foreground));
+  caret-color: rgb(var(--foreground));
+  box-shadow: inset 0 0 0 1000px rgb(var(--card));
   transition: background-color 99999s ease-out 0s;
 }
 

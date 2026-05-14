@@ -4,21 +4,23 @@ import { requireUser } from "@/lib/auth";
 import { canUseFeature, effectivePlanFromSubscription } from "@/lib/plans";
 import { createClient } from "@/lib/supabase-server";
 import { getLatestActiveSubscription } from "@/lib/subscription-state";
+import { planUpgradeCopy } from "@/lib/i18n-account-subscription";
+import { getLocalizedPlanRow } from "@/lib/plan-copy";
+import { getServerLocale } from "@/lib/server-locale";
 
 export const dynamic = "force-dynamic";
 
 export default async function AtsScorePage({ searchParams }: { searchParams?: Promise<{ modo?: string }> }) {
+  const locale = await getServerLocale();
+  const u = planUpgradeCopy[locale];
   const { user, profile } = await requireUser();
   const supabase = await createClient();
   const subscription = await getLatestActiveSubscription(supabase, user.id);
   const planId = effectivePlanFromSubscription(profile?.plan, subscription?.plan, subscription?.status, profile?.email || user.email);
   if (!canUseFeature(planId, "ats_score")) {
+    const proName = getLocalizedPlanRow(locale, "pro").name;
     return (
-      <UpgradeGate
-        requiredPlan="Disponível a partir do plano Pro"
-        title="ATS Score é uma ferramenta Pro"
-        description="As análises de compatibilidade, palavras-chave e otimização a partir do score fazem parte do plano Pro e Elite."
-      />
+      <UpgradeGate requiredPlan={u.fromPlan(proName)} title={u.atsScoreProTitle} description={u.atsScoreProBody} />
     );
   }
   const params = searchParams ? await searchParams : {};

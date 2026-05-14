@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 import { getAppUrl } from "@/lib/app-url";
-import { cookiesSections, legalUpdatedAt } from "@/lib/legal-content";
+import { legalDocTitles, legalPageChrome, legalUpdatedAtByLocale } from "@/lib/i18n-legal-chrome";
+import { legalIntrosByLocale } from "@/lib/i18n-legal-intros";
+import { legalBindingNotice } from "@/lib/i18n-legal-notice";
+import { cookiesSections } from "@/lib/legal-content";
+import { getServerLocale } from "@/lib/server-locale";
 
 export const metadata: Metadata = {
   title: "Política de Cookies | GlobalHire AI",
@@ -15,16 +19,18 @@ export const metadata: Metadata = {
   }
 };
 
-export default function CookiesPage() {
+export default async function CookiesPage() {
+  const locale = await getServerLocale();
+  const chrome = legalPageChrome[locale];
+  const titles = legalDocTitles[locale];
   return (
     <LegalPage
-      title="Política de Cookies"
-      updatedAt={legalUpdatedAt}
-      intro={[
-        "Esta Política de Cookies explica como a GlobalHire AI utiliza cookies e tecnologias similares para segurança, autenticação, funcionamento da conta, analytics e melhoria de produto.",
-        "Cookies essenciais não dependem de consentimento para funcionamento do serviço. Cookies analíticos devem respeitar as escolhas do usuário e a configuração do banner de privacidade."
-      ]}
+      chrome={chrome}
+      title={titles.cookies}
+      updatedAt={legalUpdatedAtByLocale[locale]}
+      intro={legalIntrosByLocale[locale].cookies}
       sections={cookiesSections}
+      bindingNotice={legalBindingNotice[locale]}
     />
   );
 }

@@ -28,33 +28,25 @@ export function AutoSiteFooter({ className }: { className?: string }) {
 }
 
 const socialBtn =
-  "inline-flex size-10 items-center justify-center rounded-md border border-graphite/20 bg-white/90 text-ink transition hover:bg-white hover:text-ink dark:border-white/[0.08] dark:bg-[#0d1410] dark:text-white/75 dark:hover:bg-[#162018] dark:hover:border-white/12 dark:hover:text-white/90";
+  "inline-flex size-10 items-center justify-center rounded-xl border border-border bg-card text-card-foreground transition hover:bg-muted hover:text-foreground";
 
 export function SiteFooter({ locale, className }: { locale: Locale; className?: string }) {
   const copy = footerCopy[locale];
   const social = getSocialLinks();
-  const linkClass = "text-graphite/75 underline-offset-2 hover:text-ink hover:underline dark:text-white/60 dark:hover:text-white";
+  const linkClass =
+    "text-muted-foreground underline-offset-2 transition hover:text-foreground hover:underline";
 
   return (
-    <footer
-      className={cn(
-        "border-t border-graphite/15 px-4 py-8 text-sm text-graphite/70 dark:border-white/10 dark:text-white/55 sm:px-6",
-        className
-      )}
-    >
+    <footer className={cn("border-t border-border bg-background/80 px-4 py-10 text-sm text-muted-foreground backdrop-blur-sm sm:px-6", className)}>
       <div className="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
-          <p className="text-graphite dark:text-white/90">{copy.copyright}</p>
-          <p className="mt-2 text-xs text-graphite/60 dark:text-white/40">{copy.cnpjLine}</p>
-          <a
-            href="mailto:contato@globalhireai.com.br"
-            className={cn("mt-3 inline-flex items-center gap-2", linkClass)}
-            rel="noopener noreferrer"
-          >
+          <p className="text-foreground">{copy.copyright}</p>
+          <p className="mt-2 text-xs text-muted-foreground">{copy.cnpjLine}</p>
+          <a href="mailto:contato@globalhireai.com.br" className={cn("mt-3 inline-flex items-center gap-2", linkClass)} rel="noopener noreferrer">
             <Mail size={15} aria-hidden />
             contato@globalhireai.com.br
           </a>
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-graphite/55 dark:text-white/45">
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
             <a href="mailto:support@globalhireai.com.br" className={linkClass} rel="noopener noreferrer">
               support@globalhireai.com.br
             </a>

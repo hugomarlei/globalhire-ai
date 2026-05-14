@@ -7,15 +7,16 @@ import { Button, inputClass } from "@/components/ui";
 import { useLanguage } from "@/components/language-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { dashboardCopy, locales, navCopy, type Locale } from "@/lib/i18n";
+import { appNavStrings } from "@/lib/i18n-app-wide";
 
 function LanguageSelector() {
   const { locale, setLocale } = useLanguage();
 
   return (
-    <label className="flex min-w-0 items-center gap-2 text-graphite/70 dark:text-white/70">
-      <Globe2 size={17} className="shrink-0" />
+    <label className="flex min-w-0 items-center gap-2 text-muted-foreground">
+      <Globe2 size={17} className="shrink-0 text-foreground/80" />
       <select
-        aria-label="Language"
+        aria-label={appNavStrings[locale].languageAria}
         className={`${inputClass} h-10 min-h-10 w-full min-w-[11rem] max-w-[15rem] py-1 text-xs sm:w-44`}
         value={locale}
         onChange={(event) => setLocale(event.target.value as Locale)}
@@ -37,22 +38,29 @@ export function PublicNav() {
   const themeLabels = { light: dash.themeLight, dark: dash.themeDark, system: dash.themeSystem };
 
   return (
-    <header className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 text-ink dark:text-white sm:flex-nowrap sm:px-6 sm:py-5">
-      <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold text-ink dark:text-white">
-        <Image src="/branding/logo-symbol.svg" alt="" width={36} height={36} className="size-9 rounded-md shadow-glow" priority />
+    <header className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-foreground sm:flex-nowrap sm:px-6 sm:py-6">
+      <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold text-foreground">
+        <Image
+          src="/branding/logo-symbol.svg"
+          alt=""
+          width={36}
+          height={36}
+          className="size-9 rounded-lg shadow-[0_0_0_1px_rgb(var(--primary)/0.2)]"
+          priority
+        />
         <span className="min-w-0">
           <span className="block truncate leading-5">GlobalHire AI</span>
-          <span className="hidden text-[11px] font-medium text-graphite/55 dark:text-white/45 sm:block">Get Hired Smarter.</span>
+          <span className="hidden text-[11px] font-medium text-muted-foreground sm:block">{appNavStrings[locale].tagline}</span>
         </span>
       </Link>
-      <nav className="flex shrink-0 items-center gap-2 text-sm text-graphite/75 dark:text-white/70 sm:gap-3">
+      <nav className="flex shrink-0 items-center gap-2 text-sm text-muted-foreground sm:gap-3">
         <Link
           href="/login"
-          className="focus-ring inline-flex h-10 items-center justify-center rounded-md border border-graphite/20 bg-white/90 px-3 font-semibold text-ink shadow-sm hover:bg-white dark:border-white/10 dark:bg-[#141d18] dark:text-white dark:shadow-none dark:hover:bg-[#1c2821] dark:hover:text-white sm:px-4"
+          className="focus-ring inline-flex h-10 items-center justify-center rounded-xl border border-border bg-card/90 px-3 font-semibold text-card-foreground shadow-sm transition hover:bg-muted dark:bg-card/95 sm:px-4"
         >
-          {copy.login === "Login" ? "Entrar" : copy.login}
+          {copy.login}
         </Link>
-        <Button href="/cadastro" className="h-10 px-3 sm:px-4">
+        <Button href="/cadastro" className="h-10 rounded-xl px-3 sm:px-4">
           {copy.signup}
         </Button>
       </nav>
@@ -71,69 +79,85 @@ function initials(email?: string) {
 export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; email?: string }) {
   const { locale } = useLanguage();
   const copy = navCopy[locale];
+  const n = appNavStrings[locale];
   const dash = dashboardCopy[locale];
   const themeLabels = { light: dash.themeLight, dark: dash.themeDark, system: dash.themeSystem };
   const groups = [
     {
-      label: "Ferramentas",
+      label: n.tools,
       items: [
-        { href: "/gerador", label: "Currículo ATS", Icon: BriefcaseBusiness },
-        { href: "/gerador?tipo=cover_letter", label: "Carta de apresentação", Icon: MailPlus },
-        { href: "/gerador?tipo=linkedin_summary", label: "Resumo LinkedIn", Icon: Linkedin },
-        { href: "/gerador?tipo=recruiter_message", label: "Mensagem para recrutador", Icon: MessagesSquare },
-        { href: "/gerador?tipo=interview_prep", label: "Simular entrevista", Icon: Video },
-        { href: "/gerador?tipo=translate_resume", label: "Traduzir currículo", Icon: Languages }
+        { href: "/gerador", label: n.toolAts, Icon: BriefcaseBusiness },
+        { href: "/gerador?tipo=cover_letter", label: n.toolCover, Icon: MailPlus },
+        { href: "/gerador?tipo=linkedin_summary", label: n.toolLinkedin, Icon: Linkedin },
+        { href: "/gerador?tipo=recruiter_message", label: n.toolRecruiter, Icon: MessagesSquare },
+        { href: "/gerador?tipo=interview_prep", label: n.toolInterview, Icon: Video },
+        { href: "/gerador?tipo=translate_resume", label: n.toolTranslate, Icon: Languages }
       ]
     },
     {
-      label: "Analisar",
+      label: n.analyze,
       items: [
-        { href: "/ats-score", label: "ATS Score", Icon: Gauge },
-        { href: "/ats-score?modo=keywords#keywords", label: "Palavras-chave", Icon: BookOpenText }
+        { href: "/ats-score", label: n.atsScore, Icon: Gauge },
+        { href: "/ats-score?modo=keywords#keywords", label: n.keywords, Icon: BookOpenText }
       ]
     },
     {
-      label: "Documentos",
+      label: n.documents,
       items: [
-        { href: "/historico", label: "Histórico", Icon: FileClock },
-        { href: "/historico?tab=documentos", label: "Meus documentos", Icon: MessageSquareText }
+        { href: "/historico", label: n.history, Icon: FileClock },
+        { href: "/historico?tab=documentos", label: n.myDocuments, Icon: MessageSquareText }
       ]
     }
   ];
   const accountLinks = [
-    { href: "/conta", label: "Minha conta", Icon: UserCircle },
-    { href: "/assinatura", label: "Assinatura", Icon: BarChart3 },
-    { href: "/historico", label: "Histórico", Icon: FileClock },
-    { href: "/configuracoes", label: "Configurações", Icon: Settings },
-    { href: "/support", label: "Suporte", Icon: LifeBuoy },
-    { href: "/privacidade", label: "Privacidade", Icon: ShieldCheck }
+    { href: "/conta", label: n.myAccount, Icon: UserCircle },
+    { href: "/assinatura", label: n.subscription, Icon: BarChart3 },
+    { href: "/historico", label: n.history, Icon: FileClock },
+    { href: "/configuracoes", label: n.settings, Icon: Settings },
+    { href: "/support", label: n.support, Icon: LifeBuoy },
+    { href: "/privacidade", label: n.privacy, Icon: ShieldCheck }
   ];
 
+  const navItem = "rounded-lg px-3 py-2 text-muted-foreground transition hover:bg-muted hover:text-foreground";
+  const dropPanel =
+    "rounded-xl border border-border bg-card p-2 text-card-foreground shadow-lg backdrop-blur-md dark:shadow-soft";
+  const dropLink =
+    "flex items-center gap-3 rounded-lg px-3 py-3 text-muted-foreground transition hover:bg-muted hover:text-foreground";
+
   return (
-    <header className="sticky top-0 z-40 border-b border-graphite/15 bg-white/95 text-ink backdrop-blur dark:border-white/10 dark:bg-ink/95 dark:text-white">
+    <header className="sticky top-0 z-40 border-b border-border bg-background/95 text-foreground backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-        <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-ink dark:text-white">
-          <Image src="/branding/logo-symbol.svg" alt="" width={36} height={36} className="size-9 rounded-md shadow-glow" priority />
+        <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-foreground">
+          <Image
+            src="/branding/logo-symbol.svg"
+            alt=""
+            width={36}
+            height={36}
+            className="size-9 rounded-lg shadow-[0_0_0_1px_rgb(var(--primary)/0.2)]"
+            priority
+          />
           <span>
             <span className="block leading-5">GlobalHire AI</span>
-            <span className="hidden text-[11px] font-medium text-graphite/50 dark:text-white/45 sm:block">Get Hired Smarter.</span>
+            <span className="hidden text-[11px] font-medium text-muted-foreground sm:block">{n.tagline}</span>
           </span>
         </Link>
-        <nav className="hidden items-center gap-2 text-sm text-graphite/70 dark:text-white/70 lg:flex">
-          <Link href="/dashboard" className="inline-flex items-center gap-1 rounded-md px-3 py-2 hover:bg-graphite/10 hover:text-ink dark:hover:bg-white/8 dark:hover:text-white">
+        <nav className="hidden items-center gap-1 text-sm lg:flex">
+          <Link href="/dashboard" className={`inline-flex items-center gap-1 ${navItem}`}>
             <LayoutDashboard size={16} />
             {copy.dashboard}
           </Link>
           {groups.map((group) => (
             <div key={group.label} className="group relative">
-              <button className="focus-ring inline-flex items-center gap-1 rounded-md px-3 py-2 hover:bg-graphite/10 hover:text-ink dark:hover:bg-white/8 dark:hover:text-white">
+              <button type="button" className={`focus-ring inline-flex items-center gap-1 ${navItem}`}>
                 {group.label}
                 <ChevronDown size={15} />
               </button>
-              <div className="invisible absolute left-0 top-full z-50 w-64 translate-y-2 rounded-lg border border-graphite/15 bg-white p-2 text-ink opacity-0 shadow-lg transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 dark:border-white/10 dark:bg-[#07120E] dark:text-white dark:shadow-soft">
+              <div
+                className={`invisible absolute left-0 top-full z-50 w-64 translate-y-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 ${dropPanel}`}
+              >
                 {group.items.map(({ href, label, Icon }) => (
-                  <Link key={href} href={href} className="flex items-center gap-3 rounded-md px-3 py-3 text-graphite/80 hover:bg-graphite/10 hover:text-ink dark:text-white/75 dark:hover:bg-white/8 dark:hover:text-white">
-                    <Icon size={17} className="text-brand-500" />
+                  <Link key={href} href={href} className={dropLink}>
+                    <Icon size={17} className="text-primary" />
                     {label}
                   </Link>
                 ))}
@@ -141,7 +165,7 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
             </div>
           ))}
           {isAdmin ? (
-            <Link href="/admin" className="rounded-md px-3 py-2 hover:bg-graphite/10 hover:text-ink dark:hover:bg-white/8 dark:hover:text-white">
+            <Link href="/admin" className={navItem}>
               {copy.admin}
             </Link>
           ) : null}
@@ -150,22 +174,27 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
           <ThemeToggle labels={themeLabels} />
           <LanguageSelector />
           <div className="group relative">
-            <button className="focus-ring inline-flex items-center gap-2 rounded-full border border-graphite/20 bg-graphite/[0.06] py-1 pl-1 pr-3 text-sm text-graphite/85 hover:bg-graphite/10 dark:border-white/10 dark:bg-[#141d18] dark:text-white/80 dark:hover:bg-[#1c2821]">
-              <span className="grid size-8 place-items-center rounded-full bg-brand-500 text-xs font-bold text-ink">{initials(email)}</span>
-              Conta
+            <button
+              type="button"
+              className="focus-ring inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 py-1 pl-1 pr-3 text-sm text-foreground transition hover:bg-muted"
+            >
+              <span className="grid size-8 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{initials(email)}</span>
+              {n.account}
               <ChevronDown size={15} />
             </button>
-            <div className="invisible absolute right-0 top-full z-50 w-64 translate-y-2 rounded-lg border border-graphite/15 bg-white p-2 text-ink opacity-0 shadow-lg transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 dark:border-white/10 dark:bg-[#07120E] dark:text-white dark:shadow-soft">
-              <p className="px-3 py-2 text-xs text-graphite/50 dark:text-white/45">{email}</p>
+            <div
+              className={`invisible absolute right-0 top-full z-50 w-64 translate-y-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 ${dropPanel}`}
+            >
+              <p className="px-3 py-2 text-xs text-muted-foreground">{email}</p>
               {accountLinks.map(({ href, label, Icon }) => (
-                <Link key={href} href={href} className="flex items-center gap-3 rounded-md px-3 py-3 text-graphite/80 hover:bg-graphite/10 hover:text-ink dark:text-white/75 dark:hover:bg-white/8 dark:hover:text-white">
-                  <Icon size={17} className="text-brand-500" />
+                <Link key={href} href={href} className={dropLink}>
+                  <Icon size={17} className="text-primary" />
                   {label}
                 </Link>
               ))}
-              <form action="/api/auth/signout" method="post" className="border-t border-graphite/15 pt-2 dark:border-white/10">
-                <button className="flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-graphite/80 hover:bg-graphite/10 hover:text-ink dark:text-white/75 dark:hover:bg-white/8 dark:hover:text-white" type="submit">
-                  <LogOut size={17} className="text-brand-500" />
+              <form action="/api/auth/signout" method="post" className="border-t border-border pt-2">
+                <button type="submit" className={`${dropLink} w-full`}>
+                  <LogOut size={17} className="text-primary" />
                   {copy.logout}
                 </button>
               </form>
@@ -173,41 +202,41 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
           </div>
         </div>
         <details className="group relative lg:hidden">
-          <summary className="focus-ring flex list-none items-center gap-2 rounded-md border border-graphite/20 bg-graphite/[0.06] px-3 py-2 text-sm text-graphite/85 dark:border-white/10 dark:bg-[#141d18] dark:text-white/80 dark:hover:bg-[#1c2821]">
+          <summary className="focus-ring flex list-none items-center gap-2 rounded-xl border border-border bg-muted/60 px-3 py-2 text-sm text-foreground">
             <Menu size={18} />
-            Menu
+            {n.menu}
           </summary>
-          <div className="absolute right-0 top-full z-50 mt-2 max-h-[78vh] w-[min(92vw,360px)] overflow-auto rounded-lg border border-graphite/15 bg-white p-3 text-ink shadow-lg dark:border-white/10 dark:bg-[#07120E] dark:text-white dark:shadow-soft">
+          <div className={`absolute right-0 top-full z-50 mt-2 max-h-[78vh] w-[min(92vw,360px)] overflow-auto p-3 ${dropPanel}`}>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <ThemeToggle labels={themeLabels} />
               <LanguageSelector />
             </div>
-            <Link href="/dashboard" className="flex items-center gap-3 rounded-md px-3 py-3 text-graphite/80 hover:bg-graphite/10 hover:text-ink dark:text-white/75 dark:hover:bg-white/8 dark:hover:text-white">
-              <LayoutDashboard size={17} className="text-brand-500" />
+            <Link href="/dashboard" className={dropLink}>
+              <LayoutDashboard size={17} className="text-primary" />
               {copy.dashboard}
             </Link>
             {groups.map((group) => (
-              <div key={group.label} className="mt-2 border-t border-graphite/15 pt-2 dark:border-white/10">
-                <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-graphite/45 dark:text-white/35">{group.label}</p>
+              <div key={group.label} className="mt-2 border-t border-border pt-2">
+                <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group.label}</p>
                 {group.items.map(({ href, label, Icon }) => (
-                  <Link key={href} href={href} className="flex items-center gap-3 rounded-md px-3 py-3 text-graphite/80 hover:bg-graphite/10 hover:text-ink dark:text-white/75 dark:hover:bg-white/8 dark:hover:text-white">
-                    <Icon size={17} className="text-brand-500" />
+                  <Link key={href} href={href} className={dropLink}>
+                    <Icon size={17} className="text-primary" />
                     {label}
                   </Link>
                 ))}
               </div>
             ))}
-            <div className="mt-2 border-t border-graphite/15 pt-2 dark:border-white/10">
-              <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-graphite/45 dark:text-white/35">Conta</p>
+            <div className="mt-2 border-t border-border pt-2">
+              <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{n.account}</p>
               {accountLinks.map(({ href, label, Icon }) => (
-                <Link key={href} href={href} className="flex items-center gap-3 rounded-md px-3 py-3 text-graphite/80 hover:bg-graphite/10 hover:text-ink dark:text-white/75 dark:hover:bg-white/8 dark:hover:text-white">
-                  <Icon size={17} className="text-brand-500" />
+                <Link key={href} href={href} className={dropLink}>
+                  <Icon size={17} className="text-primary" />
                   {label}
                 </Link>
               ))}
               <form action="/api/auth/signout" method="post">
-                <button className="flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-graphite/80 hover:bg-graphite/10 hover:text-ink dark:text-white/75 dark:hover:bg-white/8 dark:hover:text-white" type="submit">
-                  <LogOut size={17} className="text-brand-500" />
+                <button type="submit" className={`${dropLink} w-full`}>
+                  <LogOut size={17} className="text-primary" />
                   {copy.logout}
                 </button>
               </form>

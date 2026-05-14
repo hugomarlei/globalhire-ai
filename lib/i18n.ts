@@ -185,7 +185,7 @@ export const navCopy: Record<Locale, {
   admin: string;
   logout: string;
 }> = {
-  "pt-BR": { login: "Login", signup: "Criar conta", dashboard: "Dashboard", history: "Histórico", admin: "Admin", logout: "Sair" },
+  "pt-BR": { login: "Entrar", signup: "Criar conta", dashboard: "Dashboard", history: "Histórico", admin: "Admin", logout: "Sair" },
   en: { login: "Log in", signup: "Create account", dashboard: "Dashboard", history: "History", admin: "Admin", logout: "Log out" },
   es: { login: "Iniciar sesión", signup: "Crear cuenta", dashboard: "Panel", history: "Historial", admin: "Admin", logout: "Salir" },
   fr: { login: "Connexion", signup: "Créer un compte", dashboard: "Tableau de bord", history: "Historique", admin: "Admin", logout: "Déconnexion" }
@@ -261,7 +261,7 @@ export const landingCopy: Record<Locale, {
       { title: "Documento", text: "Receba uma versão pronta para candidatura." }
     ],
     benefitsTitle: "Benefícios",
-    benefits: ["Currículos com palavras-chave para ATS", "Cartas alinhadas a cada vaga", "LinkedIn com posicionamento internacional", "Mensagens para recrutadores sem travar", "Preparação para entrevistas em outro idioma", "Adaptação por país: EUA, Canadá e Europa"],
+    benefits: ["Currículos com palavras-chave para ATS", "Cartas alinhadas a cada vaga", "LinkedIn com posicionamento internacional", "Mensagens para recrutadores sem travar", "Preparação para entrevistas em outro idioma", "Adaptação por região: Brasil, Estados Unidos e Europa"],
     pricingTitle: "Preços simples",
     scoreTitle: "Aumente seu ATS Score antes de aplicar.",
     scoreText: "Planos pagos liberam mais gerações, exportação sem marca d'água e otimizações contínuas por vaga.",
@@ -337,7 +337,7 @@ export const landingCopy: Record<Locale, {
     howItWorks: "How it works",
     steps: [{ title: "Base", text: "Paste your current resume." }, { title: "Role", text: "Add the job description." }, { title: "Direction", text: "Choose language, country and output." }, { title: "Document", text: "Receive an application-ready version." }],
     benefitsTitle: "Benefits",
-    benefits: ["ATS keyword optimization", "Cover letters tailored to each role", "International LinkedIn positioning", "Recruiter messages without friction", "Interview preparation in another language", "Country adaptation for the US, Canada and Europe"],
+    benefits: ["ATS keyword optimization", "Cover letters tailored to each role", "International LinkedIn positioning", "Recruiter messages without friction", "Interview preparation in another language", "Regional adaptation: Brazil, United States and Europe"],
     pricingTitle: "Simple pricing",
     scoreTitle: "Raise your ATS Score before applying.",
     scoreText: "Paid plans unlock more generations, watermark-free exports and continuous job-specific optimization.",
@@ -413,7 +413,7 @@ export const landingCopy: Record<Locale, {
     howItWorks: "Cómo funciona",
     steps: [{ title: "Base", text: "Pega tu currículum actual." }, { title: "Vacante", text: "Añade la descripción de la vacante." }, { title: "Dirección", text: "Elige idioma, país y entrega." }, { title: "Documento", text: "Recibe una versión lista para postular." }],
     benefitsTitle: "Beneficios",
-    benefits: ["Currículums con palabras clave para ATS", "Cartas alineadas a cada vacante", "Posicionamiento internacional en LinkedIn", "Mensajes para reclutadores sin bloqueo", "Preparación de entrevistas en otro idioma", "Adaptación por país: EE. UU., Canadá y Europa"],
+    benefits: ["Currículums con palabras clave para ATS", "Cartas alineadas a cada vacante", "Posicionamiento internacional en LinkedIn", "Mensajes para reclutadores sin bloqueo", "Preparación de entrevistas en otro idioma", "Adaptación regional: Brasil, Estados Unidos y Europa"],
     pricingTitle: "Precios simples",
     scoreTitle: "Mejora tu ATS Score antes de postular.",
     scoreText: "Los planes de pago liberan más generaciones, exportación sin marca de agua y optimizaciones continuas por vacante.",
@@ -489,7 +489,7 @@ export const landingCopy: Record<Locale, {
     howItWorks: "Comment ça marche",
     steps: [{ title: "Base", text: "Collez votre CV actuel." }, { title: "Poste", text: "Ajoutez la description du poste." }, { title: "Direction", text: "Choisissez la langue, le pays et le livrable." }, { title: "Document", text: "Recevez une version prête à candidater." }],
     benefitsTitle: "Avantages",
-    benefits: ["CV avec mots-clés ATS", "Lettres adaptées à chaque poste", "Positionnement LinkedIn international", "Messages recruteurs sans blocage", "Préparation d'entretien dans une autre langue", "Adaptation par pays : États-Unis, Canada et Europe"],
+    benefits: ["CV avec mots-clés ATS", "Lettres adaptées à chaque poste", "Positionnement LinkedIn international", "Messages recruteurs sans blocage", "Préparation d'entretien dans une autre langue", "Adaptation régionale : Brésil, États-Unis et Europe"],
     pricingTitle: "Tarifs simples",
     scoreTitle: "Améliorez votre ATS Score avant de postuler.",
     scoreText: "Les offres payantes débloquent plus de générations, l'export sans filigrane et l'optimisation continue par poste.",

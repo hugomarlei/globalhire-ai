@@ -9,9 +9,13 @@ import { SocialAuthButtons } from "@/components/social-auth-buttons";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import { trackEvent } from "@/lib/analytics";
 import { getAppUrl } from "@/lib/app-url";
+import { useLanguage } from "@/components/language-provider";
+import { authSignupCopy } from "@/lib/i18n-auth-pages";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { locale } = useLanguage();
+  const t = authSignupCopy[locale];
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,7 +38,7 @@ export default function SignupPage() {
       const data = await captchaResponse.json().catch(() => ({}));
       setLoading(false);
       setCaptchaReset((current) => current + 1);
-      setMessage(data.error || "Confirme o captcha para criar sua conta.");
+      setMessage(data.error || t.captchaError);
       return;
     }
     const supabase = createClient();
@@ -54,7 +58,7 @@ export default function SignupPage() {
       return;
     }
 
-    setMessage("Conta criada. Se o Supabase pedir confirmação, abra seu e-mail; senão você já pode entrar.");
+    setMessage(t.accountCreated);
     trackEvent("signup_completed", { method: "password" });
     router.push("/dashboard");
     router.refresh();
@@ -63,48 +67,48 @@ export default function SignupPage() {
   return (
     <main className="grid flex-1 place-items-center px-4 py-10">
       <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-semibold text-ink dark:text-white">Criar conta grátis</h1>
-        <p className="mt-2 text-sm text-graphite/70 dark:text-white/60">Comece com uma geração teste.</p>
+        <h1 className="text-2xl font-semibold text-foreground">{t.title}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{t.lead}</p>
         <div className="mt-6">
           <SocialAuthButtons mode="signup" />
         </div>
-        <form onSubmit={submit} className="mt-6 grid gap-4" aria-label="Continuar com e-mail">
-          <p className="text-sm font-semibold text-ink dark:text-white">Continuar com e-mail</p>
-          <Field label="Nome">
+        <form onSubmit={submit} className="mt-6 grid gap-4" aria-label={t.continueEmail}>
+          <p className="text-sm font-semibold text-foreground">{t.continueEmail}</p>
+          <Field label={t.name}>
             <input data-clarity-mask="true" className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} required />
           </Field>
-          <Field label="E-mail">
+          <Field label={t.email}>
             <input data-clarity-mask="true" className={inputClass} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </Field>
-          <Field label="Senha">
+          <Field label={t.password}>
             <input data-clarity-mask="true" className={inputClass} type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
           </Field>
           <TurnstileWidget action="signup" onVerify={setTurnstileToken} resetSignal={captchaReset} />
-          {message ? <p className="text-sm text-graphite/75 dark:text-white/70">{message}</p> : null}
-          <Button type="submit" className="bg-brand-500 text-ink hover:bg-brand-200">
-            {loading ? "Criando..." : "Criar meu currículo grátis"}
+          {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+          <Button type="submit" className="bg-primary text-primary-foreground hover:brightness-105">
+            {loading ? t.submitting : t.submit}
           </Button>
         </form>
-        <p className="mt-5 text-sm text-graphite/70 dark:text-white/60">
-          Já tem conta?{" "}
+        <p className="mt-5 text-sm text-muted-foreground">
+          {t.hasAccount}{" "}
           <Link href="/login" className="font-medium text-brand-700 hover:underline dark:text-brand-200 dark:hover:text-white">
-            Entrar
+            {t.loginLink}
           </Link>
         </p>
-        <p className="mt-4 text-xs leading-5 text-graphite/60 dark:text-white/45">
-          Ao criar conta, você concorda com os{" "}
+        <p className="mt-4 text-xs leading-5 text-muted-foreground">
+          {t.legalPrefix}{" "}
           <Link href="/termos" className="font-medium text-brand-700 underline-offset-2 hover:underline dark:text-brand-200 dark:hover:text-white">
-            Termos de Uso
+            {t.terms}
           </Link>
-          , a{" "}
+          {t.legalMidPrivacy}{" "}
           <Link href="/privacidade" className="font-medium text-brand-700 underline-offset-2 hover:underline dark:text-brand-200 dark:hover:text-white">
-            Política de Privacidade
-          </Link>{" "}
-          e a{" "}
-          <Link href="/cookies" className="font-medium text-brand-700 underline-offset-2 hover:underline dark:text-brand-200 dark:hover:text-white">
-            Política de Cookies
+            {t.privacy}
           </Link>
-          .
+          {t.legalMidCookies}{" "}
+          <Link href="/cookies" className="font-medium text-brand-700 underline-offset-2 hover:underline dark:text-brand-200 dark:hover:text-white">
+            {t.cookies}
+          </Link>
+          {t.legalSuffix}
         </p>
       </Card>
     </main>

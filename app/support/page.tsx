@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 import { getAppUrl } from "@/lib/app-url";
-import { legalUpdatedAt, supportSections } from "@/lib/legal-content";
+import { legalDocTitles, legalPageChrome, legalUpdatedAtByLocale } from "@/lib/i18n-legal-chrome";
+import { legalIntrosByLocale } from "@/lib/i18n-legal-intros";
+import { legalBindingNotice } from "@/lib/i18n-legal-notice";
+import { supportSections } from "@/lib/legal-content";
+import { getServerLocale } from "@/lib/server-locale";
 
 export const metadata: Metadata = {
   title: "Suporte | GlobalHire AI",
@@ -15,16 +19,18 @@ export const metadata: Metadata = {
   }
 };
 
-export default function SupportPage() {
+export default async function SupportPage() {
+  const locale = await getServerLocale();
+  const chrome = legalPageChrome[locale];
+  const titles = legalDocTitles[locale];
   return (
     <LegalPage
-      title="Central de Suporte"
-      updatedAt={legalUpdatedAt}
-      intro={[
-        "Esta página reúne os canais oficiais para suporte, cobrança, privacidade e dúvidas operacionais sobre a GlobalHire AI.",
-        "Para agilizar atendimento, envie o e-mail da conta, o plano contratado quando aplicável e uma descrição objetiva do problema. Não envie dados sensíveis desnecessários."
-      ]}
+      chrome={chrome}
+      title={titles.support}
+      updatedAt={legalUpdatedAtByLocale[locale]}
+      intro={legalIntrosByLocale[locale].support}
       sections={supportSections}
+      bindingNotice={legalBindingNotice[locale]}
     />
   );
 }

@@ -5,9 +5,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Card, Field, inputClass } from "@/components/ui";
 import { createClient } from "@/lib/supabase-browser";
+import { useLanguage } from "@/components/language-provider";
+import { authResetCopy } from "@/lib/i18n-auth-pages";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const { locale } = useLanguage();
+  const t = authResetCopy[locale];
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [message, setMessage] = useState("");
@@ -46,12 +50,12 @@ export default function ResetPasswordPage() {
     setMessage("");
 
     if (password.length < 6) {
-      setMessage("Use pelo menos 6 caracteres.");
+      setMessage(t.tooShort);
       return;
     }
 
     if (password !== confirm) {
-      setMessage("As senhas não conferem.");
+      setMessage(t.mismatch);
       return;
     }
 
@@ -61,7 +65,7 @@ export default function ResetPasswordPage() {
     setLoading(false);
 
     if (error) {
-      setMessage("O link expirou ou é inválido. Solicite uma nova recuperação.");
+      setMessage(t.linkInvalid);
       return;
     }
 
@@ -72,31 +76,30 @@ export default function ResetPasswordPage() {
   return (
     <main className="grid flex-1 place-items-center px-4 py-10">
       <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-semibold text-ink dark:text-white">Criar nova senha</h1>
-        <p className="mt-2 text-sm text-graphite/70 dark:text-white/60">Defina uma senha segura para voltar ao dashboard.</p>
+        <h1 className="text-2xl font-semibold text-foreground">{t.title}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{t.lead}</p>
         {!checkingSession && !hasRecoverySession ? (
           <div className="mt-5 rounded-md bg-coral/15 p-4 text-sm leading-6 text-coral">
-            Este link expirou ou não abriu corretamente. Solicite um novo link de recuperação.
-            <Button href="/recuperar-senha" className="mt-3 bg-brand-500 text-ink hover:bg-brand-600">Solicitar novo link</Button>
+            {t.expiredBanner}
+            <Button href="/recuperar-senha" className="mt-3 bg-primary text-primary-foreground hover:brightness-105">
+              {t.requestNew}
+            </Button>
           </div>
         ) : null}
         <form onSubmit={submit} className="mt-6 grid gap-4">
-          <Field label="Nova senha">
+          <Field label={t.newPassword}>
             <input className={inputClass} type="password" value={password} onChange={(event) => setPassword(event.target.value)} required />
           </Field>
-          <Field label="Confirmar senha">
+          <Field label={t.confirmPassword}>
             <input className={inputClass} type="password" value={confirm} onChange={(event) => setConfirm(event.target.value)} required />
           </Field>
-          {message ? <p className="text-sm text-graphite/75 dark:text-white/65">{message}</p> : null}
-          <Button type="submit" className="bg-brand-500 text-ink hover:bg-brand-200" disabled={loading || checkingSession || !hasRecoverySession}>
-            {checkingSession ? "Validando link..." : loading ? "Salvando..." : "Salvar nova senha"}
+          {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+          <Button type="submit" className="bg-primary text-primary-foreground hover:brightness-105" disabled={loading || checkingSession || !hasRecoverySession}>
+            {checkingSession ? t.checking : loading ? t.saving : t.save}
           </Button>
         </form>
-        <Link
-          href="/login"
-          className="mt-5 inline-block text-sm font-medium text-brand-700 hover:underline dark:text-brand-200 dark:hover:text-white"
-        >
-          Voltar ao login
+        <Link href="/login" className="mt-5 inline-block text-sm font-medium text-brand-700 hover:underline dark:text-brand-200 dark:hover:text-white">
+          {t.backLogin}
         </Link>
       </Card>
     </main>
