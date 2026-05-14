@@ -5,56 +5,37 @@ import { allowedGenerationTypes, canUseFeature, effectivePlanFromSubscription, f
 import { createClient } from "@/lib/supabase-server";
 import { getLatestActiveSubscription } from "@/lib/subscription-state";
 import type { GenerationType } from "@/lib/types";
+import { planUpgradeCopy } from "@/lib/i18n-account-subscription";
+import { getGeneratorUi } from "@/lib/i18n-generator";
+import { getLocalizedPlanRow } from "@/lib/plan-copy";
+import { getServerLocale } from "@/lib/server-locale";
 
 export const dynamic = "force-dynamic";
 
 const generationTypes: GenerationType[] = ["ats_resume", "cover_letter", "linkedin_summary", "recruiter_message", "interview_prep", "translate_resume"];
-const pageContext: Record<GenerationType, { title: string; subtitle: string }> = {
-  ats_resume: {
-    title: "Gerador de Currículo ATS",
-    subtitle: "Crie uma versão internacional, otimizada para ATS e adaptada à vaga."
-  },
-  cover_letter: {
-    title: "Gerador de Carta de Apresentação",
-    subtitle: "Transforme sua experiência em uma carta clara, convincente e personalizada."
-  },
-  linkedin_summary: {
-    title: "Gerador de Resumo LinkedIn",
-    subtitle: "Posicione seu perfil para recrutadores internacionais com uma narrativa forte."
-  },
-  recruiter_message: {
-    title: "Mensagem para Recrutador",
-    subtitle: "Crie uma abordagem curta, profissional e relevante."
-  },
-  interview_prep: {
-    title: "Preparação para Entrevista",
-    subtitle: "Gere perguntas prováveis, respostas e pontos de atenção por vaga."
-  },
-  translate_resume: {
-    title: "Tradução e Adaptação Internacional",
-    subtitle: "Adapte idioma, tom e convenções do currículo para o país-alvo."
-  }
-};
 
 export default async function GeneratorPage({ searchParams }: { searchParams?: Promise<{ tipo?: string }> }) {
+  const locale = await getServerLocale();
+  const u = planUpgradeCopy[locale];
+  const genUi = getGeneratorUi(locale);
   const { user, profile } = await requireUser();
   const supabase = await createClient();
   const subscription = await getLatestActiveSubscription(supabase, user.id);
   const planId = effectivePlanFromSubscription(profile?.plan, subscription?.plan, subscription?.status, profile?.email || user.email);
   const plan = plans[planId] || plans.free;
   const params = searchParams ? await searchParams : {};
-  const initialType = generationTypes.includes(params.tipo as GenerationType) ? params.tipo as GenerationType : undefined;
+  const initialType = generationTypes.includes(params.tipo as GenerationType) ? (params.tipo as GenerationType) : undefined;
   const selectedType = initialType || "ats_resume";
-  const context = pageContext[selectedType];
+  const context = genUi.byType[selectedType];
   const allowedTypes = allowedGenerationTypes(planId);
 
   if (!canUseFeature(planId, selectedType)) {
-    const required = plans[featureMinimumPlan[selectedType]].name;
+    const requiredPlan = getLocalizedPlanRow(locale, featureMinimumPlan[selectedType]).name;
     return (
       <UpgradeGate
-        requiredPlan={`Disponível a partir do plano ${required}`}
-        title={`${context.title} não está incluído no seu plano atual`}
-        description="Seu plano atual continua funcionando para as ferramentas incluídas nele. Para liberar esta ferramenta, escolha um plano compatível."
+        requiredPlan={u.fromPlan(requiredPlan)}
+        title={u.toolNotInPlanTitle(context.title)}
+        description={u.toolNotInPlanBody}
       />
     );
   }

@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 import { getAppUrl } from "@/lib/app-url";
-import { dataProcessingSections, legalUpdatedAt } from "@/lib/legal-content";
+import { legalDocTitles, legalPageChrome, legalUpdatedAtByLocale } from "@/lib/i18n-legal-chrome";
+import { legalIntrosByLocale } from "@/lib/i18n-legal-intros";
+import { legalBindingNotice } from "@/lib/i18n-legal-notice";
+import { dataProcessingSections } from "@/lib/legal-content";
+import { getServerLocale } from "@/lib/server-locale";
 
 export const metadata: Metadata = {
   title: "Tratamento de Dados | GlobalHire AI",
@@ -15,16 +19,18 @@ export const metadata: Metadata = {
   }
 };
 
-export default function DataProcessingPage() {
+export default async function DataProcessingPage() {
+  const locale = await getServerLocale();
+  const chrome = legalPageChrome[locale];
+  const titles = legalDocTitles[locale];
   return (
     <LegalPage
-      title="Tratamento de Dados"
-      updatedAt={legalUpdatedAt}
-      intro={[
-        "Este documento resume a arquitetura operacional de tratamento de dados da GlobalHire AI e deve ser lido em conjunto com a Política de Privacidade, Termos de Uso e Política de Cookies.",
-        "Ele explica, em linguagem objetiva, como a plataforma trata dados profissionais e dados técnicos para entregar funcionalidades SaaS com IA generativa."
-      ]}
+      chrome={chrome}
+      title={titles.dataProcessing}
+      updatedAt={legalUpdatedAtByLocale[locale]}
+      intro={legalIntrosByLocale[locale].dataProcessing}
       sections={dataProcessingSections}
+      bindingNotice={legalBindingNotice[locale]}
     />
   );
 }

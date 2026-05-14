@@ -4,10 +4,14 @@ import { requireUser } from "@/lib/auth";
 import { effectivePlanFromSubscription, plans } from "@/lib/plans";
 import { createClient } from "@/lib/supabase-server";
 import { getLatestActiveSubscription } from "@/lib/subscription-state";
+import { subscriptionPageCopy } from "@/lib/i18n-account-subscription";
+import { getServerLocale } from "@/lib/server-locale";
 
 export const dynamic = "force-dynamic";
 
 export default async function SubscriptionPage() {
+  const locale = await getServerLocale();
+  const s = subscriptionPageCopy[locale];
   const { user, profile } = await requireUser();
   const supabase = await createClient();
   const subscription = await getLatestActiveSubscription(supabase, user.id);
@@ -17,16 +21,16 @@ export default async function SubscriptionPage() {
     <div className="grid gap-8">
       <AccountPanel
         email={user.email || ""}
-        planName={plan.name}
-        monthlyLimit={plan.monthlyLimit >= 9999 ? "Ilimitado" : String(plan.monthlyLimit)}
+        planId={plan.id}
+        monthlyLimitValue={plan.monthlyLimit}
         subscriptionStatus={subscription?.status || "free"}
         currentPeriodEnd={subscription?.current_period_end}
         initialTab="subscription"
       />
       <section id="planos" className="scroll-mt-28 grid gap-3">
         <div>
-          <h2 className="text-2xl font-semibold text-foreground">Comparar planos</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Escolha o plano ideal sem perder seu histórico ou configurações.</p>
+          <h2 className="text-2xl font-semibold text-foreground">{s.compareTitle}</h2>
+          <p className="mt-2 text-sm text-muted-foreground">{s.compareLead}</p>
         </div>
         <UpgradePlans currentPlan={plan.id} />
       </section>

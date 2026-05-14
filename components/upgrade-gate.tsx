@@ -1,5 +1,9 @@
+"use client";
+
 import { LockKeyhole, Sparkles } from "lucide-react";
 import { Button, Card } from "@/components/ui";
+import { useLanguage } from "@/components/language-provider";
+import { upgradeGateChromeCopy } from "@/lib/i18n-account-subscription";
 
 export function UpgradeGate({
   title,
@@ -10,6 +14,8 @@ export function UpgradeGate({
   description: string;
   requiredPlan: string;
 }) {
+  const { locale } = useLanguage();
+  const g = upgradeGateChromeCopy[locale];
   return (
     <Card className="border-brand-500/35">
       <div className="grid gap-4 py-6 text-center">
@@ -24,10 +30,10 @@ export function UpgradeGate({
         <div className="flex flex-col justify-center gap-3 sm:flex-row">
           <Button href="/assinatura#planos" className="bg-primary text-primary-foreground hover:brightness-105">
             <Sparkles size={17} />
-            Ver planos
+            {g.viewPlans}
           </Button>
           <Button href="/dashboard" className="border border-border bg-muted text-foreground shadow-none hover:bg-muted/80 dark:shadow-none">
-            Voltar ao dashboard
+            {g.backDashboard}
           </Button>
         </div>
       </div>

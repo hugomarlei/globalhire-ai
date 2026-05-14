@@ -2,9 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useLanguage } from "@/components/language-provider";
+import { adminBlockCopy } from "@/lib/i18n-admin";
 
 export function AdminBlockButton({ userId, blocked }: { userId: string; blocked: boolean }) {
   const router = useRouter();
+  const { locale } = useLanguage();
+  const t = adminBlockCopy[locale];
   const [loading, setLoading] = useState(false);
 
   async function toggle() {
@@ -25,7 +29,7 @@ export function AdminBlockButton({ userId, blocked }: { userId: string; blocked:
       disabled={loading}
       className="focus-ring rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50"
     >
-      {blocked ? "Desbloquear" : "Bloquear"}
+      {blocked ? t.unblock : t.block}
     </button>
   );
 }

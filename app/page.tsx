@@ -85,33 +85,34 @@ export default function Home() {
 
         <Card className="relative overflow-hidden rounded-2xl p-5">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent" />
-          <div className="rounded-xl border border-border/80 bg-ink/93 p-5 text-white shadow-inner">
+          {/* Painel sempre escuro: evita texto claro herdado do Card (light) e garante contraste AA nos títulos. */}
+          <div className="rounded-xl border border-zinc-700/90 bg-zinc-950 p-5 text-zinc-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] dark:border-zinc-600/80 dark:bg-zinc-950">
             <div className="mb-5 flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-sm text-white/70">{copy.scoreMockLabel}</p>
-                <p className="mt-1 text-xl font-semibold text-white">{copy.scoreMockSubtitle}</p>
+                <p className="text-sm font-medium text-zinc-300">{copy.scoreMockLabel}</p>
+                <p className="mt-1 text-xl font-semibold tracking-tight text-zinc-50">{copy.scoreMockSubtitle}</p>
               </div>
-              <Gauge className="shrink-0 text-primary" size={28} />
+              <Gauge className="shrink-0 text-emerald-400" size={28} aria-hidden />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-lg border border-white/15 bg-black/30 p-4">
-                <p className="text-sm font-medium text-white/90">{copy.scoreBefore}</p>
-                <p className="mt-3 text-4xl font-semibold tabular-nums tracking-tight text-white">42%</p>
-                <div className="mt-4 h-2 rounded-full bg-white/15">
-                  <div className="h-2 w-[42%] rounded-full bg-white/55" />
+              <div className="rounded-lg border border-zinc-600/80 bg-zinc-900/90 p-4">
+                <p className="text-sm font-semibold text-zinc-200">{copy.scoreBefore}</p>
+                <p className="mt-3 text-4xl font-semibold tabular-nums tracking-tight text-zinc-50">42%</p>
+                <div className="mt-4 h-2 rounded-full bg-zinc-800">
+                  <div className="h-2 w-[42%] rounded-full bg-zinc-300" />
                 </div>
               </div>
-              <div className="rounded-lg border border-emerald-300/45 bg-gradient-to-br from-emerald-700 via-emerald-800 to-emerald-950 p-4 shadow-inner">
-                <p className="text-sm font-semibold text-white">{copy.scoreAfter}</p>
+              <div className="rounded-lg border border-emerald-400/50 bg-gradient-to-br from-emerald-800 via-emerald-900 to-zinc-950 p-4 shadow-inner">
+                <p className="text-sm font-semibold text-emerald-50">{copy.scoreAfter}</p>
                 <p className="mt-3 text-4xl font-semibold tabular-nums tracking-tight text-white">91%</p>
-                <div className="mt-4 h-2 rounded-full bg-black/30">
-                  <div className="h-2 w-[91%] rounded-full bg-emerald-200" />
+                <div className="mt-4 h-2 rounded-full bg-black/40">
+                  <div className="h-2 w-[91%] rounded-full bg-emerald-300" />
                 </div>
               </div>
             </div>
-            <div className="mt-4 rounded-lg border border-white/25 bg-white p-4 text-zinc-900 shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
-              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-800">{copy.scoreHintTitle}</p>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-700">{copy.scoreHintBody}</p>
+            <div className="mt-4 rounded-lg border border-zinc-200 bg-white p-4 text-zinc-900 shadow-[0_12px_40px_rgba(0,0,0,0.18)] dark:border-zinc-300 dark:bg-zinc-50">
+              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-900">{copy.scoreHintTitle}</p>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-800">{copy.scoreHintBody}</p>
             </div>
           </div>
         </Card>

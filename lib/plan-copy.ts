@@ -165,3 +165,10 @@ export function getLocalizedPlans(locale: Locale): { free: PlanDisplayRow; paid:
     paid: paidPlans.map((plan) => ({ id: plan.id, ...row[plan.id] }))
   };
 }
+
+export function getLocalizedPlanRow(locale: Locale, planId: PlanId): PlanDisplayRow {
+  const { free, paid } = getLocalizedPlans(locale);
+  if (planId === "free") return free;
+  const hit = paid.find((p) => p.id === planId);
+  return hit || free;
+}

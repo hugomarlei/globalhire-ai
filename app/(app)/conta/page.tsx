@@ -15,8 +15,8 @@ export default async function AccountPage() {
   return (
     <AccountPanel
       email={user.email || ""}
-      planName={plan.name}
-      monthlyLimit={plan.monthlyLimit >= 9999 ? "Ilimitado" : String(plan.monthlyLimit)}
+      planId={plan.id}
+      monthlyLimitValue={plan.monthlyLimit}
       subscriptionStatus={subscription?.status || "free"}
       currentPeriodEnd={subscription?.current_period_end}
     />

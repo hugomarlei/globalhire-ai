@@ -21,12 +21,12 @@ const labels: Record<Locale, Record<TargetCountryCanonical, string>> = {
   es: {
     Brasil: "Brasil",
     "Estados Unidos": "Estados Unidos",
-    Europa: "Europa (región)"
+    Europa: "Europa"
   },
   fr: {
     Brasil: "Brésil",
     "Estados Unidos": "États-Unis",
-    Europa: "Europe (région)"
+    Europa: "Europe"
   }
 };
 

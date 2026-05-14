@@ -2,14 +2,43 @@
 
 import Link from "next/link";
 import { AlertTriangle, CheckCircle2, Copy, FileClock, FileUp, Loader2, RefreshCw, SearchCheck, Sparkles } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Field, textareaClass } from "@/components/ui";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import { trackEvent } from "@/lib/analytics";
+import { useLanguage } from "@/components/language-provider";
+import { locales } from "@/lib/i18n";
+import { atsAnalyzerCopy, buildAtsRecommendations, outputLanguageLabelForApi } from "@/lib/i18n-history-ats";
+import { targetCountryCanonicalSet } from "@/lib/target-countries";
 
 const stopWords = new Set([
-  "and", "or", "the", "with", "for", "para", "com", "uma", "um", "que", "de", "da", "do", "em", "a", "o",
-  "remote", "job", "role", "experience", "years", "work", "team", "teams", "vaga", "cargo", "empresa"
+  "and",
+  "or",
+  "the",
+  "with",
+  "for",
+  "para",
+  "com",
+  "uma",
+  "um",
+  "que",
+  "de",
+  "da",
+  "do",
+  "em",
+  "a",
+  "o",
+  "remote",
+  "job",
+  "role",
+  "experience",
+  "years",
+  "work",
+  "team",
+  "teams",
+  "vaga",
+  "cargo",
+  "empresa"
 ]);
 
 function extractKeywords(value: string) {
@@ -30,6 +59,8 @@ function extractKeywords(value: string) {
 }
 
 export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" }) {
+  const { locale } = useLanguage();
+  const a = atsAnalyzerCopy[locale];
   const [resume, setResume] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [loadingUpload, setLoadingUpload] = useState(false);
@@ -40,6 +71,31 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
   const [copied, setCopied] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
   const [captchaReset, setCaptchaReset] = useState(0);
+  const [apiLanguage, setApiLanguage] = useState(() => outputLanguageLabelForApi("pt-BR"));
+  const [apiTargetCountry, setApiTargetCountry] = useState("Estados Unidos");
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("globalhire-preferences");
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      const lang = parsed.language;
+      if (typeof lang === "string" && locales.some((l) => l.outputLabel === lang)) {
+        setApiLanguage(lang);
+      }
+      const tc = parsed.targetCountry;
+      if (typeof tc === "string" && targetCountryCanonicalSet.has(tc)) {
+        setApiTargetCountry(tc);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    setApiLanguage(outputLanguageLabelForApi(locale));
+  }, [locale]);
+
   const isKeywordMode = mode === "keywords";
 
   const analysis = useMemo(() => {
@@ -58,13 +114,9 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
       match,
       found,
       missing,
-      recommendations: [
-        missing.length ? `Inclua palavras-chave reais da vaga como ${missing.slice(0, 5).join(", ")} quando forem verdadeiras para sua experiência.` : "As principais palavras-chave da vaga já aparecem no currículo.",
-        resume.length < 1800 ? "O currículo parece curto. Adicione mais contexto, escopo, ferramentas e impacto nas experiências relevantes." : "A densidade do currículo está boa para análise ATS.",
-        score < 80 ? "Gere uma versão otimizada para elevar clareza, senioridade e alinhamento com a vaga." : "Seu currículo está competitivo. Faça ajustes finos por vaga antes de aplicar."
-      ]
+      recommendations: buildAtsRecommendations(locale, { missing, resumeLen: resume.length, score })
     };
-  }, [resume, jobDescription]);
+  }, [resume, jobDescription, locale]);
 
   async function upload(file: File | null) {
     if (!file) return;
@@ -78,12 +130,13 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        setUploadMessage(data.error || "Não consegui ler o arquivo. Se for PDF escaneado, cole o texto manualmente.");
+        setUploadMessage(data.error || a.uploadErrorGeneric);
         return;
       }
 
       setResume(data.text);
-      setUploadMessage(`Currículo importado com sucesso: ${Math.round(data.text.length / 100) / 10} mil caracteres extraídos.`);
+      const tenths = `${Math.round(data.text.length / 100) / 10}`;
+      setUploadMessage(a.uploadSuccess(tenths));
       trackEvent("resume_uploaded", {
         source: "ats_score",
         file_type: file.type || file.name.split(".").pop(),
@@ -91,7 +144,7 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
         extracted_chars: data.text.length
       });
     } catch {
-      setUploadMessage("Não consegui concluir o upload. Tente novamente ou cole o currículo manualmente.");
+      setUploadMessage(a.uploadErrorNetwork);
     } finally {
       setLoadingUpload(false);
     }
@@ -114,8 +167,8 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
         found: analysis.found,
         missing: analysis.missing,
         recommendations: analysis.recommendations,
-        language: "Português do Brasil",
-        targetCountry: "Estados Unidos",
+        language: apiLanguage,
+        targetCountry: apiTargetCountry,
         turnstileToken
       })
     });
@@ -125,7 +178,7 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
     setCaptchaReset((current) => current + 1);
 
     if (!response.ok) {
-      setOptimizationError(data.error || "Não consegui gerar a versão otimizada agora.");
+      setOptimizationError(data.error || a.optimizeError);
       trackEvent(response.status === 402 ? "plan_limit_reached" : "ats_analysis_failed", { status: response.status, mode });
       return;
     }
@@ -141,21 +194,29 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
     window.setTimeout(() => setCopied(false), 1800);
   }
 
+  const showUpgradeOnError = optimizationError.toLowerCase().includes(a.limitKeyword);
+
   return (
     <div className="grid gap-6">
       <div className="rounded-lg border border-border bg-card p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-foreground">{isKeywordMode ? "Análise de Palavras-chave" : "ATS Score"}</h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-              {isKeywordMode
-                ? "Veja quais termos da vaga já aparecem no currículo e quais lacunas podem reduzir sua compatibilidade."
-                : "Compare seu currículo com uma vaga, veja compatibilidade, palavras-chave e gere uma versão otimizada na própria tela."}
-            </p>
+            <h1 className="text-3xl font-semibold text-foreground">{isKeywordMode ? a.titleKeywords : a.titleScore}</h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{isKeywordMode ? a.leadKeywords : a.leadScore}</p>
           </div>
           <div className="flex gap-2">
-            <Link href="/ats-score" className={`focus-ring rounded-md px-3 py-2 text-sm font-semibold ${!isKeywordMode ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}>ATS Score</Link>
-            <Link href="/ats-score?modo=keywords#keywords" className={`focus-ring rounded-md px-3 py-2 text-sm font-semibold ${isKeywordMode ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}>Palavras-chave</Link>
+            <Link
+              href="/ats-score"
+              className={`focus-ring rounded-md px-3 py-2 text-sm font-semibold ${!isKeywordMode ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+            >
+              {a.tabScore}
+            </Link>
+            <Link
+              href="/ats-score?modo=keywords#keywords"
+              className={`focus-ring rounded-md px-3 py-2 text-sm font-semibold ${isKeywordMode ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+            >
+              {a.tabKeywords}
+            </Link>
           </div>
         </div>
       </div>
@@ -164,25 +225,23 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
         <Card>
           <div className="flex items-center gap-2">
             <SearchCheck className="text-brand-500" size={22} />
-            <h2 className="text-2xl font-semibold text-foreground">{isKeywordMode ? "Comparador de keywords" : "Analisador ATS"}</h2>
+            <h2 className="text-2xl font-semibold text-foreground">{isKeywordMode ? a.analyzerTitleKeywords : a.analyzerTitleScore}</h2>
           </div>
-          <p className="mt-3 rounded-md border border-border bg-card p-3 text-xs leading-5 text-muted-foreground">
-            O ATS Score é uma estimativa para orientar melhorias. Ele não garante aprovação, entrevista ou resposta de recrutadores.
-          </p>
+          <p className="mt-3 rounded-md border border-border bg-card p-3 text-xs leading-5 text-muted-foreground">{a.disclaimer}</p>
           <div className="mt-6 grid gap-4">
-            <Field label="Upload PDF ou DOCX">
-              <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-brand-500/40 bg-brand-500/10 p-4 text-sm text-brand-800 hover:bg-brand-500/15 dark:text-brand-50">
+            <Field label={a.uploadLabel}>
+              <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border bg-muted/40 p-4 text-sm text-foreground hover:bg-muted/70 dark:border-border">
                 {loadingUpload ? <Loader2 className="animate-spin" size={18} /> : <FileUp size={18} />}
-                {loadingUpload ? "Lendo arquivo..." : "Selecionar currículo"}
+                {loadingUpload ? a.uploadLoading : a.uploadIdle}
                 <input data-clarity-mask="true" className="hidden" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => upload(event.target.files?.[0] || null)} />
               </label>
             </Field>
             {uploadMessage ? <p className="text-sm text-muted-foreground">{uploadMessage}</p> : null}
-            <Field label="Ou cole o currículo">
-              <textarea data-clarity-mask="true" className={textareaClass} value={resume} onChange={(event) => setResume(event.target.value)} placeholder="Cole seu currículo completo aqui." />
+            <Field label={a.pasteResumeLabel}>
+              <textarea data-clarity-mask="true" className={textareaClass} value={resume} onChange={(event) => setResume(event.target.value)} placeholder={a.pasteResumePlaceholder} />
             </Field>
-            <Field label="Descrição da vaga">
-              <textarea data-clarity-mask="true" className={textareaClass} value={jobDescription} onChange={(event) => setJobDescription(event.target.value)} placeholder="Cole a descrição da vaga para comparar score e palavras-chave." />
+            <Field label={a.jobLabel}>
+              <textarea data-clarity-mask="true" className={textareaClass} value={jobDescription} onChange={(event) => setJobDescription(event.target.value)} placeholder={a.jobPlaceholder} />
             </Field>
           </div>
         </Card>
@@ -190,55 +249,75 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
         <Card>
           <div className="grid gap-5 md:grid-cols-[220px_1fr]">
             <div className="grid place-items-center rounded-lg border border-border bg-card p-6">
-              <div className="grid size-40 place-items-center rounded-full border-[10px] border-brand-500/25 bg-brand-500/10">
+              <div className="grid size-40 place-items-center rounded-full border-[10px] border-primary/25 bg-muted">
                 <div className="text-center">
-                  <p className="text-5xl font-semibold text-brand-500">{analysis.score}</p>
-                  <p className="text-sm text-muted-foreground">ATS Score</p>
+                  <p className="text-5xl font-semibold text-primary">{analysis.score}</p>
+                  <p className="text-sm text-muted-foreground">{a.scoreGaugeLabel}</p>
                 </div>
               </div>
             </div>
             <div className="grid gap-4">
               <div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Match com a vaga</span>
-                  <span className="font-semibold text-brand-500">{analysis.match}%</span>
+                  <span className="text-muted-foreground">{a.matchLabel}</span>
+                  <span className="font-semibold text-primary">{analysis.match}%</span>
                 </div>
                 <div className="mt-2 h-2 rounded-full bg-muted">
-                  <div className="h-2 rounded-full bg-brand-500" style={{ width: `${analysis.match}%` }} />
+                  <div className="h-2 rounded-full bg-primary" style={{ width: `${analysis.match}%` }} />
                 </div>
               </div>
               <div id="keywords" className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-md border border-border bg-card p-4">
-                  <h2 className="font-semibold text-foreground">Keywords encontradas</h2>
+                  <h2 className="font-semibold text-foreground">{a.foundTitle}</h2>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {analysis.found.slice(0, 12).map((keyword) => <span key={keyword} className="rounded-md bg-brand-500/15 px-2 py-1 text-xs text-brand-800 dark:text-brand-50">{keyword}</span>)}
-                    {!analysis.found.length ? <p className="text-sm text-muted-foreground">Cole uma vaga para analisar.</p> : null}
+                    {analysis.found.slice(0, 12).map((keyword) => (
+                      <span key={keyword} className="rounded-md bg-primary/15 px-2 py-1 text-xs text-foreground">
+                        {keyword}
+                      </span>
+                    ))}
+                    {!analysis.found.length ? <p className="text-sm text-muted-foreground">{a.pasteJobHint}</p> : null}
                   </div>
                 </div>
                 <div className="rounded-md border border-border bg-card p-4">
-                  <h2 className="font-semibold text-foreground">Keywords ausentes</h2>
+                  <h2 className="font-semibold text-foreground">{a.missingTitle}</h2>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {analysis.missing.slice(0, 12).map((keyword) => <span key={keyword} className="rounded-md bg-coral/15 px-2 py-1 text-xs text-coral">{keyword}</span>)}
-                    {!analysis.missing.length ? <p className="text-sm text-muted-foreground">Nenhuma lacuna crítica detectada.</p> : null}
+                    {analysis.missing.slice(0, 12).map((keyword) => (
+                      <span key={keyword} className="rounded-md bg-coral/15 px-2 py-1 text-xs text-coral">
+                        {keyword}
+                      </span>
+                    ))}
+                    {!analysis.missing.length ? <p className="text-sm text-muted-foreground">{a.noGap}</p> : null}
                   </div>
                 </div>
               </div>
               <div className="rounded-md border border-border bg-card p-4">
-                <h2 className="flex items-center gap-2 font-semibold text-foreground"><Sparkles className="text-brand-500" size={18} /> Recomendações</h2>
+                <h2 className="flex items-center gap-2 font-semibold text-foreground">
+                  <Sparkles className="text-primary" size={18} /> {a.recommendationsTitle}
+                </h2>
                 <ul className="mt-3 grid gap-2 text-sm leading-6 text-muted-foreground">
-                  {analysis.recommendations.map((item) => <li key={item} className="flex gap-2"><CheckCircle2 className="mt-1 shrink-0 text-brand-500" size={15} /> {item}</li>)}
+                  {analysis.recommendations.map((item) => (
+                    <li key={item} className="flex gap-2">
+                      <CheckCircle2 className="mt-1 shrink-0 text-primary" size={15} /> {item}
+                    </li>
+                  ))}
                 </ul>
               </div>
               {optimizationError ? (
                 <div className="rounded-md bg-coral/15 p-3 text-sm text-coral">
-                  <p className="flex items-center gap-2"><AlertTriangle size={16} /> {optimizationError}</p>
-                  {optimizationError.toLowerCase().includes("limite") ? <Button href="/assinatura#planos" className="mt-3 bg-primary text-primary-foreground hover:brightness-105">Ver planos</Button> : null}
+                  <p className="flex items-center gap-2">
+                    <AlertTriangle size={16} /> {optimizationError}
+                  </p>
+                  {showUpgradeOnError ? (
+                    <Button href="/assinatura#planos" className="mt-3 bg-primary text-primary-foreground hover:brightness-105">
+                      {a.viewPlans}
+                    </Button>
+                  ) : null}
                 </div>
               ) : null}
               <TurnstileWidget action="ats_score" onVerify={setTurnstileToken} resetSignal={captchaReset} />
               <Button onClick={optimizeFromScore} disabled={optimizing || resume.length < 100 || jobDescription.length < 40} className="bg-primary text-primary-foreground hover:brightness-105">
                 {optimizing ? <Loader2 className="animate-spin" size={17} /> : <Sparkles size={17} />}
-                {optimizing ? "Otimizando currículo..." : "Criar versão otimizada"}
+                {optimizing ? a.optimizing : a.optimizeCta}
               </Button>
             </div>
           </div>
@@ -248,26 +327,26 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
       <Card>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">Currículo otimizado pelo ATS Score</h2>
-            <p className="mt-1 text-sm text-muted-foreground">A versão gerada aqui é salva automaticamente no histórico.</p>
+            <h2 className="text-xl font-semibold text-foreground">{a.outputCardTitle}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{a.outputCardLead}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button onClick={copyOutput} disabled={!optimizedOutput} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-40">
               <Copy size={16} />
-              {copied ? "Copiado" : "Copiar"}
+              {copied ? a.copied : a.copy}
             </button>
             <button onClick={optimizeFromScore} disabled={optimizing || resume.length < 100 || jobDescription.length < 40} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-40">
               <RefreshCw size={16} />
-              Gerar novamente
+              {a.generateAgain}
             </button>
             <Link href="/historico" className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
               <FileClock size={16} />
-              Salvo no histórico
+              {a.savedHistory}
             </Link>
           </div>
         </div>
         <pre data-clarity-mask="true" className="mt-5 min-h-72 whitespace-pre-wrap rounded-md border border-border bg-muted p-4 text-sm leading-6 text-foreground">
-          {optimizing ? "Gerando uma versão otimizada com base no score, keywords e recomendações..." : optimizedOutput || "Depois da análise, clique em Criar versão otimizada para ver o currículo reescrito aqui."}
+          {optimizing ? a.preOutput : optimizedOutput || a.emptyPreOutput}
         </pre>
       </Card>
     </div>
