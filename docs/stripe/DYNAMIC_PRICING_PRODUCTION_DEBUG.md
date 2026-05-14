@@ -17,13 +17,14 @@
 
 | File | Change |
 |------|--------|
-| `lib/stripe-price-fetch.ts` | Safe structured logs (`stripe_pricing_diag`), **do not cache empty catalog** (cache layer throws on empty; null is never stored as success), uncached retry after cache miss, `getStripePricingDebugSnapshot()`. |
+| `lib/stripe-price-fetch.ts` | Safe structured logs (`stripe_pricing_diag`), **do not cache empty catalog** (cache layer throws on empty; null is never stored as success), uncached retry after cache miss. |
 | `app/page.tsx` | `revalidate = 300`, `dynamic = "force-dynamic"`. |
 | `app/pricing/page.tsx` | Same segment config; comment when `stripeCatalog` is null. |
 | `components/home-page.tsx` | Comment when `stripeCatalog` is null. |
 | `components/upgrade-plans.tsx` | Comment when `stripeCatalog` is null. |
-| `app/api/debug/stripe-pricing/route.ts` | **Admin-only** GET JSON snapshot (no secrets, no full price IDs). |
 | `docs/stripe/DYNAMIC_PRICING_PRODUCTION_DEBUG.md` | This document. |
+
+**Go-live note:** o endpoint temporário `GET /api/debug/stripe-pricing` foi **removido** na auditoria final de segurança (reduz superfície de ataque). Diagnóstico: apenas **Vercel Logs** com o prefixo `stripe_pricing_diag`.
 
 **Not changed (per request):** Stripe checkout route, webhooks, `NEXT_PUBLIC_STRIPE_*_PRICE_ID` env **names**, subscription business logic, Supabase, auth, plan IDs/limits, manual fallback strings in `lib/plans` / `plan-copy`.
 
@@ -49,21 +50,12 @@
 
 Legacy line **`stripe_price_catalog_fetch_failed`** may still appear on hard Stripe errors (stack stripped in structured log).
 
-## Validate on debug endpoint
-
-1. Log in as a user who is **admin** (`profiles.is_admin` or email in `ADMIN_EMAILS`).
-2. Same-origin GET: **`/api/debug/stripe-pricing`** (from the app UI origin so CSRF origin check passes).
-3. JSON fields only: `hasStripeSecret`, `priceIdsPresent`, `catalogLoaded`, `loadedPlanIds`, `fallbackUsed`, `timestamp`.
-
-**Remove** `app/api/debug/stripe-pricing/route.ts` (or tighten further) after diagnosis if you do not want a permanent admin surface.
-
 ## Post-deploy checklist
 
 - [ ] `/` — paid cards show Stripe amounts when env is correct.
 - [ ] `/pricing` — same.
 - [ ] `/assinatura` — upgrade cards match Stripe.
 - [ ] Vercel logs — `stripe_pricing_diag` shows `catalogLoaded: true` in steady state.
-- [ ] `/api/debug/stripe-pricing` — admin JSON matches expectations.
 
 ## Checkout / webhook / price_id confirmation
 

@@ -202,31 +202,3 @@ export async function getCachedStripePriceCatalog(): Promise<StripePriceCatalogJ
     return fresh;
   }
 }
-
-export type StripePricingDebugResponse = {
-  hasStripeSecret: boolean;
-  priceIdsPresent: StripePriceIdsPresent;
-  catalogLoaded: boolean;
-  loadedPlanIds: string[];
-  fallbackUsed: boolean;
-  timestamp: string;
-};
-
-/**
- * Same shape as GET /api/debug/stripe-pricing (no secrets, no price IDs). Triggers a live catalog read.
- */
-export async function getStripePricingDebugSnapshot(): Promise<StripePricingDebugResponse> {
-  const hasStripeSecret = stripeSecretConfigured();
-  const priceIdsPresent = readPriceIdPresence();
-  const catalog = await getCachedStripePriceCatalog();
-  const loadedPlanIds = catalog ? Object.keys(catalog.paid) : [];
-  const catalogLoaded = loadedPlanIds.length > 0;
-  return {
-    hasStripeSecret,
-    priceIdsPresent,
-    catalogLoaded,
-    loadedPlanIds,
-    fallbackUsed: !catalogLoaded,
-    timestamp: new Date().toISOString()
-  };
-}
