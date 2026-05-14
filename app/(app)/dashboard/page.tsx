@@ -1,17 +1,30 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import type React from "react";
 import { BarChart3, BriefcaseBusiness, CreditCard, ExternalLink, FileText, Gauge, Globe2, Languages, Linkedin, MailPlus, Target } from "lucide-react";
 import { Card } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
-import { createAdminClient, createClient } from "@/lib/supabase-server";
+import { getAppUrl } from "@/lib/app-url";
+import { navCopy } from "@/lib/i18n";
+import { dashboardPageCopy, deliveryLabel } from "@/lib/i18n-app-wide";
+import { getLocalizedPlanRow } from "@/lib/plan-copy";
 import { allowedGenerationTypes, effectivePlanFromSubscription, hasAdminBypass, plans } from "@/lib/plans";
+import { getServerLocale } from "@/lib/server-locale";
+import { createAdminClient, createClient } from "@/lib/supabase-server";
 import { syncLatestStripeSubscriptionForUser } from "@/lib/stripe-subscription";
 import { getLatestActiveSubscription } from "@/lib/subscription-state";
 import type { GenerationType } from "@/lib/types";
-import { dashboardPageCopy, deliveryLabel } from "@/lib/i18n-app-wide";
-import { getServerLocale } from "@/lib/server-locale";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const nav = navCopy[locale];
+  return {
+    title: `${nav.dashboard} | GlobalHire AI`,
+    alternates: { canonical: `${getAppUrl()}/dashboard` }
+  };
+}
 
 const ALL_GENERATION_TYPES: GenerationType[] = [
   "ats_resume",
@@ -69,6 +82,7 @@ export default async function DashboardPage({
   const isBypassAccount = hasAdminBypass(profile?.email || user.email);
   const planId = effectivePlanFromSubscription(profile?.plan, subscription?.plan, subscription?.status, profile?.email || user.email);
   const plan = plans[planId] || plans.free;
+  const localizedPlanName = getLocalizedPlanRow(locale, planId).name;
   const since = new Date();
   since.setDate(1);
   since.setHours(0, 0, 0, 0);
@@ -118,7 +132,7 @@ export default async function DashboardPage({
         <Card>
           <CreditCard className="text-brand-500" size={22} />
           <p className="mt-3 text-sm text-muted-foreground">{d.currentPlan}</p>
-          <p className="text-2xl font-semibold">{isBypassAccount ? d.eliteTest : plan.name}</p>
+          <p className="text-2xl font-semibold">{isBypassAccount ? d.eliteTest : localizedPlanName}</p>
           <Link href="/assinatura#planos" className="mt-3 inline-flex text-sm font-semibold text-brand-600 hover:text-brand-500 dark:text-brand-500 dark:hover:text-brand-400">{d.viewPlans}</Link>
         </Card>
         <Card>
