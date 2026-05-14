@@ -28,7 +28,7 @@ export function AutoSiteFooter({ className }: { className?: string }) {
 }
 
 const socialBtn =
-  "inline-flex size-10 items-center justify-center rounded-md border border-graphite/20 bg-white/90 text-ink transition hover:bg-white hover:text-ink dark:border-white/[0.08] dark:bg-[#0d1410] dark:text-white/75 dark:hover:bg-[#162018] dark:hover:border-white/12 dark:hover:text-white/90";
+  "inline-flex size-10 items-center justify-center rounded-xl border border-graphite/18 bg-white/95 text-ink transition hover:bg-white hover:text-ink dark:border-white/[0.08] dark:bg-[#0d1410] dark:text-white/75 dark:hover:bg-[#152018] dark:hover:border-white/12 dark:hover:text-white/90";
 
 export function SiteFooter({ locale, className }: { locale: Locale; className?: string }) {
   const copy = footerCopy[locale];

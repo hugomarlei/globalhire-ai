@@ -1,57 +1,67 @@
 # GlobalHire AI — Design System Tokens
 
+**SSOT (código):** `tailwind.config.ts` + variáveis `--shell-*-rgb` em `app/globals.css` (`.brand-shell`) + `next/font` em `app/layout.tsx`.
+
+**Tipografia:** `Inter` (`--font-sans`) para UI; `Fraunces` (`--font-display`) para títulos da **landing** (`font-display`).
+
 ## Core colors
 
-| Token | HEX | Tailwind |
-|---|---:|---|
-| Ink | `#050B08` | `ink` |
-| Graphite | `#0B1410` | `graphite` |
-| Paper | `#F4FFF8` | `paper` |
-| Signal Green | `#32E875` | `brand-500`, `mint` |
-| Cyber Blue | `#7DD3FC` | `cyber` |
-| Violet | `#A78BFA` | `violet` |
-| Amber | `#F7C948` | `amber` |
-| Coral | `#FF6B6B` | `coral` |
+| Token | HEX | Tailwind | Notas |
+|-------|---:|----------|-------|
+| Ink | `#06120F` | `ink` | Texto principal / fundo dark base |
+| Graphite | `#0F1714` | `graphite` | Superfícies elevadas |
+| Paper | `#F5F7F6` | `paper` | Fundo claro global |
+| Brand (primary) | `#2A9B76` | `brand-500`, `mint` | Mint sofisticado (menos neon) |
+| Cyber | `#5BA9BC` | `cyber` | Acento frio contido |
+| Violet | `#7168D4` | `violet` | Secundário |
+| Amber | `#C8943A` | `amber` | Destaque quente |
+| Coral | `#D96B6B` | `coral` | Erro / alerta |
+
+## Marketing shell (`shell.*`)
+
+Usar **apenas** dentro de `.brand-shell` (landing). Os valores RGB vêm de `app/globals.css` e mudam com `html.dark`.
+
+| Token Tailwind | Uso típico |
+|----------------|------------|
+| `text-shell-fg` | Títulos e corpo principal na landing |
+| `text-shell-muted` | Subtítulos, parágrafos secundários |
+| `text-shell-subtle` | Meta, disclaimers |
+| `border-shell-line` | Linhas e contornos |
+| `bg-shell-glass` | Painéis translúcidos leves |
+| `bg-shell-band` | Faixas de secção |
 
 ## Radius
 
-- Buttons: 6px.
-- Cards: 8px.
-- Modals/tools: 8px.
-- Logo mark: 8-16px depending size.
+| Uso | Valor | Tailwind |
+|-----|------|----------|
+| Botões, inputs | 10–12px | `rounded-xl` |
+| Cards | 12px | `rounded-xl` |
+| Secções / cartões hero | 16px | `rounded-2xl` |
 
 ## Shadows
 
-- `shadow-soft`: dark ambient product shadow.
-- `shadow-glow`: restrained green CTA glow.
+| Token | Descrição |
+|-------|-----------|
+| `shadow-soft` | Profundidade ambiente (sombra longa, opacidade moderada) |
+| `shadow-glow` | Halo **restrito** em CTAs primários (brand) |
 
-## Spacing
+## Spacing (convénio)
 
-- Section desktop: 80px.
-- Section mobile: 56px.
-- Card padding: 20px.
-- Form gap: 16px.
-- Dashboard gap: 20-24px.
+- Secções landing: `py-24`–`py-28` (resp. `sm:`).
+- Grelha marketing: `gap-5`–`gap-6`.
+- Container horizontal: `max-w-7xl` + `px-4 sm:px-6`.
 
-## Typography
+## Estados
 
-- Font stack: Inter/system.
-- H1 landing: 56-72px desktop, 44-48px mobile.
-- H2: 30-36px.
-- Body: 14-16px.
-- UI labels: 12-14px.
+- **Focus:** anel `brand-500` (`.focus-ring` em `globals.css`).
+- **Disabled:** `opacity-60` em botões.
+- **Erro:** superfície `coral/15` + texto `coral`.
 
-## States
+## Mobile
 
-- Focus: Signal Green ring.
-- Disabled: opacity 60%, no translate.
-- Error: Coral surface 15%.
-- Success: Signal Green surface 10-15%.
+- CTAs principais altura mínima confortável (`h-11` / `h-12` em landing).
+- Inputs largura total em formulários estreitos.
 
-## Mobile rules
+---
 
-- Never hide login/create account.
-- Inputs full width.
-- Cards one column.
-- Menus max width `min(92vw, 360px)`.
-- CTA height minimum 44px.
+*Última actualização: rebranding 2026-05-14 — alinhado ao código.*
