@@ -20,6 +20,7 @@ export function UpgradePlans({
 }) {
   const { locale } = useLanguage();
   const u = upgradePlansCopy[locale];
+  // stripeCatalog null → static fallback prices in getLocalizedPlans; see docs/stripe/DYNAMIC_PRICING_PRODUCTION_DEBUG.md.
   const { paid } = useMemo(() => getLocalizedPlans(locale, stripeCatalog), [locale, stripeCatalog]);
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState("");

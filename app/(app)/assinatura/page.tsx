@@ -10,6 +10,7 @@ import { getCachedStripePriceCatalog } from "@/lib/stripe-price-fetch";
 
 export const dynamic = "force-dynamic";
 
+/** Subscription compare: server-fetched stripeCatalog → UpgradePlans + getLocalizedPlans (not statically frozen). */
 export default async function SubscriptionPage() {
   const locale = await getServerLocale();
   const s = subscriptionPageCopy[locale];

@@ -10,6 +10,10 @@ import { getLocalizedPlans } from "@/lib/plan-copy";
 import { getCachedStripePriceCatalog } from "@/lib/stripe-price-fetch";
 import { getServerLocale } from "@/lib/server-locale";
 
+/** Same as home: pricing must not stay stuck on build-time fallback when Stripe/env recovers. */
+export const revalidate = 300;
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale();
   const t = marketingPricingCopy[locale];
@@ -24,6 +28,7 @@ export default async function PricingPage() {
   const locale = await getServerLocale();
   const t = marketingPricingCopy[locale];
   const stripeCatalog = await getCachedStripePriceCatalog();
+  // stripeCatalog null → getLocalizedPlans uses static fallback copy in lib/plan-copy (see docs/stripe/DYNAMIC_PRICING_PRODUCTION_DEBUG.md).
   const { free, paid } = getLocalizedPlans(locale, stripeCatalog);
   return (
     <main className="min-h-screen bg-background text-foreground">
