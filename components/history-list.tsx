@@ -105,25 +105,25 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
 
   return (
     <div className="grid gap-5">
-      <div className="flex flex-col gap-4 rounded-lg border border-graphite/15 bg-graphite/[0.05] p-4 dark:border-white/10 dark:bg-graphite/35 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-ink dark:text-white">{mode === "history" ? "Histórico" : "Meus documentos"}</h1>
-          <p className="mt-1 text-sm text-graphite/60 dark:text-white/55">
+          <h1 className="text-3xl font-semibold text-foreground">{mode === "history" ? "Histórico" : "Meus documentos"}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             {mode === "history"
               ? "Linha do tempo de todas as gerações realizadas, com data, idioma, país e ações rápidas."
               : "Biblioteca organizada dos documentos finais, com busca, filtros e ações de arquivo."}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link href="/historico" className={`focus-ring inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${mode === "history" ? "bg-brand-500 text-ink" : "border border-graphite/20 text-graphite/75 hover:bg-graphite/10 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/8"}`}>
+          <Link href="/historico" className={`focus-ring inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${mode === "history" ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
             <Clock size={16} />
             Histórico
           </Link>
-          <Link href="/historico?tab=documentos" className={`focus-ring inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${mode === "documents" ? "bg-brand-500 text-ink" : "border border-graphite/20 text-graphite/75 hover:bg-graphite/10 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/8"}`}>
+          <Link href="/historico?tab=documentos" className={`focus-ring inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${mode === "documents" ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
             <FolderOpen size={16} />
             Meus documentos
           </Link>
-          <Button href="/gerador" className="bg-brand-500 text-ink hover:bg-brand-600">
+          <Button href="/gerador" className="bg-primary text-primary-foreground hover:brightness-105">
             <FilePlus2 size={17} />
             Criar novo
           </Button>
@@ -133,7 +133,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
       <Card>
         <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
           <label className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-graphite/40 dark:text-white/35" size={17} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={17} />
             <input
               data-clarity-mask="true"
               className={`${inputClass} pl-10`}
@@ -143,11 +143,11 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
             />
           </label>
           <div className="flex max-w-full gap-2 overflow-x-auto">
-            <button onClick={() => setFilter("all")} className={`focus-ring shrink-0 rounded-md px-3 py-2 text-sm font-semibold ${filter === "all" ? "bg-brand-500 text-ink" : "border border-graphite/20 text-graphite/75 hover:bg-graphite/10 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/8"}`}>
+            <button onClick={() => setFilter("all")} className={`focus-ring shrink-0 rounded-md px-3 py-2 text-sm font-semibold ${filter === "all" ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
               Todos
             </button>
             {types.map((type) => (
-              <button key={type} onClick={() => setFilter(type)} className={`focus-ring shrink-0 rounded-md px-3 py-2 text-sm font-semibold ${filter === type ? "bg-brand-500 text-ink" : "border border-graphite/20 text-graphite/75 hover:bg-graphite/10 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/8"}`}>
+              <button key={type} onClick={() => setFilter(type)} className={`focus-ring shrink-0 rounded-md px-3 py-2 text-sm font-semibold ${filter === type ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
                 {typeLabels[type] || type}
               </button>
             ))}
@@ -157,7 +157,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
           <TurnstileWidget action="regenerate" onVerify={setTurnstileToken} resetSignal={captchaReset} />
         </div>
       </Card>
-      {notice ? <p className="rounded-md border border-graphite/15 bg-graphite/[0.06] p-3 text-sm text-graphite/80 dark:border-white/10 dark:bg-graphite/30 dark:text-white/75">{notice}</p> : null}
+      {notice ? <p className="rounded-md border border-border bg-card p-3 text-sm text-card-foreground">{notice}</p> : null}
 
       <div className={mode === "documents" ? "grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3" : "grid gap-3"}>
         {filtered.map((item) => (
@@ -165,15 +165,15 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
             <div className={mode === "history" ? "grid gap-4 p-4 lg:grid-cols-[1fr_auto] lg:items-start" : "grid gap-4 p-4"}>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="font-semibold text-ink dark:text-white">{typeLabels[item.type] || item.type}</h2>
-                  <span className="rounded-full bg-graphite/10 px-2 py-1 text-xs text-graphite/65 dark:bg-white/8 dark:text-white/55">{item.language}</span>
-                  <span className="rounded-full bg-graphite/10 px-2 py-1 text-xs text-graphite/65 dark:bg-white/8 dark:text-white/55">{item.target_country}</span>
+                  <h2 className="font-semibold text-foreground">{typeLabels[item.type] || item.type}</h2>
+                  <span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">{item.language}</span>
+                  <span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">{item.target_country}</span>
                 </div>
-                <p className="mt-1 text-xs text-graphite/50 dark:text-white/40">{new Date(item.created_at).toLocaleString("pt-BR")}</p>
-                <p data-clarity-mask="true" className={`${mode === "documents" ? "line-clamp-4" : "line-clamp-2"} mt-3 text-sm leading-6 text-graphite/65 dark:text-white/55`}>{item.output}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString("pt-BR")}</p>
+                <p data-clarity-mask="true" className={`${mode === "documents" ? "line-clamp-4" : "line-clamp-2"} mt-3 text-sm leading-6 text-muted-foreground`}>{item.output}</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <button onClick={() => copyText(item.id, item.output)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-graphite/20 px-3 py-2 text-sm text-graphite/80 hover:bg-graphite/10 dark:border-white/10 dark:text-white/80 dark:hover:bg-white/10">
+                <button onClick={() => copyText(item.id, item.output)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
                   <Copy size={16} />
                   {copied === item.id ? "Copiado" : "Copiar"}
                 </button>
@@ -182,7 +182,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                     type="button"
                     disabled
                     title={copy.historyExportUnavailable}
-                    className="focus-ring inline-flex cursor-not-allowed items-center gap-2 rounded-md border border-graphite/15 px-3 py-2 text-sm text-graphite/40 dark:border-white/10 dark:text-white/40"
+                    className="focus-ring inline-flex cursor-not-allowed items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-muted-foreground opacity-50"
                   >
                     <Download size={16} />
                     {copy.historyDownloadText}
@@ -192,13 +192,13 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                     href={`/api/history/${item.id}/export`}
                     download
                     rel="noopener noreferrer"
-                    className="focus-ring inline-flex items-center gap-2 rounded-md border border-graphite/20 px-3 py-2 text-sm text-graphite/80 hover:bg-graphite/10 dark:border-white/10 dark:text-white/80 dark:hover:bg-white/10"
+                    className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted"
                   >
                     <Download size={16} />
                     {copy.historyDownloadText}
                   </a>
                 )}
-                <button onClick={() => regenerate(item.id)} disabled={regenerating === item.id} className="focus-ring inline-flex items-center gap-2 rounded-md border border-graphite/20 px-3 py-2 text-sm text-graphite/80 hover:bg-graphite/10 disabled:opacity-50 dark:border-white/10 dark:text-white/80 dark:hover:bg-white/10">
+                <button onClick={() => regenerate(item.id)} disabled={regenerating === item.id} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50">
                   <RefreshCw className={regenerating === item.id ? "animate-spin" : ""} size={16} />
                   {regenerating === item.id ? "Regenerando..." : "Regenerar"}
                 </button>
@@ -208,10 +208,10 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                 </button>
               </div>
             </div>
-            <div className="min-h-0 border-t border-graphite/15 px-4 py-3 dark:border-white/10">
+            <div className="min-h-0 border-t border-border px-4 py-3">
               <button
                 type="button"
-                className="focus-ring inline-flex w-full cursor-pointer items-center gap-2 rounded-md px-1 py-2 text-left text-sm font-semibold text-graphite/80 hover:bg-graphite/10 hover:text-ink dark:text-white/80 dark:hover:bg-white/[0.06] dark:hover:text-white"
+                className="focus-ring inline-flex w-full cursor-pointer items-center gap-2 rounded-md px-1 py-2 text-left text-sm font-semibold text-foreground hover:bg-muted"
                 aria-expanded={Boolean(docOpenById[item.id])}
                 onClick={() =>
                   setDocOpenById((prev) => ({
@@ -226,7 +226,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
               {docOpenById[item.id] ? (
                 <pre
                   data-clarity-mask="true"
-                  className="mt-3 max-h-72 min-h-0 overflow-y-auto overflow-x-auto whitespace-pre-wrap rounded-md border border-graphite/20 bg-[#eef2ef] p-4 text-sm leading-6 text-ink dark:border-white/10 dark:bg-[#0b100e] dark:text-white/90"
+                  className="mt-3 max-h-72 min-h-0 overflow-y-auto overflow-x-auto whitespace-pre-wrap rounded-md border border-border bg-muted p-4 text-sm leading-6 text-foreground"
                 >
                   {item.output}
                 </pre>
@@ -239,9 +239,9 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
         <Card>
           <div className="grid place-items-center gap-3 py-8 text-center">
             <FilePlus2 className="text-brand-500" size={34} />
-            <h2 className="text-xl font-semibold text-ink dark:text-white">Nenhum documento encontrado</h2>
-            <p className="max-w-md text-sm text-graphite/60 dark:text-white/55">Crie uma versão otimizada ou ajuste os filtros para encontrar documentos anteriores.</p>
-            <Button href="/gerador" className="bg-brand-500 text-ink hover:bg-brand-600">Criar documento</Button>
+            <h2 className="text-xl font-semibold text-foreground">Nenhum documento encontrado</h2>
+            <p className="max-w-md text-sm text-muted-foreground">Crie uma versão otimizada ou ajuste os filtros para encontrar documentos anteriores.</p>
+            <Button href="/gerador" className="bg-primary text-primary-foreground hover:brightness-105">Criar documento</Button>
           </div>
         </Card>
       ) : null}

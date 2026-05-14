@@ -62,8 +62,8 @@ export default async function GeneratorPage({ searchParams }: { searchParams?: P
   return (
     <div className="grid gap-4">
       <div>
-        <h1 className="text-3xl font-semibold text-ink dark:text-white">{context.title}</h1>
-        <p className="mt-2 text-sm text-graphite/65 dark:text-white/60">{context.subtitle}</p>
+        <h1 className="text-3xl font-semibold text-foreground">{context.title}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{context.subtitle}</p>
       </div>
       <DashboardGenerator hasPaidPlan={plan.id !== "free"} initialType={selectedType} allowedTypes={allowedTypes} />
     </div>

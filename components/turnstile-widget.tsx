@@ -204,7 +204,7 @@ export function TurnstileWidget({
 
   if (!siteKey) {
     return (
-      <p className="rounded-md border border-graphite/15 bg-graphite/[0.05] p-3 text-xs leading-5 text-graphite/55 dark:border-white/10 dark:bg-white/5 dark:text-white/45">
+      <p className="rounded-md border border-border bg-card p-3 text-xs leading-5 text-muted-foreground">
         Captcha desativado neste ambiente. Em produção, configure Cloudflare Turnstile para proteção anti-bot.
       </p>
     );
@@ -214,12 +214,12 @@ export function TurnstileWidget({
     <div className="grid gap-2">
       <div id={containerId} className="min-h-[65px]" />
       {status === "loading" && !widgetMounted ? (
-        <p className="text-xs text-graphite/50 dark:text-white/45">Carregando verificação de segurança...</p>
+        <p className="text-xs text-muted-foreground">Carregando verificação de segurança...</p>
       ) : null}
       {status === "error" ? (
         <div className="rounded-md border border-coral/25 bg-coral/10 p-3 text-xs leading-5 text-coral">
           <p>Não consegui carregar o captcha. Verifique a conexão, desative bloqueadores para este site ou tente recarregar apenas a verificação.</p>
-          <button type="button" onClick={retryWidget} className="focus-ring mt-2 rounded-md border border-coral/30 px-3 py-2 font-semibold text-ink hover:bg-coral/10 dark:text-white">
+          <button type="button" onClick={retryWidget} className="focus-ring mt-2 rounded-md border border-border bg-card px-3 py-2 font-semibold text-foreground hover:bg-muted">
             Recarregar captcha
           </button>
         </div>

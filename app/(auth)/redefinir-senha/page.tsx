@@ -72,12 +72,12 @@ export default function ResetPasswordPage() {
   return (
     <main className="grid flex-1 place-items-center px-4 py-10">
       <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-semibold text-ink dark:text-white">Criar nova senha</h1>
-        <p className="mt-2 text-sm text-graphite/70 dark:text-white/60">Defina uma senha segura para voltar ao dashboard.</p>
+        <h1 className="text-2xl font-semibold text-foreground">Criar nova senha</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Defina uma senha segura para voltar ao dashboard.</p>
         {!checkingSession && !hasRecoverySession ? (
           <div className="mt-5 rounded-md bg-coral/15 p-4 text-sm leading-6 text-coral">
             Este link expirou ou não abriu corretamente. Solicite um novo link de recuperação.
-            <Button href="/recuperar-senha" className="mt-3 bg-brand-500 text-ink hover:bg-brand-600">Solicitar novo link</Button>
+            <Button href="/recuperar-senha" className="mt-3 bg-primary text-primary-foreground hover:brightness-105">Solicitar novo link</Button>
           </div>
         ) : null}
         <form onSubmit={submit} className="mt-6 grid gap-4">
@@ -87,8 +87,8 @@ export default function ResetPasswordPage() {
           <Field label="Confirmar senha">
             <input className={inputClass} type="password" value={confirm} onChange={(event) => setConfirm(event.target.value)} required />
           </Field>
-          {message ? <p className="text-sm text-graphite/75 dark:text-white/65">{message}</p> : null}
-          <Button type="submit" className="bg-brand-500 text-ink hover:bg-brand-200" disabled={loading || checkingSession || !hasRecoverySession}>
+          {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+          <Button type="submit" className="bg-primary text-primary-foreground hover:brightness-105" disabled={loading || checkingSession || !hasRecoverySession}>
             {checkingSession ? "Validando link..." : loading ? "Salvando..." : "Salvar nova senha"}
           </Button>
         </form>

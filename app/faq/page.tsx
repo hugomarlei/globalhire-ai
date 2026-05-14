@@ -22,16 +22,16 @@ export const metadata: Metadata = {
 
 export default function FaqPage() {
   return (
-    <main className="min-h-screen bg-paper text-ink dark:bg-ink dark:text-white">
+    <main className="min-h-screen bg-background text-foreground">
       <FaqStructuredData items={faqs as Array<[string, string]>} />
       <PublicNav />
       <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-        <h1 className="text-4xl font-semibold text-ink dark:text-white">FAQ</h1>
+        <h1 className="text-4xl font-semibold text-foreground">FAQ</h1>
         <div className="mt-8 grid gap-3">
           {faqs.map(([question, answer]) => (
             <Card key={question}>
-              <h2 className="font-semibold text-ink dark:text-white">{question}</h2>
-              <p className="mt-2 text-sm leading-6 text-graphite/75 dark:text-white/65">{answer}</p>
+              <h2 className="font-semibold text-foreground">{question}</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{answer}</p>
             </Card>
           ))}
         </div>

@@ -61,8 +61,8 @@ export default function LoginPage() {
   return (
     <main className="grid flex-1 place-items-center px-4 py-10">
       <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-semibold text-ink dark:text-white">Entrar</h1>
-        <p className="mt-2 text-sm text-graphite/70 dark:text-white/60">Acesse seu painel da GlobalHire AI.</p>
+        <h1 className="text-2xl font-semibold text-foreground">Entrar</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Acesse seu painel da GlobalHire AI.</p>
         {passwordUpdated ? (
           <p className="mt-4 rounded-md bg-brand-500/15 p-3 text-sm text-brand-800 dark:text-brand-50">
             Senha atualizada com sucesso. Entre com sua nova senha.
@@ -75,7 +75,7 @@ export default function LoginPage() {
           <SocialAuthButtons mode="login" />
         </div>
         <form onSubmit={submit} className="mt-6 grid gap-4" aria-label="Continuar com e-mail">
-          <p className="text-sm font-semibold text-ink dark:text-white">Continuar com e-mail</p>
+          <p className="text-sm font-semibold text-foreground">Continuar com e-mail</p>
           <Field label="E-mail">
             <input data-clarity-mask="true" className={inputClass} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </Field>
@@ -84,11 +84,11 @@ export default function LoginPage() {
           </Field>
           <TurnstileWidget action="login" onVerify={setTurnstileToken} resetSignal={captchaReset} />
           {error ? <p className="text-sm text-coral">{error}</p> : null}
-          <Button type="submit" className="bg-brand-500 text-ink hover:bg-brand-200">
+          <Button type="submit" className="bg-primary text-primary-foreground hover:brightness-105">
             {loading ? "Entrando..." : "Entrar"}
           </Button>
         </form>
-        <div className="mt-5 flex justify-between text-sm text-graphite/70 dark:text-white/60">
+        <div className="mt-5 flex justify-between text-sm text-muted-foreground">
           <Link href="/cadastro" className="font-medium text-brand-700 hover:underline dark:text-brand-200 dark:hover:text-white">
             Criar conta
           </Link>
@@ -96,7 +96,7 @@ export default function LoginPage() {
             Recuperar senha
           </Link>
         </div>
-        <p className="mt-5 text-xs leading-5 text-graphite/60 dark:text-white/45">
+        <p className="mt-5 text-xs leading-5 text-muted-foreground">
           Ao entrar, você concorda com os{" "}
           <Link href="/termos" className="font-medium text-brand-700 underline-offset-2 hover:underline dark:text-brand-200 dark:hover:text-white">
             Termos de Uso

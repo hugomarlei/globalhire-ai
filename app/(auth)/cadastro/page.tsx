@@ -63,13 +63,13 @@ export default function SignupPage() {
   return (
     <main className="grid flex-1 place-items-center px-4 py-10">
       <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-semibold text-ink dark:text-white">Criar conta grátis</h1>
-        <p className="mt-2 text-sm text-graphite/70 dark:text-white/60">Comece com uma geração teste.</p>
+        <h1 className="text-2xl font-semibold text-foreground">Criar conta grátis</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Comece com uma geração teste.</p>
         <div className="mt-6">
           <SocialAuthButtons mode="signup" />
         </div>
         <form onSubmit={submit} className="mt-6 grid gap-4" aria-label="Continuar com e-mail">
-          <p className="text-sm font-semibold text-ink dark:text-white">Continuar com e-mail</p>
+          <p className="text-sm font-semibold text-foreground">Continuar com e-mail</p>
           <Field label="Nome">
             <input data-clarity-mask="true" className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} required />
           </Field>
@@ -80,18 +80,18 @@ export default function SignupPage() {
             <input data-clarity-mask="true" className={inputClass} type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
           </Field>
           <TurnstileWidget action="signup" onVerify={setTurnstileToken} resetSignal={captchaReset} />
-          {message ? <p className="text-sm text-graphite/75 dark:text-white/70">{message}</p> : null}
-          <Button type="submit" className="bg-brand-500 text-ink hover:bg-brand-200">
+          {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+          <Button type="submit" className="bg-primary text-primary-foreground hover:brightness-105">
             {loading ? "Criando..." : "Criar meu currículo grátis"}
           </Button>
         </form>
-        <p className="mt-5 text-sm text-graphite/70 dark:text-white/60">
+        <p className="mt-5 text-sm text-muted-foreground">
           Já tem conta?{" "}
           <Link href="/login" className="font-medium text-brand-700 hover:underline dark:text-brand-200 dark:hover:text-white">
             Entrar
           </Link>
         </p>
-        <p className="mt-4 text-xs leading-5 text-graphite/60 dark:text-white/45">
+        <p className="mt-4 text-xs leading-5 text-muted-foreground">
           Ao criar conta, você concorda com os{" "}
           <Link href="/termos" className="font-medium text-brand-700 underline-offset-2 hover:underline dark:text-brand-200 dark:hover:text-white">
             Termos de Uso

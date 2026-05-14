@@ -22,13 +22,13 @@ export default function RecoverPasswordPage() {
   return (
     <main className="grid flex-1 place-items-center px-4 py-10">
       <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-semibold text-ink dark:text-white">Recuperar senha</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Recuperar senha</h1>
         <form onSubmit={submit} className="mt-6 grid gap-4">
           <Field label="E-mail">
             <input className={inputClass} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </Field>
-          {message ? <p className="text-sm text-graphite/75 dark:text-white/70">{message}</p> : null}
-          <Button type="submit" className="bg-brand-500 text-ink hover:bg-brand-200">
+          {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+          <Button type="submit" className="bg-primary text-primary-foreground hover:brightness-105">
             Enviar link
           </Button>
         </form>

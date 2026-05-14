@@ -51,30 +51,30 @@ export default async function AdminPage() {
   return (
     <div className="grid gap-6">
       <div>
-        <h1 className="text-3xl font-semibold text-ink dark:text-white">Admin</h1>
-        <p className="mt-2 text-sm text-graphite/60 dark:text-white/55">Visão operacional sem exibir currículos, vagas ou dados pessoais completos.</p>
+        <h1 className="text-3xl font-semibold text-foreground">Admin</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Visão operacional sem exibir currículos, vagas ou dados pessoais completos.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><p className="text-sm text-graphite/55 dark:text-white/50">Usuários</p><p className="text-3xl font-semibold">{safeUsers.length}</p></Card>
-        <Card><p className="text-sm text-graphite/55 dark:text-white/50">Novos em 7 dias</p><p className="text-3xl font-semibold">{recentUsers.length}</p></Card>
-        <Card><p className="text-sm text-graphite/55 dark:text-white/50">Assinaturas ativas</p><p className="text-3xl font-semibold">{active.length}</p></Card>
-        <Card><p className="text-sm text-graphite/55 dark:text-white/50">Receita estimada</p><p className="text-3xl font-semibold">R${revenue}/mês</p></Card>
+        <Card><p className="text-sm text-muted-foreground">Usuários</p><p className="text-3xl font-semibold">{safeUsers.length}</p></Card>
+        <Card><p className="text-sm text-muted-foreground">Novos em 7 dias</p><p className="text-3xl font-semibold">{recentUsers.length}</p></Card>
+        <Card><p className="text-sm text-muted-foreground">Assinaturas ativas</p><p className="text-3xl font-semibold">{active.length}</p></Card>
+        <Card><p className="text-sm text-muted-foreground">Receita estimada</p><p className="text-3xl font-semibold">R${revenue}/mês</p></Card>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><p className="text-sm text-graphite/55 dark:text-white/50">Total ATS/currículo</p><p className="text-3xl font-semibold">{atsAnalyses.length}</p></Card>
-        <Card><p className="text-sm text-graphite/55 dark:text-white/50">Análises hoje</p><p className="text-3xl font-semibold">{analysesToday.length}</p></Card>
-        <Card><p className="text-sm text-graphite/55 dark:text-white/50">Erros armazenados</p><p className="text-3xl font-semibold">Pendente</p></Card>
-        <Card><p className="text-sm text-graphite/55 dark:text-white/50">Upgrades clicados</p><p className="text-3xl font-semibold">PostHog</p></Card>
+        <Card><p className="text-sm text-muted-foreground">Total ATS/currículo</p><p className="text-3xl font-semibold">{atsAnalyses.length}</p></Card>
+        <Card><p className="text-sm text-muted-foreground">Análises hoje</p><p className="text-3xl font-semibold">{analysesToday.length}</p></Card>
+        <Card><p className="text-sm text-muted-foreground">Erros armazenados</p><p className="text-3xl font-semibold">Pendente</p></Card>
+        <Card><p className="text-sm text-muted-foreground">Upgrades clicados</p><p className="text-3xl font-semibold">PostHog</p></Card>
       </div>
 
       <Card>
-        <h2 className="text-xl font-semibold text-ink dark:text-white">Usuários por plano</h2>
+        <h2 className="text-xl font-semibold text-foreground">Usuários por plano</h2>
         <div className="mt-4 grid gap-2 sm:grid-cols-4">
           {["free", "starter", "pro", "elite"].map((plan) => (
-            <div key={plan} className="rounded-md border border-graphite/15 bg-graphite/[0.05] p-3 dark:border-white/10 dark:bg-white/5">
-              <p className="text-sm capitalize text-graphite/60 dark:text-white/55">{plan}</p>
+            <div key={plan} className="rounded-md border border-border bg-card p-3">
+              <p className="text-sm capitalize text-muted-foreground">{plan}</p>
               <p className="text-2xl font-semibold">{planCounts[plan] || 0}</p>
             </div>
           ))}
@@ -82,10 +82,10 @@ export default async function AdminPage() {
       </Card>
 
       <Card>
-        <h2 className="text-xl font-semibold text-ink dark:text-white">Usuários recentes</h2>
+        <h2 className="text-xl font-semibold text-foreground">Usuários recentes</h2>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[860px] text-left text-sm">
-            <thead className="text-graphite/50 dark:text-white/50">
+            <thead className="text-muted-foreground">
               <tr>
                 <th className="py-3">Nome</th>
                 <th>E-mail mascarado</th>
@@ -99,12 +99,12 @@ export default async function AdminPage() {
             </thead>
             <tbody>
               {safeUsers.slice(0, 50).map((user) => (
-                <tr key={user.id} className="border-t border-graphite/15 dark:border-white/10">
+                <tr key={user.id} className="border-t border-border">
                   <td className="py-3">{user.full_name || "-"}</td>
                   <td>{maskEmail(user.email)}</td>
                   <td>{user.plan}</td>
                   <td>{user.created_at ? new Date(user.created_at).toLocaleDateString("pt-BR") : "-"}</td>
-                  <td className="text-graphite/50 dark:text-white/45">Pendente</td>
+                  <td className="text-muted-foreground">Pendente</td>
                   <td>{userGenerationCounts[user.id] || 0}</td>
                   <td>{user.is_blocked ? "Bloqueado" : "Ativo"}</td>
                   <td><AdminBlockButton userId={user.id} blocked={user.is_blocked} /></td>
@@ -116,10 +116,10 @@ export default async function AdminPage() {
       </Card>
 
       <Card>
-        <h2 className="text-xl font-semibold text-ink dark:text-white">Gerações recentes</h2>
-        <div className="mt-4 grid gap-2 text-sm text-graphite/75 dark:text-white/75">
+        <h2 className="text-xl font-semibold text-foreground">Gerações recentes</h2>
+        <div className="mt-4 grid gap-2 text-sm text-muted-foreground">
           {safeGenerations.slice(0, 20).map((item) => (
-            <div key={item.id} className="flex justify-between rounded-md bg-graphite/[0.05] p-3 dark:bg-white/5">
+            <div key={item.id} className="flex justify-between rounded-md bg-muted p-3">
               <span>{item.type}</span>
               <span>{new Date(item.created_at).toLocaleString("pt-BR")}</span>
             </div>
