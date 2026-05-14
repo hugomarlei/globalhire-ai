@@ -2,9 +2,7 @@
 
 ## Tokens
 
-**SSOT actual:** [`tokens.md`](./tokens.md) + `tailwind.config.ts` + variáveis `.brand-shell` em `app/globals.css`.
-
-Referência legada (pode estar desactualizada): `docs/branding/color-system-v2.md`.
+Ver `docs/branding/color-system-v2.md`.
 
 ## Spacing
 

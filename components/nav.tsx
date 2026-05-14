@@ -37,16 +37,9 @@ export function PublicNav() {
   const themeLabels = { light: dash.themeLight, dark: dash.themeDark, system: dash.themeSystem };
 
   return (
-    <header className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-ink dark:text-white sm:flex-nowrap sm:px-6 sm:py-6">
-      <Link href="/" className="flex min-w-0 items-center gap-2.5 font-semibold text-ink dark:text-white">
-        <Image
-          src="/branding/logo-symbol.svg"
-          alt=""
-          width={36}
-          height={36}
-          className="size-9 rounded-lg shadow-[0_0_0_1px_rgba(42,155,118,0.12)] dark:shadow-[0_0_0_1px_rgba(42,155,118,0.2)]"
-          priority
-        />
+    <header className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 text-ink dark:text-white sm:flex-nowrap sm:px-6 sm:py-5">
+      <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold text-ink dark:text-white">
+        <Image src="/branding/logo-symbol.svg" alt="" width={36} height={36} className="size-9 rounded-md shadow-glow" priority />
         <span className="min-w-0">
           <span className="block truncate leading-5">GlobalHire AI</span>
           <span className="hidden text-[11px] font-medium text-graphite/55 dark:text-white/45 sm:block">Get Hired Smarter.</span>
@@ -55,11 +48,11 @@ export function PublicNav() {
       <nav className="flex shrink-0 items-center gap-2 text-sm text-graphite/75 dark:text-white/70 sm:gap-3">
         <Link
           href="/login"
-          className="focus-ring inline-flex h-10 items-center justify-center rounded-xl border border-graphite/18 bg-white/95 px-3 font-semibold text-ink shadow-sm transition hover:bg-white dark:border-white/10 dark:bg-[#121a16] dark:text-white dark:shadow-none dark:hover:bg-[#1a2420] sm:px-4"
+          className="focus-ring inline-flex h-10 items-center justify-center rounded-md border border-graphite/20 bg-white/90 px-3 font-semibold text-ink shadow-sm hover:bg-white dark:border-white/10 dark:bg-[#141d18] dark:text-white dark:shadow-none dark:hover:bg-[#1c2821] dark:hover:text-white sm:px-4"
         >
           {copy.login === "Login" ? "Entrar" : copy.login}
         </Link>
-        <Button href="/cadastro" className="h-10 rounded-xl px-3 sm:px-4">
+        <Button href="/cadastro" className="h-10 px-3 sm:px-4">
           {copy.signup}
         </Button>
       </nav>
@@ -117,17 +110,10 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-graphite/12 bg-white/95 text-ink backdrop-blur-md dark:border-white/[0.08] dark:bg-ink/95 dark:text-white">
+    <header className="sticky top-0 z-40 border-b border-graphite/15 bg-white/95 text-ink backdrop-blur dark:border-white/10 dark:bg-ink/95 dark:text-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-        <Link href="/dashboard" className="flex items-center gap-2.5 font-semibold text-ink dark:text-white">
-          <Image
-            src="/branding/logo-symbol.svg"
-            alt=""
-            width={36}
-            height={36}
-            className="size-9 rounded-lg shadow-[0_0_0_1px_rgba(42,155,118,0.12)] dark:shadow-[0_0_0_1px_rgba(42,155,118,0.2)]"
-            priority
-          />
+        <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-ink dark:text-white">
+          <Image src="/branding/logo-symbol.svg" alt="" width={36} height={36} className="size-9 rounded-md shadow-glow" priority />
           <span>
             <span className="block leading-5">GlobalHire AI</span>
             <span className="hidden text-[11px] font-medium text-graphite/50 dark:text-white/45 sm:block">Get Hired Smarter.</span>

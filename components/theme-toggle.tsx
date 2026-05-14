@@ -22,7 +22,7 @@ export function ThemeToggle({ labels, className }: { labels: { light: string; da
   return (
     <div
       className={cn(
-        "inline-flex shrink-0 rounded-xl border p-0.5 shadow-sm",
+        "inline-flex shrink-0 rounded-md border p-0.5 shadow-sm",
         "border-graphite/20 bg-white/90 dark:border-white/[0.08] dark:bg-[#0d1410] dark:shadow-none",
         className
       )}
@@ -35,7 +35,7 @@ export function ThemeToggle({ labels, className }: { labels: { light: string; da
           type="button"
           onClick={() => setPreference(value)}
           className={cn(
-            "focus-ring inline-flex size-9 items-center justify-center rounded-lg transition",
+            "focus-ring inline-flex size-9 items-center justify-center rounded-md transition",
             preference === value
               ? "bg-brand-500 text-ink shadow-sm dark:shadow-none"
               : "text-graphite/70 hover:bg-graphite/12 hover:text-ink dark:text-white/70 dark:hover:bg-[#1a2420] dark:hover:text-white"

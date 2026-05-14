@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { Fraunces, Inter } from "next/font/google";
 import { AnalyticsScripts } from "@/components/analytics-scripts";
 import { CookieConsent } from "@/components/cookie-consent";
 import { LanguageProvider } from "@/components/language-provider";
@@ -9,18 +8,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { GlobalStructuredData } from "@/components/structured-data";
 import { getAppUrl } from "@/lib/app-url";
 import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap"
-});
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap"
-});
 
 const brandDir = join(process.cwd(), "public", "brand");
 const hasOgImage = existsSync(join(brandDir, "og-image.png"));
@@ -66,8 +53,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${fraunces.variable}`} suppressHydrationWarning>
-      <body className="min-h-screen bg-paper font-sans text-ink antialiased transition-colors dark:bg-ink dark:text-white">
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className="min-h-screen bg-paper text-ink antialiased transition-colors dark:bg-ink dark:text-white">
         <LanguageProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </LanguageProvider>
