@@ -12,7 +12,7 @@ function JsonLd({ data, id }: { data: Record<string, unknown>; id: string }) {
   );
 }
 
-export function GlobalStructuredData() {
+export function GlobalStructuredData({ aggregateOfferHighPrice = "149" }: { aggregateOfferHighPrice?: string }) {
   const baseUrl = getAppUrl();
   const organization = {
     "@context": "https://schema.org",
@@ -54,7 +54,7 @@ export function GlobalStructuredData() {
       "@type": "AggregateOffer",
       priceCurrency: "BRL",
       lowPrice: "0",
-      highPrice: "149"
+      highPrice: aggregateOfferHighPrice
     }
   };
 

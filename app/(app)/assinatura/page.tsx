@@ -6,9 +6,11 @@ import { createClient } from "@/lib/supabase-server";
 import { getLatestActiveSubscription } from "@/lib/subscription-state";
 import { subscriptionPageCopy } from "@/lib/i18n-account-subscription";
 import { getServerLocale } from "@/lib/server-locale";
+import { getCachedStripePriceCatalog } from "@/lib/stripe-price-fetch";
 
 export const dynamic = "force-dynamic";
 
+/** Subscription compare: server-fetched stripeCatalog → UpgradePlans + getLocalizedPlans (not statically frozen). */
 export default async function SubscriptionPage() {
   const locale = await getServerLocale();
   const s = subscriptionPageCopy[locale];
@@ -16,6 +18,7 @@ export default async function SubscriptionPage() {
   const supabase = await createClient();
   const subscription = await getLatestActiveSubscription(supabase, user.id);
   const plan = plans[effectivePlanFromSubscription(profile?.plan, subscription?.plan, subscription?.status, user.email)] || plans.free;
+  const stripeCatalog = await getCachedStripePriceCatalog();
 
   return (
     <div className="grid gap-8">
@@ -32,7 +35,7 @@ export default async function SubscriptionPage() {
           <h2 className="text-2xl font-semibold text-foreground">{s.compareTitle}</h2>
           <p className="mt-2 text-sm text-muted-foreground">{s.compareLead}</p>
         </div>
-        <UpgradePlans currentPlan={plan.id} />
+        <UpgradePlans currentPlan={plan.id} stripeCatalog={stripeCatalog} />
       </section>
     </div>
   );

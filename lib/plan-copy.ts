@@ -1,6 +1,8 @@
 import type { Locale } from "@/lib/i18n";
 import type { PlanId } from "@/lib/plans";
 import { paidPlans, plans } from "@/lib/plans";
+import { formatStripePaidPlanPrice } from "@/lib/plan-price-display";
+import type { StripePriceCatalogJson } from "@/lib/stripe-price-catalog-types";
 
 export type PlanDisplayRow = {
   id: PlanId;
@@ -158,16 +160,31 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
   }
 };
 
-export function getLocalizedPlans(locale: Locale): { free: PlanDisplayRow; paid: PlanDisplayRow[] } {
+/**
+ * Localized plan rows for UI.
+ * When `stripeCatalog` is provided and contains live `unitAmount`, paid-plan `price` strings
+ * come from Stripe (see `formatStripePaidPlanPrice`). Otherwise uses **FALLBACK_STATIC_PRICES**
+ * from this file / `lib/plans.ts` — same copy as before the dynamic pricing rollout.
+ */
+export function getLocalizedPlans(
+  locale: Locale,
+  stripeCatalog?: StripePriceCatalogJson | null
+): { free: PlanDisplayRow; paid: PlanDisplayRow[] } {
   const row = byLocale[locale];
   return {
     free: { id: "free", ...row.free },
-    paid: paidPlans.map((plan) => ({ id: plan.id, ...row[plan.id] }))
+    paid: paidPlans.map((plan) => {
+      const base = row[plan.id];
+      const stripeRow = stripeCatalog?.paid?.[plan.id];
+      const price =
+        stripeRow && stripeRow.unitAmount != null ? formatStripePaidPlanPrice(locale, stripeRow) : base.price;
+      return { id: plan.id, name: base.name, price, features: base.features };
+    })
   };
 }
 
-export function getLocalizedPlanRow(locale: Locale, planId: PlanId): PlanDisplayRow {
-  const { free, paid } = getLocalizedPlans(locale);
+export function getLocalizedPlanRow(locale: Locale, planId: PlanId, stripeCatalog?: StripePriceCatalogJson | null): PlanDisplayRow {
+  const { free, paid } = getLocalizedPlans(locale, stripeCatalog);
   if (planId === "free") return free;
   const hit = paid.find((p) => p.id === planId);
   return hit || free;

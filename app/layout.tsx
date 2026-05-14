@@ -9,6 +9,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { GlobalStructuredData } from "@/components/structured-data";
 import { brandIcon } from "@/lib/brand-assets";
 import { getAppUrl } from "@/lib/app-url";
+import { computeAggregateOfferHighPriceMajorUnits } from "@/lib/plan-price-display";
+import { getCachedStripePriceCatalog } from "@/lib/stripe-price-fetch";
 import "./globals.css";
 
 const inter = Inter({
@@ -74,7 +76,10 @@ export const metadata: Metadata = {
       : undefined
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const stripeCatalog = await getCachedStripePriceCatalog();
+  const aggregateOfferHighPrice = computeAggregateOfferHighPriceMajorUnits(stripeCatalog);
+
   return (
     <html lang="pt-BR" className={`${inter.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans text-foreground antialiased transition-colors duration-300">
@@ -84,7 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <CookieConsent />
           </ThemeProvider>
         </LanguageProvider>
-        <GlobalStructuredData />
+        <GlobalStructuredData aggregateOfferHighPrice={aggregateOfferHighPrice} />
         <AnalyticsScripts />
       </body>
     </html>

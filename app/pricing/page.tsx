@@ -6,8 +6,13 @@ import { PublicNav } from "@/components/nav";
 import { Button, Card } from "@/components/ui";
 import { getAppUrl } from "@/lib/app-url";
 import { marketingPricingCopy } from "@/lib/i18n-app-wide";
-import { paidPlans, plans } from "@/lib/plans";
+import { getLocalizedPlans } from "@/lib/plan-copy";
+import { getCachedStripePriceCatalog } from "@/lib/stripe-price-fetch";
 import { getServerLocale } from "@/lib/server-locale";
+
+/** Same as home: pricing must not stay stuck on build-time fallback when Stripe/env recovers. */
+export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale();
@@ -22,6 +27,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function PricingPage() {
   const locale = await getServerLocale();
   const t = marketingPricingCopy[locale];
+  const stripeCatalog = await getCachedStripePriceCatalog();
+  // stripeCatalog null → getLocalizedPlans uses static fallback copy in lib/plan-copy (see docs/stripe/DYNAMIC_PRICING_PRODUCTION_DEBUG.md).
+  const { free, paid } = getLocalizedPlans(locale, stripeCatalog);
   return (
     <main className="min-h-screen bg-background text-foreground">
       <PublicNav />
@@ -29,7 +37,7 @@ export default async function PricingPage() {
         <h1 className="text-4xl font-semibold text-foreground">{t.title}</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">{t.lead}</p>
         <div className="mt-8 grid gap-4 lg:grid-cols-4">
-          {[plans.free, ...paidPlans].map((plan) => (
+          {[free, ...paid].map((plan) => (
             <Card key={plan.id} className={plan.id === "pro" ? "border-brand-500/60" : ""}>
               <h2 className="text-xl font-semibold text-foreground">{plan.name}</h2>
               <p className="mt-2 text-3xl font-semibold">{plan.price}</p>

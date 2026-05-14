@@ -2,18 +2,26 @@
 
 import Link from "next/link";
 import { CheckCircle2, Loader2, TrendingUp } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Card } from "@/components/ui";
 import { paidPlans, type PlanId } from "@/lib/plans";
 import { trackEvent } from "@/lib/analytics";
 import { useLanguage } from "@/components/language-provider";
 import { upgradePlansCopy } from "@/lib/i18n-account-subscription";
 import { getLocalizedPlans } from "@/lib/plan-copy";
+import type { StripePriceCatalogJson } from "@/lib/stripe-price-catalog-types";
 
-export function UpgradePlans({ currentPlan = "free" }: { currentPlan?: PlanId }) {
+export function UpgradePlans({
+  currentPlan = "free",
+  stripeCatalog = null
+}: {
+  currentPlan?: PlanId;
+  stripeCatalog?: StripePriceCatalogJson | null;
+}) {
   const { locale } = useLanguage();
   const u = upgradePlansCopy[locale];
-  const { paid } = getLocalizedPlans(locale);
+  // stripeCatalog null → static fallback prices in getLocalizedPlans; see docs/stripe/DYNAMIC_PRICING_PRODUCTION_DEBUG.md.
+  const { paid } = useMemo(() => getLocalizedPlans(locale, stripeCatalog), [locale, stripeCatalog]);
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState("");
 
