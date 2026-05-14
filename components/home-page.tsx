@@ -16,7 +16,7 @@ const howIcons = [FileText, Target, Wand2] as const;
 export function HomePage({ stripeCatalog }: { stripeCatalog: StripePriceCatalogJson | null }) {
   const { locale } = useLanguage();
   const copy = landingCopy[locale];
-  // stripeCatalog null → getLocalizedPlans falls back to static plan-copy prices; diagnose with Vercel logs (stripe_pricing_diag) or GET /api/debug/stripe-pricing (admin).
+  // stripeCatalog null → getLocalizedPlans falls back to static plan-copy prices; diagnose with Vercel logs (stripe_pricing_diag).
   const { free, paid } = useMemo(() => getLocalizedPlans(locale, stripeCatalog), [locale, stripeCatalog]);
   const [showLogoutBanner, setShowLogoutBanner] = useState(false);
 

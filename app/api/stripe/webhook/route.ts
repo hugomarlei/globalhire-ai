@@ -33,7 +33,8 @@ export async function POST(request: Request) {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (error) {
-    console.error("stripe_webhook_invalid_signature", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("stripe_webhook_invalid_signature", { message: message.slice(0, 240) });
     return NextResponse.json({ error: "Assinatura invalida." }, { status: 400 });
   }
 
@@ -91,7 +92,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("stripe_webhook_processing_error", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("stripe_webhook_processing_error", { message: message.slice(0, 400) });
     return NextResponse.json({ error: "Erro ao processar webhook." }, { status: 500 });
   }
 }
