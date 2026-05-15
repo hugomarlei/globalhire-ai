@@ -70,7 +70,7 @@ Use sempre **minúsculas** e **hífens** (sem espaços) para facilitar filtros n
 | `checkout_started` | Clique em upgrade → Stripe Checkout | `upgrade-plans.tsx` |
 | `subscription_completed` | Retorno `?checkout=success` no dashboard | `analytics-scripts.tsx` |
 
-Eventos auxiliares (já existentes): `page_view`, `lp_viewed`, `lp_cta_clicked`, `resume_uploaded` (legado), `checkout_completed` (legado).
+Eventos auxiliares (já existentes): `page_view`, `lp_viewed`, `lp_cta_clicked`, `resume_uploaded` (legado), `checkout_completed` (legado), `share_linkedin_clicked`, `share_whatsapp_clicked`, `share_text_copied` (banner `/?logout=success`, `location: logout_success_banner`).
 
 **Produção:** scripts de analytics só carregam com consentimento (`globalhire-cookie-consent` = `all` ou `accepted`) e `NODE_ENV=production`.
 
