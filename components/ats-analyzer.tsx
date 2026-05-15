@@ -137,12 +137,14 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
       setResume(data.text);
       const tenths = `${Math.round(data.text.length / 100) / 10}`;
       setUploadMessage(a.uploadSuccess(tenths));
-      trackEvent("resume_uploaded", {
+      const uploadProps = {
         source: "ats_score",
         file_type: file.type || file.name.split(".").pop(),
         file_size_kb: Math.round(file.size / 1024),
         extracted_chars: data.text.length
-      });
+      };
+      trackEvent("resume_upload_completed", uploadProps);
+      trackEvent("resume_uploaded", uploadProps);
     } catch {
       setUploadMessage(a.uploadErrorNetwork);
     } finally {

@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { Inter } from "next/font/google";
 import { AnalyticsScripts } from "@/components/analytics-scripts";
+import { UtmCapture } from "@/components/utm-capture";
 import { CookieConsent } from "@/components/cookie-consent";
 import { LanguageProvider } from "@/components/language-provider";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -90,6 +91,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </ThemeProvider>
         </LanguageProvider>
         <GlobalStructuredData aggregateOfferHighPrice={aggregateOfferHighPrice} />
+        <UtmCapture />
         <AnalyticsScripts />
       </body>
     </html>

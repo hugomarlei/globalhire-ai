@@ -60,6 +60,7 @@ export function AnalyticsScripts() {
 
       if (pathname === "/dashboard") {
         if (searchParams.get("checkout") === "success") {
+          trackEvent("subscription_completed", { source: "stripe_checkout" });
           trackEvent("checkout_completed", { source: "stripe" });
         }
         if (searchParams.get("subscription") === "updated") {

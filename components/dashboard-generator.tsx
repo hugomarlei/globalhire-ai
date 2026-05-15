@@ -169,11 +169,14 @@ export function DashboardGenerator({
 
       setResume(data.text);
       setUploadMessage(`${genUi.uploadSuccessIntro} ${Math.round(data.text.length / 100) / 10}k chars.`);
-      trackEvent("resume_uploaded", {
+      const uploadProps = {
+        source: "generator",
         file_type: file.type || file.name.split(".").pop(),
         file_size_kb: Math.round(file.size / 1024),
         extracted_chars: data.text.length
-      });
+      };
+      trackEvent("resume_upload_completed", uploadProps);
+      trackEvent("resume_uploaded", uploadProps);
     } catch {
       setUploadMessage(genUi.uploadErrorNetwork);
     } finally {

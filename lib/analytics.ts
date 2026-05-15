@@ -1,5 +1,7 @@
 "use client";
 
+import { getAttributionProperties } from "@/lib/utm";
+
 type AnalyticsPayload = Record<string, unknown>;
 
 declare global {
@@ -55,6 +57,7 @@ export function sanitizeProperties(properties: AnalyticsPayload = {}) {
 export function trackEvent(eventName: string, properties?: AnalyticsPayload) {
   if (typeof window === "undefined") return;
   const safeProperties = {
+    ...getAttributionProperties(),
     ...sanitizeProperties(properties),
     anonymous_id: getAnonymousId()
   };
