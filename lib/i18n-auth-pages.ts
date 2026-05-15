@@ -20,6 +20,14 @@ export type AuthSignupStrings = {
   legalSuffix: string;
   captchaError: string;
   accountCreated: string;
+  confirmEmailTitle: string;
+  confirmEmailMessage: string;
+  confirmEmailHint: string;
+  goToLogin: string;
+  resendEmail: string;
+  resendSending: string;
+  resendSuccess: string;
+  resendError: string;
 };
 
 export const authSignupCopy: Record<Locale, AuthSignupStrings> = {
@@ -42,7 +50,16 @@ export const authSignupCopy: Record<Locale, AuthSignupStrings> = {
     cookies: "Política de Cookies",
     legalSuffix: ".",
     captchaError: "Confirme o captcha para criar sua conta.",
-    accountCreated: "Conta criada. Se o Supabase pedir confirmação, abra seu e-mail; senão você já pode entrar."
+    accountCreated: "Conta criada. Se o Supabase pedir confirmação, abra seu e-mail; senão você já pode entrar.",
+    confirmEmailTitle: "Confirme seu e-mail",
+    confirmEmailMessage:
+      "Enviamos um link de confirmação para seu e-mail. Verifique também a caixa de spam ou promoções.",
+    confirmEmailHint: "Depois de confirmar, volte aqui e entre com o mesmo e-mail e senha.",
+    goToLogin: "Ir para login",
+    resendEmail: "Reenviar e-mail de confirmação",
+    resendSending: "Reenviando...",
+    resendSuccess: "Enviamos outro e-mail de confirmação. Confira sua caixa de entrada.",
+    resendError: "Não foi possível reenviar agora. Aguarde alguns minutos e tente de novo."
   },
   en: {
     title: "Create a free account",
@@ -63,7 +80,16 @@ export const authSignupCopy: Record<Locale, AuthSignupStrings> = {
     cookies: "Cookie Policy",
     legalSuffix: ".",
     captchaError: "Please complete the captcha to create your account.",
-    accountCreated: "Account created. If Supabase requires email confirmation, check your inbox; otherwise you can sign in now."
+    accountCreated: "Account created. If Supabase requires email confirmation, check your inbox; otherwise you can sign in now.",
+    confirmEmailTitle: "Confirm your email",
+    confirmEmailMessage:
+      "We sent a confirmation link to your email. Also check your spam or promotions folder.",
+    confirmEmailHint: "After confirming, return here and sign in with the same email and password.",
+    goToLogin: "Go to log in",
+    resendEmail: "Resend confirmation email",
+    resendSending: "Resending...",
+    resendSuccess: "We sent another confirmation email. Check your inbox.",
+    resendError: "Could not resend right now. Wait a few minutes and try again."
   },
   es: {
     title: "Crear cuenta gratis",
@@ -84,7 +110,16 @@ export const authSignupCopy: Record<Locale, AuthSignupStrings> = {
     cookies: "Política de cookies",
     legalSuffix: ".",
     captchaError: "Confirma el captcha para crear tu cuenta.",
-    accountCreated: "Cuenta creada. Si Supabase pide confirmación, revisa tu correo; si no, ya puedes entrar."
+    accountCreated: "Cuenta creada. Si Supabase pide confirmación, revisa tu correo; si no, ya puedes entrar.",
+    confirmEmailTitle: "Confirma tu correo",
+    confirmEmailMessage:
+      "Enviamos un enlace de confirmación a tu correo. Revisa también spam o promociones.",
+    confirmEmailHint: "Después de confirmar, vuelve aquí e inicia sesión con el mismo correo y contraseña.",
+    goToLogin: "Ir a iniciar sesión",
+    resendEmail: "Reenviar correo de confirmación",
+    resendSending: "Reenviando...",
+    resendSuccess: "Enviamos otro correo de confirmación. Revisa tu bandeja de entrada.",
+    resendError: "No pudimos reenviar ahora. Espera unos minutos e inténtalo de nuevo."
   },
   fr: {
     title: "Créer un compte gratuit",
@@ -105,7 +140,16 @@ export const authSignupCopy: Record<Locale, AuthSignupStrings> = {
     cookies: "Politique relative aux cookies",
     legalSuffix: ".",
     captchaError: "Veuillez valider le captcha pour créer votre compte.",
-    accountCreated: "Compte créé. Si Supabase demande une confirmation, consultez votre boîte mail ; sinon vous pouvez vous connecter."
+    accountCreated: "Compte créé. Si Supabase demande une confirmation, consultez votre boîte mail ; sinon vous pouvez vous connecter.",
+    confirmEmailTitle: "Confirmez votre e-mail",
+    confirmEmailMessage:
+      "Nous avons envoyé un lien de confirmation à votre adresse. Vérifiez aussi les spams ou l’onglet promotions.",
+    confirmEmailHint: "Après confirmation, revenez ici et connectez-vous avec le même e-mail et mot de passe.",
+    goToLogin: "Aller à la connexion",
+    resendEmail: "Renvoyer l’e-mail de confirmation",
+    resendSending: "Envoi en cours...",
+    resendSuccess: "Nous avons renvoyé un e-mail de confirmation. Consultez votre boîte de réception.",
+    resendError: "Impossible de renvoyer pour le moment. Attendez quelques minutes et réessayez."
   }
 };
 
