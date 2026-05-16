@@ -166,9 +166,14 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
             </div>
           ))}
           {isAdmin ? (
-            <Link href="/admin" className={navItem}>
-              {copy.admin}
-            </Link>
+            <>
+              <Link href="/admin" className={navItem}>
+                {copy.admin}
+              </Link>
+              <Link href="/admin/growth" className={navItem}>
+                {copy.adminGrowth}
+              </Link>
+            </>
           ) : null}
         </nav>
         <div className="hidden items-center gap-3 lg:flex">
@@ -216,6 +221,19 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
               <LayoutDashboard size={17} className="text-primary" />
               {copy.dashboard}
             </Link>
+            {isAdmin ? (
+              <div className="mt-2 border-t border-border pt-2">
+                <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{copy.admin}</p>
+                <Link href="/admin" className={dropLink}>
+                  <ShieldCheck size={17} className="text-primary" />
+                  {copy.admin}
+                </Link>
+                <Link href="/admin/growth" className={dropLink}>
+                  <BarChart3 size={17} className="text-primary" />
+                  {copy.adminGrowth}
+                </Link>
+              </div>
+            ) : null}
             {groups.map((group) => (
               <div key={group.label} className="mt-2 border-t border-border pt-2">
                 <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group.label}</p>

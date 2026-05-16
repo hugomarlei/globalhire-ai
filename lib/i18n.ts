@@ -183,12 +183,45 @@ export const navCopy: Record<Locale, {
   dashboard: string;
   history: string;
   admin: string;
+  adminGrowth: string;
   logout: string;
 }> = {
-  "pt-BR": { login: "Entrar", signup: "Criar conta", dashboard: "Dashboard", history: "Histórico", admin: "Admin", logout: "Sair" },
-  en: { login: "Log in", signup: "Create account", dashboard: "Dashboard", history: "History", admin: "Admin", logout: "Log out" },
-  es: { login: "Iniciar sesión", signup: "Crear cuenta", dashboard: "Panel", history: "Historial", admin: "Admin", logout: "Salir" },
-  fr: { login: "Connexion", signup: "Créer un compte", dashboard: "Tableau de bord", history: "Historique", admin: "Admin", logout: "Déconnexion" }
+  "pt-BR": {
+    login: "Entrar",
+    signup: "Criar conta",
+    dashboard: "Dashboard",
+    history: "Histórico",
+    admin: "Admin",
+    adminGrowth: "Growth",
+    logout: "Sair"
+  },
+  en: {
+    login: "Log in",
+    signup: "Create account",
+    dashboard: "Dashboard",
+    history: "History",
+    admin: "Admin",
+    adminGrowth: "Growth",
+    logout: "Log out"
+  },
+  es: {
+    login: "Iniciar sesión",
+    signup: "Crear cuenta",
+    dashboard: "Panel",
+    history: "Historial",
+    admin: "Admin",
+    adminGrowth: "Growth",
+    logout: "Salir"
+  },
+  fr: {
+    login: "Connexion",
+    signup: "Créer un compte",
+    dashboard: "Tableau de bord",
+    history: "Historique",
+    admin: "Admin",
+    adminGrowth: "Growth",
+    logout: "Déconnexion"
+  }
 };
 
 export const landingCopy: Record<Locale, {

@@ -3,6 +3,9 @@ import type { Locale } from "@/lib/i18n";
 export type AdminDashboardStrings = {
   title: string;
   lead: string;
+  growthCardTitle: string;
+  growthCardLead: string;
+  growthCardCta: string;
   cardUsers: string;
   cardNew7d: string;
   cardActiveSubs: string;
@@ -33,6 +36,9 @@ export const adminDashboardCopy: Record<Locale, AdminDashboardStrings> = {
   "pt-BR": {
     title: "Admin",
     lead: "Visão operacional sem exibir currículos, vagas ou dados pessoais completos.",
+    growthCardTitle: "Growth Cockpit",
+    growthCardLead: "Operação semanal de conteúdo, UTMs e aprendizados (uso interno).",
+    growthCardCta: "Abrir cockpit",
     cardUsers: "Usuários",
     cardNew7d: "Novos em 7 dias",
     cardActiveSubs: "Assinaturas ativas",
@@ -61,6 +67,9 @@ export const adminDashboardCopy: Record<Locale, AdminDashboardStrings> = {
   en: {
     title: "Admin",
     lead: "Operational view without exposing resumes, job posts or full personal data.",
+    growthCardTitle: "Growth Cockpit",
+    growthCardLead: "Weekly content ops, UTMs, and learnings (internal only).",
+    growthCardCta: "Open cockpit",
     cardUsers: "Users",
     cardNew7d: "New in 7 days",
     cardActiveSubs: "Active subscriptions",
@@ -89,6 +98,9 @@ export const adminDashboardCopy: Record<Locale, AdminDashboardStrings> = {
   es: {
     title: "Admin",
     lead: "Vista operativa sin mostrar CV, vacantes ni datos personales completos.",
+    growthCardTitle: "Growth Cockpit",
+    growthCardLead: "Operación semanal de contenido, UTMs y aprendizajes (solo interno).",
+    growthCardCta: "Abrir cockpit",
     cardUsers: "Usuarios",
     cardNew7d: "Nuevos en 7 días",
     cardActiveSubs: "Suscripciones activas",
@@ -117,6 +129,9 @@ export const adminDashboardCopy: Record<Locale, AdminDashboardStrings> = {
   fr: {
     title: "Admin",
     lead: "Vue opérationnelle sans exposer CV, offres ni données personnelles complètes.",
+    growthCardTitle: "Growth Cockpit",
+    growthCardLead: "Opérations hebdo contenu, UTMs et apprentissages (usage interne).",
+    growthCardCta: "Ouvrir le cockpit",
     cardUsers: "Utilisateurs",
     cardNew7d: "Nouveaux sur 7 jours",
     cardActiveSubs: "Abonnements actifs",
