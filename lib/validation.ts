@@ -7,7 +7,9 @@ export const generateSchema = z.object({
   language: z.string().min(2).max(40),
   targetCountry: z.string().min(2).max(60),
   type: z.enum(generationTypes),
-  turnstileToken: z.string().optional()
+  turnstileToken: z.string().optional(),
+  outputLength: z.enum(["short", "medium", "detailed"]).optional().default("medium"),
+  outputTone: z.enum(["natural", "professional", "confident", "direct"]).optional().default("professional")
 });
 
 export const checkoutSchema = z.object({
