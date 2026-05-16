@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { isAllowedAdminEmail } from "@/lib/admin-access";
 import { createClient } from "@/lib/supabase-server";
 
 export async function requireUser() {
@@ -22,10 +23,7 @@ export async function requireUser() {
 
 export async function requireAdmin() {
   const session = await requireUser();
-  const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((email) => email.trim().toLowerCase());
-  const email = session.user.email?.toLowerCase() || "";
-
-  if (!session.profile?.is_admin && !adminEmails.includes(email)) {
+  if (!isAllowedAdminEmail(session.user.email)) {
     redirect("/dashboard");
   }
 

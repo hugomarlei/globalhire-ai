@@ -1,5 +1,8 @@
 import type { GenerationType } from "@/lib/types";
 
+export type OutputLength = "short" | "medium" | "detailed";
+export type OutputTone = "natural" | "professional" | "confident" | "direct";
+
 type PromptArgs = {
   type: GenerationType;
   resume: string;
@@ -9,14 +12,56 @@ type PromptArgs = {
   optimizationInstruction?: string;
   planLabel?: string;
   intensityPercent?: string;
+  outputLength?: OutputLength;
+  outputTone?: OutputTone;
 };
+
+const VOICE_TYPES: GenerationType[] = ["recruiter_message", "cover_letter", "linkedin_summary"];
+
+/** Types that honor output length & tone controls (client + API). */
+export const VOICE_CONTROLLED_GENERATION_TYPES = VOICE_TYPES;
+
+function buildVoiceBlock(type: GenerationType, length: OutputLength, tone: OutputTone) {
+  if (!VOICE_TYPES.includes(type)) return "";
+
+  const lengthLines: Record<OutputLength, string> = {
+    short:
+      "Extensao desejada: CURTA. Seja economico: va direto ao ponto, sem preambulos longos ou repeticao de buzzwords.",
+    medium:
+      "Extensao desejada: MEDIA. Equilibre contexto util com objetividade; nao encaixe paragrafos de preenchimento.",
+    detailed:
+      "Extensao desejada: DETALHADA. Mais contexto e nuances, mas ainda sem enrolacao; cada frase deve acrescentar algo."
+  };
+
+  const toneLines: Record<OutputTone, string> = {
+    natural:
+      "Tom NATURAL: soe como uma pessoa escrevendo com clareza; contracoes sao permitidas quando naturais no idioma final.",
+    professional:
+      "Tom PROFISSIONAL: cordial e credivel, sem jargao vazio nem tom de manual corporativo.",
+    confident:
+      "Tom CONFIANTE: afirmativo e competente, sem arrogancia; mostre adequacao sem pedir desculpas pela candidatura.",
+    direct:
+      "Tom DIRETO: frases curtas, verbo ativo, zero rodeios e zero clichês de abertura."
+  };
+
+  return `
+=== Controle de tamanho e tom (obrigatorio para esta entrega) ===
+${lengthLines[length]}
+${toneLines[tone]}
+Evite sinais de texto generico de modelo de IA:
+- Nao abra com formulas como "Nos dias de hoje", "E importante notar", "No atual cenario", "Como profissional altamente motivado".
+- Nao use lista de adjetivos vazios (proativo, dinamico, apaixonado por desafios) sem exemplo concreto.
+- Nao repita a mesma estrutura de frase em paragrafos seguidos.
+- Prefira especificidade baseada no curriculo e na vaga em vez de generalidades.
+`.trim();
+}
 
 const labels: Record<GenerationType, string> = {
   ats_resume: "otimização de currículo ATS internacional",
   cover_letter: "carta de apresentação persuasiva",
   linkedin_summary: "resumo de LinkedIn forte e global",
   recruiter_message: "mensagem curta para recrutador",
-  interview_prep: "preparação para entrevista",
+  interview_prep: "guia estruturado para entrevista (cards e secoes escaneaveis)",
   translate_resume: "tradução e adaptação internacional do currículo"
 };
 
@@ -47,37 +92,50 @@ Regras especificas:
 `,
   cover_letter: `
 Entrega: carta de apresentação.
-Objetivo: criar uma narrativa convincente para a vaga.
+Objetivo: soar convincente e humano — não como modelo genérico de IA.
 Regras especificas:
-- Abra conectando o perfil do candidato ao problema da empresa/vaga.
-- Use 3 a 5 paragrafos.
-- Cite evidências reais do currículo.
-- Demonstre adequação ao país-alvo e ao contexto internacional.
-- Não repetir o currículo; transformar experiência em argumento de contratação.
+- Abra com uma frase concreta ligando perfil da vaga a uma evidencia real do curriculo (sem aberturas de formula).
+- Evite cartas que "cheiram" a ChatGPT: sem listas de buzzwords, sem paragrafos so de adjetivos.
+- Respeite a extensao pedida no bloco "Controle de tamanho e tom"; ajuste o numero de paragrafos (ex.: curta = 2-3 paragrafos curtos; detalhada = 4-6 com mais contexto).
+- Cite evidencias reais do curriculo em linguagem simples.
+- Demonstre adequacao ao pais-alvo sem juridiquês nem ironia.
+- Nao repita o curriculo linha a linha; transforme experiencia em argumento de contratacao.
 `,
   linkedin_summary: `
 Entrega: resumo de LinkedIn.
-Objetivo: posicionar o candidato para recrutadores internacionais.
+Objetivo: primeiro paragrafo ja mostrar personalidade e clareza — como quem fala com um recrutador, nao com um template.
 Regras especificas:
-- Escreva em primeira pessoa, com tom profissional e humano.
-- Inclua especialidade, impacto, tipos de problema que resolve, setores/ferramentas e objetivo internacional.
-- Preserve contacto e localização presentes no material de origem; não remova cidade, telefone ou e-mail reais.
+- Primeira pessoa, ritmo variado, frases de tamanhos diferentes.
+- Inclua especialidade, impacto, problemas que resolve, ferramentas/setores e objetivo internacional quando fizer sentido.
+- Nada de blocos inteiro em tom de "brochura"; troque por detalhes especificos.
+- Preserve contacto e localizacao presentes no material de origem; nao remova cidade, telefone ou e-mail reais.
+- Respeite a extensao pedida no bloco "Controle de tamanho e tom" (ex.: curta = ~900-1200 caracteres; detalhada = mais espaco para prova social e foco).
 `,
   recruiter_message: `
 Entrega: mensagem para recrutador.
-Objetivo: gerar uma mensagem curta, natural e altamente relevante.
+Objetivo: mensagem que parece escrita por um humano ocupado — direta, cordial, util.
 Regras especificas:
-- No maximo 120 palavras.
-- Conectar candidato, vaga e motivo de contato.
-- Incluir uma chamada para conversa.
+- Limite-orientacao por extensao: CURTA ~60-90 palavras; MEDIA ~90-120; DETALHADA ~120-170 (nao ultrapasse 190).
+- Nao use "Espero que essa mensagem te encontre bem" nem floreio semelhante.
+- Uma frase de contexto, uma de valor/prova, um pedido claro de proximo passo (sem pressao agressiva).
+- Mencione a vaga ou cargo quando souber; evite vaguidade total.
 `,
   interview_prep: `
-Entrega: preparação para entrevista.
-Objetivo: preparar o candidato para a vaga.
+Entrega: guia de preparacao para entrevista.
+Objetivo: organizar o conteudo para estudo rapido antes da conversa.
 Regras especificas:
-- Liste perguntas provaveis.
-- Sugira respostas em formato STAR quando possivel.
-- Inclua pontos fortes a enfatizar e riscos a preparar.
+- OBRIGATORIO: estruture por secoes usando linhas exatamente neste formato (tres sinais de igual, titulo, tres sinais de igual):
+=== PERGUNTAS PROVAVEIS ===
+(conteudo)
+
+Cada secao deve ter titulo em MAIUSCULAS curtas (sem emoji). Sugestao de secoes (use as que fizerem sentido, pode omitir secao vazia):
+=== PERGUNTAS PROVAVEIS ===
+=== RESPOSTAS EM STAR ===
+=== PONTOS FORTES PARA ENFATIZAR ===
+=== RISCOS OU LACUNAS ===
+=== PERGUNTAS PARA FAZER AO ENTREVISTADOR ===
+- Dentro de cada secao use listas com trave (-) quando ajudar a escaneabilidade.
+- Sugira respostas STAR quando fizer sentido, de forma compacta.
 `,
   translate_resume: `
 Entrega: tradução e adaptação internacional do currículo.
@@ -92,6 +150,9 @@ Regras especificas:
 export function buildPrompt(args: PromptArgs) {
   const task = labels[args.type];
   const guidance = deliveryGuidance[args.type];
+  const length: OutputLength = args.outputLength || "medium";
+  const tone: OutputTone = args.outputTone || "professional";
+  const voice = buildVoiceBlock(args.type, length, tone);
 
   return `
 Voce e um especialista senior em carreira internacional, ATS, recrutamento global e escrita profissional.
@@ -130,6 +191,8 @@ Regras de qualidade:
 - Insira uma linha em branco entre a linha de localizacao/availability e a secao de resumo profissional, quando ambas existirem.
 
 ${guidance}
+
+${voice ? `${voice}\n` : ""}
 
 Formato obrigatorio da resposta:
 Responda exclusivamente usando os marcadores abaixo.

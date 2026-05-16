@@ -7,8 +7,13 @@ import { getAuthCallbackUrl } from "@/lib/app-url";
 import { trackEvent } from "@/lib/analytics";
 import { useLanguage } from "@/components/language-provider";
 import { socialAuthCopy } from "@/lib/i18n-app-wide";
-
-type Provider = "google" | "linkedin_oidc" | "facebook";
+import {
+  clearOAuthAttempt,
+  oauthSignInOptions,
+  storeOAuthAttempt,
+  SUPABASE_OAUTH_PROVIDERS,
+  type SupabaseOAuthProvider
+} from "@/lib/social-oauth";
 
 export function SocialAuthButtons({ mode }: { mode: "login" | "signup" }) {
   const { locale } = useLanguage();
@@ -17,47 +22,53 @@ export function SocialAuthButtons({ mode }: { mode: "login" | "signup" }) {
     () =>
       [
         {
-          id: "google" as const,
+          id: SUPABASE_OAUTH_PROVIDERS.google,
           label: s.googleLabel,
           icon: <span className="grid size-5 place-items-center rounded-full bg-muted text-xs font-bold text-foreground">G</span>
         },
         {
-          id: "linkedin_oidc" as const,
+          id: SUPABASE_OAUTH_PROVIDERS.linkedin,
           label: s.linkedinLabel,
           icon: <Linkedin size={18} className="shrink-0 text-foreground" aria-hidden />
         },
         {
-          id: "facebook" as const,
+          id: SUPABASE_OAUTH_PROVIDERS.facebook,
           label: s.facebookLabel,
           icon: <Facebook size={18} className="shrink-0 text-foreground" aria-hidden />
         }
-      ] satisfies Array<{ id: Provider; label: string; icon: React.ReactNode }>,
+      ] satisfies Array<{ id: SupabaseOAuthProvider; label: string; icon: React.ReactNode }>,
     [s.facebookLabel, s.googleLabel, s.linkedinLabel]
   );
 
-  const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null);
+  const [loadingProvider, setLoadingProvider] = useState<SupabaseOAuthProvider | null>(null);
   const [error, setError] = useState("");
 
-  async function signIn(provider: Provider) {
+  function providerErrorMessage(provider: SupabaseOAuthProvider) {
+    if (provider === SUPABASE_OAUTH_PROVIDERS.linkedin) return s.errorLinkedIn;
+    if (provider === SUPABASE_OAUTH_PROVIDERS.facebook) return s.errorFacebook;
+    return s.error;
+  }
+
+  async function signIn(provider: SupabaseOAuthProvider) {
     setLoadingProvider(provider);
     setError("");
     trackEvent(mode === "login" ? "login_started" : "signup_started", {
-      method: provider === "google" ? "google_oauth" : "social_oauth",
-      provider: provider === "google" ? "google" : provider
+      method: provider === SUPABASE_OAUTH_PROVIDERS.google ? "google_oauth" : "social_oauth",
+      provider: provider === SUPABASE_OAUTH_PROVIDERS.linkedin ? "linkedin" : provider
     });
+
+    storeOAuthAttempt(mode, provider);
 
     const supabase = createClient();
     const { error: authError } = await supabase.auth.signInWithOAuth({
       provider,
-      options: {
-        redirectTo: getAuthCallbackUrl("/dashboard"),
-        queryParams: provider === "google" ? { access_type: "offline", prompt: "consent" } : undefined
-      }
+      options: oauthSignInOptions(provider, getAuthCallbackUrl("/dashboard"))
     });
 
     if (authError) {
+      clearOAuthAttempt();
       setLoadingProvider(null);
-      setError(s.error);
+      setError(providerErrorMessage(provider));
     }
   }
 
@@ -87,6 +98,7 @@ export function SocialAuthButtons({ mode }: { mode: "login" | "signup" }) {
         ))}
       </div>
       {error ? <p className="rounded-md bg-coral/15 p-3 text-sm text-coral">{error}</p> : null}
+      <p className="text-xs leading-5 text-muted-foreground">{s.providerSetupHint}</p>
     </div>
   );
 }

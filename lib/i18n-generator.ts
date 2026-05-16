@@ -29,6 +29,18 @@ export type GeneratorUiStrings = {
   limitRenewNotice: string;
   upgradeCta: string;
   pdfFreeWatermark: string;
+  formColumnTitle: string;
+  previewColumnTitle: string;
+  outputLengthLabel: string;
+  toneLabel: string;
+  lengthShort: string;
+  lengthMedium: string;
+  lengthDetailed: string;
+  toneNatural: string;
+  toneProfessional: string;
+  toneConfident: string;
+  toneDirect: string;
+  voiceControlsHint: string;
   pdfTemplates: Record<PdfTemplateKey, string>;
   byType: Record<GenerationType, GenBlock>;
 };
@@ -73,13 +85,14 @@ const ptByType: Record<GenerationType, GenBlock> = {
     empty: "Sua mensagem para recrutador aparecerá aqui."
   },
   interview_prep: {
-    title: "Preparação para Entrevista",
-    subtitle: "Prepare respostas, riscos e argumentos com base na vaga e no seu histórico.",
+    title: "Guia para entrevista",
+    subtitle:
+      "Organize perguntas prováveis, respostas em STAR, pontos fortes, riscos e o que perguntar ao recrutador — tudo escaneável.",
     resumeLabel: "Currículo ou experiência",
     resumePlaceholder: "Cole seu currículo ou descreva sua experiência principal.",
-    jobPlaceholder: "Cole a descrição da vaga para gerar perguntas e respostas direcionadas.",
-    cta: "Preparar entrevista",
-    empty: "Seu roteiro de preparação para entrevista aparecerá aqui."
+    jobPlaceholder: "Cole a descrição da vaga para gerar um guia alinhado ao cargo.",
+    cta: "Gerar guia",
+    empty: "Seu guia aparecerá aqui em cartões, pronto para revisar antes da conversa."
   },
   translate_resume: {
     title: "Tradução e Adaptação Internacional",
@@ -130,13 +143,13 @@ const enByType: Record<GenerationType, GenBlock> = {
     empty: "Your recruiter message will appear here."
   },
   interview_prep: {
-    title: "Interview preparation",
-    subtitle: "Prepare answers, risks and talking points from the job and your background.",
+    title: "Interview guide",
+    subtitle: "Structure likely questions, STAR answers, strengths, gaps, and what to ask — easy to scan.",
     resumeLabel: "Resume or experience",
-    resumePlaceholder: "Paste your resume or describe your main experience.",
-    jobPlaceholder: "Paste the job description to generate targeted Q&A.",
-    cta: "Prepare interview",
-    empty: "Your interview prep script will appear here."
+    resumePlaceholder: "Paste your resume or describe your core experience.",
+    jobPlaceholder: "Paste the job description to tailor the guide to the role.",
+    cta: "Build interview guide",
+    empty: "Your guide will appear here in cards, ready to review before the interview."
   },
   translate_resume: {
     title: "International translation & adaptation",
@@ -187,13 +200,13 @@ const esByType: Record<GenerationType, GenBlock> = {
     empty: "Tu mensaje para reclutador aparecerá aquí."
   },
   interview_prep: {
-    title: "Preparación para entrevista",
-    subtitle: "Prepara respuestas, riesgos y argumentos según la vacante y tu historial.",
+    title: "Guía para entrevista",
+    subtitle: "Organiza preguntas probables, respuestas STAR, fortalezas, riesgos y qué preguntar — fácil de escanear.",
     resumeLabel: "CV o experiencia",
     resumePlaceholder: "Pega tu CV o describe tu experiencia principal.",
-    jobPlaceholder: "Pega la descripción de la vacante para generar preguntas y respuestas.",
-    cta: "Preparar entrevista",
-    empty: "Tu guion de preparación aparecerá aquí."
+    jobPlaceholder: "Pega la descripción de la vacante para alinear el guía al puesto.",
+    cta: "Generar guía",
+    empty: "Tu guía aparecerá aquí en tarjetas, lista para repasar antes de la entrevista."
   },
   translate_resume: {
     title: "Traducción y adaptación internacional",
@@ -245,13 +258,13 @@ const frByType: Record<GenerationType, GenBlock> = {
     empty: "Votre message apparaîtra ici."
   },
   interview_prep: {
-    title: "Préparation d'entretien",
-    subtitle: "Préparez réponses, risques et arguments à partir de l'offre et de votre parcours.",
+    title: "Guide d’entretien",
+    subtitle: "Structurez questions probables, réponses STAR, forces, risques et vos questions — lecture rapide.",
     resumeLabel: "CV ou expérience",
-    resumePlaceholder: "Collez votre CV ou décrivez votre expérience principale.",
-    jobPlaceholder: "Collez la description du poste pour générer Q/R ciblées.",
-    cta: "Préparer l'entretien",
-    empty: "Votre script de préparation apparaîtra ici."
+    resumePlaceholder: "Collez votre CV ou décrivez votre expérience clé.",
+    jobPlaceholder: "Collez l’offre pour aligner le guide sur le poste.",
+    cta: "Générer le guide",
+    empty: "Votre guide apparaîtra ici en cartes, prêt à relire avant l’entretien."
   },
   translate_resume: {
     title: "Traduction et adaptation internationale",
@@ -265,24 +278,24 @@ const frByType: Record<GenerationType, GenBlock> = {
 };
 
 const pdfPt: Record<PdfTemplateKey, string> = {
-  executive: "Executivo ATS",
-  modern: "Moderno internacional",
-  compact: "Compacto premium"
+  executive: "ATS — clássico executivo",
+  modern: "Moderno — acento lateral",
+  compact: "Compacto — leitura densa"
 };
 const pdfEn: Record<PdfTemplateKey, string> = {
-  executive: "Executive ATS",
-  modern: "Modern international",
-  compact: "Compact premium"
+  executive: "ATS — classic executive",
+  modern: "Modern — accent rail",
+  compact: "Compact — dense read"
 };
 const pdfEs: Record<PdfTemplateKey, string> = {
-  executive: "Ejecutivo ATS",
-  modern: "Moderno internacional",
-  compact: "Compacto premium"
+  executive: "ATS — ejecutivo clásico",
+  modern: "Moderno — acento lateral",
+  compact: "Compacto — lectura densa"
 };
 const pdfFr: Record<PdfTemplateKey, string> = {
-  executive: "Exécutif ATS",
-  modern: "Moderne international",
-  compact: "Compact premium"
+  executive: "ATS — exécutif classique",
+  modern: "Moderne — bandeau d’accent",
+  compact: "Compact — lecture dense"
 };
 
 function pack(
@@ -321,7 +334,19 @@ export const generatorUiCopy: Record<Locale, GeneratorUiStrings> = {
       preparingOutput: "Preparando resultado premium...",
       limitRenewNotice: "Seu limite mensal renova no início do próximo mês. Para continuar hoje, faça upgrade.",
       upgradeCta: "Fazer upgrade para continuar",
-      pdfFreeWatermark: "Criado com GlobalHire AI - plano grátis"
+      pdfFreeWatermark: "Criado com GlobalHire AI - plano grátis",
+      formColumnTitle: "Entradas",
+      previewColumnTitle: "Pré-visualização",
+      outputLengthLabel: "Tamanho do texto",
+      toneLabel: "Tom",
+      lengthShort: "Curto",
+      lengthMedium: "Médio",
+      lengthDetailed: "Detalhado",
+      toneNatural: "Natural",
+      toneProfessional: "Profissional",
+      toneConfident: "Confiante",
+      toneDirect: "Direto",
+      voiceControlsHint: "Aplica-se a mensagem ao recrutador, carta e resumo LinkedIn."
     }
   ),
   en: pack(
@@ -344,7 +369,19 @@ export const generatorUiCopy: Record<Locale, GeneratorUiStrings> = {
       preparingOutput: "Preparing premium output...",
       limitRenewNotice: "Your monthly limit resets next month. To keep going today, upgrade your plan.",
       upgradeCta: "Upgrade to continue",
-      pdfFreeWatermark: "Created with GlobalHire AI — free plan"
+      pdfFreeWatermark: "Created with GlobalHire AI — free plan",
+      formColumnTitle: "Inputs",
+      previewColumnTitle: "Live preview",
+      outputLengthLabel: "Length",
+      toneLabel: "Tone",
+      lengthShort: "Short",
+      lengthMedium: "Medium",
+      lengthDetailed: "Detailed",
+      toneNatural: "Natural",
+      toneProfessional: "Professional",
+      toneConfident: "Confident",
+      toneDirect: "Direct",
+      voiceControlsHint: "Applies to recruiter message, cover letter, and LinkedIn summary."
     }
   ),
   es: pack(
@@ -373,7 +410,19 @@ export const generatorUiCopy: Record<Locale, GeneratorUiStrings> = {
       preparingOutput: "Preparando resultado premium...",
       limitRenewNotice: "Tu límite mensual se renueva el próximo mes. Para seguir hoy, mejora tu plan.",
       upgradeCta: "Mejorar plan para continuar",
-      pdfFreeWatermark: "Creado con GlobalHire AI — plan gratuito"
+      pdfFreeWatermark: "Creado con GlobalHire AI — plan gratuito",
+      formColumnTitle: "Entradas",
+      previewColumnTitle: "Vista previa",
+      outputLengthLabel: "Extensión",
+      toneLabel: "Tono",
+      lengthShort: "Corto",
+      lengthMedium: "Medio",
+      lengthDetailed: "Detallado",
+      toneNatural: "Natural",
+      toneProfessional: "Profesional",
+      toneConfident: "Seguro",
+      toneDirect: "Directo",
+      voiceControlsHint: "Aplica a mensaje al reclutador, carta y resumen de LinkedIn."
     }
   ),
   fr: pack(
@@ -402,7 +451,19 @@ export const generatorUiCopy: Record<Locale, GeneratorUiStrings> = {
       preparingOutput: "Préparation du résultat premium...",
       limitRenewNotice: "Votre limite mensuelle se renouvelle le mois prochain. Pour continuer aujourd'hui, passez à un plan supérieur.",
       upgradeCta: "Mettre à niveau pour continuer",
-      pdfFreeWatermark: "Créé avec GlobalHire AI — offre gratuite"
+      pdfFreeWatermark: "Créé avec GlobalHire AI — offre gratuite",
+      formColumnTitle: "Saisie",
+      previewColumnTitle: "Aperçu",
+      outputLengthLabel: "Longueur",
+      toneLabel: "Ton",
+      lengthShort: "Court",
+      lengthMedium: "Moyen",
+      lengthDetailed: "Détaillé",
+      toneNatural: "Naturel",
+      toneProfessional: "Professionnel",
+      toneConfident: "Assuré",
+      toneDirect: "Direct",
+      voiceControlsHint: "S’applique au message recruteur, à la lettre et au résumé LinkedIn."
     }
   )
 };

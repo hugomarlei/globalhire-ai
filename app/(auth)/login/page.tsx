@@ -10,6 +10,7 @@ import { TurnstileWidget } from "@/components/turnstile-widget";
 import { useLanguage } from "@/components/language-provider";
 import { authLoginCopy } from "@/lib/i18n-app-wide";
 import { trackEvent } from "@/lib/analytics";
+import { clearOAuthAttempt } from "@/lib/social-oauth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,7 +28,10 @@ export default function LoginPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setPasswordUpdated(params.get("senha") === "atualizada");
-    setSocialNotConfigured(params.get("social") === "not_configured");
+    if (params.get("social") === "not_configured") {
+      setSocialNotConfigured(true);
+      clearOAuthAttempt();
+    }
   }, []);
 
   async function submit(event: React.FormEvent) {

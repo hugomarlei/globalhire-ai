@@ -70,7 +70,7 @@ Autenticação:
 Autorização:
 
 - `requireUser()` protege área logada e bloqueia usuários marcados.
-- `requireAdmin()` protege admin por `profiles.is_admin` ou `ADMIN_EMAILS`.
+- `requireAdmin()` protege admin **apenas** por allowlist `ADMIN_EMAILS` no servidor (`lib/admin-access.ts`); `profiles.is_admin` não autoriza rotas admin.
 - APIs validam sessão com `supabase.auth.getUser()`.
 - RLS limita leitura/inserção no banco.
 

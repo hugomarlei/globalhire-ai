@@ -129,21 +129,21 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 
 ## Admin
 
-Para liberar seu e-mail como admin:
+Para libertar o painel admin (**única fonte de verdade no servidor**):
 
-1. Abra `.env.local`.
-2. Preencha:
+1. Abra `.env.local` (e defina o mesmo em Vercel / produção).
+2. Preencha **apenas** os e-mails autorizados (separados por vírgula se mais de um):
 
 ```bash
-ADMIN_EMAILS=seuemail@dominio.com
+ADMIN_EMAILS=hugomarcianoleite@gmail.com
 ADMIN_BYPASS_EMAILS=hugomarcianoleite@gmail.com
 ```
 
-`ADMIN_EMAILS` libera acesso ao painel admin.
-`ADMIN_BYPASS_EMAILS` libera teste como plano Elite sem pagar, sem limite Free e sem marca d'agua no PDF.
+`ADMIN_EMAILS` controla **somente** o acesso a `/admin` e `/admin/growth` e APIs admin. Não basta `profiles.is_admin` na base.
+`ADMIN_BYPASS_EMAILS` serve para testar o plano Elite sem pagamento (ver documentação de planos).
 
-3. Crie conta no app com esse mesmo e-mail.
-4. Acesse:
+3. Crie conta no app com o mesmo e-mail que está em `ADMIN_EMAILS` (se ainda não existir).
+4. Aceda:
 
 ```text
 http://localhost:3000/admin

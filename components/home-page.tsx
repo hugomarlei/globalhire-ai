@@ -6,7 +6,7 @@ import { PublicNav } from "@/components/nav";
 import { SiteFooter } from "@/components/site-footer";
 import { useLanguage } from "@/components/language-provider";
 import { Button, Card } from "@/components/ui";
-import { getAppUrl } from "@/lib/app-url";
+import { LogoutShareActions } from "@/components/logout-share-actions";
 import { landingCopy } from "@/lib/i18n";
 import { getLocalizedPlans } from "@/lib/plan-copy";
 import type { StripePriceCatalogJson } from "@/lib/stripe-price-catalog-types";
@@ -24,31 +24,19 @@ export function HomePage({ stripeCatalog }: { stripeCatalog: StripePriceCatalogJ
     setShowLogoutBanner(new URLSearchParams(window.location.search).get("logout") === "success");
   }, []);
 
-  const shareHref = useMemo(() => {
-    const url = encodeURIComponent(getAppUrl());
-    return `https://www.linkedin.com/shareArticle?mini=true&url=${url}`;
-  }, []);
-
   return (
     <main className="brand-shell relative min-h-screen overflow-hidden text-foreground">
       <div className="brand-grid pointer-events-none absolute inset-0" />
       <PublicNav />
       {showLogoutBanner ? (
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="flex flex-col gap-3 rounded-2xl border border-primary/25 bg-primary/10 p-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 rounded-2xl border border-primary/25 bg-primary/10 p-4 text-sm text-muted-foreground">
             <span className="text-foreground">{copy.logoutBanner}</span>
-            <div className="flex flex-wrap gap-2">
-              <Button href="/cadastro" className="h-9 px-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <Button href="/cadastro" className="h-9 w-full px-3 sm:w-auto">
                 {copy.primaryCta}
               </Button>
-              <a
-                href={shareHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="focus-ring inline-flex h-9 items-center justify-center rounded-xl border border-border bg-muted/50 px-3 text-sm font-semibold text-foreground transition hover:bg-muted"
-              >
-                {copy.shareLabel}
-              </a>
+              <LogoutShareActions />
             </div>
           </div>
         </div>

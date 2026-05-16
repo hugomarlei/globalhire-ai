@@ -16,8 +16,7 @@ Mitigação recente: endpoints POST sensíveis validam `Origin`/`Referer` via `l
 
 Status: IMPLEMENTADO/PARCIAL
 
-- Admin protegido por `requireAdmin()`.
-- Admin também pode ser autorizado por `ADMIN_EMAILS`.
+- Admin protegido por `requireAdmin()` com allowlist `ADMIN_EMAILS` (`lib/admin-access.ts`). `profiles.is_admin` não autoriza estas rotas.
 - Usuário bloqueado é redirecionado.
 - RLS protege leitura/inserção própria.
 

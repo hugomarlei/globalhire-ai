@@ -31,7 +31,7 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
         "Cover letter",
         "LinkedIn summary",
         "Recruiter message",
-        "Interview simulation",
+        "Interview guide",
         "Resume translation",
         "ATS Score and keywords"
       ]
@@ -48,7 +48,7 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
         "Unlimited generations",
         "Everything in Starter",
         "Recruiter message",
-        "Interview simulation",
+        "Interview guide",
         "Resume translation",
         "ATS Score and keywords"
       ]
@@ -77,7 +77,7 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
         "Carta de presentación",
         "Resumen LinkedIn",
         "Mensaje al reclutador",
-        "Simulación de entrevista",
+        "Guía para entrevista",
         "Traducción de currículum",
         "ATS Score y palabras clave"
       ]
@@ -94,7 +94,7 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
         "Generaciones ilimitadas",
         "Todo lo de Starter",
         "Mensaje al reclutador",
-        "Simulación de entrevista",
+        "Guía para entrevista",
         "Traducción de currículum",
         "ATS Score y palabras clave"
       ]
@@ -123,7 +123,7 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
         "Lettre de motivation",
         "Résumé LinkedIn",
         "Message recruteur",
-        "Simulation d'entretien",
+        "Guide d’entretien",
         "Traduction de CV",
         "ATS Score et mots-clés"
       ]
@@ -140,7 +140,7 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
         "Générations illimitées",
         "Tout le pack Starter",
         "Message recruteur",
-        "Simulation d'entretien",
+        "Guide d’entretien",
         "Traduction de CV",
         "ATS Score et mots-clés"
       ]

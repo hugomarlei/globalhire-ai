@@ -60,7 +60,7 @@ export const dashboardCopy: Record<Locale, {
       cover_letter: "Gerar carta de apresentação",
       linkedin_summary: "Gerar resumo de LinkedIn",
       recruiter_message: "Mensagem para recrutador",
-      interview_prep: "Simular entrevista",
+      interview_prep: "Guia para entrevista",
       translate_resume: "Traduzir/adaptar currículo"
     },
     themeTitle: "Aparência",
@@ -95,7 +95,7 @@ export const dashboardCopy: Record<Locale, {
       cover_letter: "Generate cover letter",
       linkedin_summary: "Generate LinkedIn summary",
       recruiter_message: "Recruiter message",
-      interview_prep: "Interview simulation",
+      interview_prep: "Interview guide",
       translate_resume: "Translate/adapt resume"
     },
     themeTitle: "Appearance",
@@ -130,7 +130,7 @@ export const dashboardCopy: Record<Locale, {
       cover_letter: "Generar carta de presentación",
       linkedin_summary: "Generar resumen de LinkedIn",
       recruiter_message: "Mensaje para reclutador",
-      interview_prep: "Simular entrevista",
+      interview_prep: "Guía para entrevista",
       translate_resume: "Traducir/adaptar currículum"
     },
     themeTitle: "Apariencia",
@@ -165,7 +165,7 @@ export const dashboardCopy: Record<Locale, {
       cover_letter: "Générer une lettre de motivation",
       linkedin_summary: "Générer un résumé LinkedIn",
       recruiter_message: "Message au recruteur",
-      interview_prep: "Simuler un entretien",
+      interview_prep: "Guide d’entretien",
       translate_resume: "Traduire/adapter le CV"
     },
     themeTitle: "Apparence",
@@ -183,12 +183,45 @@ export const navCopy: Record<Locale, {
   dashboard: string;
   history: string;
   admin: string;
+  adminGrowth: string;
   logout: string;
 }> = {
-  "pt-BR": { login: "Entrar", signup: "Criar conta", dashboard: "Dashboard", history: "Histórico", admin: "Admin", logout: "Sair" },
-  en: { login: "Log in", signup: "Create account", dashboard: "Dashboard", history: "History", admin: "Admin", logout: "Log out" },
-  es: { login: "Iniciar sesión", signup: "Crear cuenta", dashboard: "Panel", history: "Historial", admin: "Admin", logout: "Salir" },
-  fr: { login: "Connexion", signup: "Créer un compte", dashboard: "Tableau de bord", history: "Historique", admin: "Admin", logout: "Déconnexion" }
+  "pt-BR": {
+    login: "Entrar",
+    signup: "Criar conta",
+    dashboard: "Dashboard",
+    history: "Histórico",
+    admin: "Admin",
+    adminGrowth: "Growth",
+    logout: "Sair"
+  },
+  en: {
+    login: "Log in",
+    signup: "Create account",
+    dashboard: "Dashboard",
+    history: "History",
+    admin: "Admin",
+    adminGrowth: "Growth",
+    logout: "Log out"
+  },
+  es: {
+    login: "Iniciar sesión",
+    signup: "Crear cuenta",
+    dashboard: "Panel",
+    history: "Historial",
+    admin: "Admin",
+    adminGrowth: "Growth",
+    logout: "Salir"
+  },
+  fr: {
+    login: "Connexion",
+    signup: "Créer un compte",
+    dashboard: "Tableau de bord",
+    history: "Historique",
+    admin: "Admin",
+    adminGrowth: "Growth",
+    logout: "Déconnexion"
+  }
 };
 
 export const landingCopy: Record<Locale, {
@@ -216,6 +249,10 @@ export const landingCopy: Record<Locale, {
   finalCtaTitle: string;
   logoutBanner: string;
   shareLabel: string;
+  shareLinkedIn: string;
+  shareWhatsApp: string;
+  shareCopyText: string;
+  shareCopied: string;
   honestyLine: string;
   truthCards: Array<[string, string]>;
   featuresSectionTitle: string;
@@ -273,6 +310,10 @@ export const landingCopy: Record<Locale, {
     finalCtaTitle: "Sua próxima vaga internacional começa pelo documento certo.",
     logoutBanner: "Você saiu da sua conta. Volte quando quiser para continuar suas candidaturas.",
     shareLabel: "Compartilhar",
+    shareLinkedIn: "Compartilhar no LinkedIn",
+    shareWhatsApp: "Compartilhar no WhatsApp",
+    shareCopyText: "Copiar texto",
+    shareCopied: "Texto copiado",
     honestyLine: "Tecnologia para competir melhor. Sem promessa de entrevista, emprego ou contratação.",
     truthCards: [
       ["O problema", "Muitos currículos são rejeitados antes de chegar ao recrutador porque não conversam com a vaga nem com filtros ATS."],
@@ -349,6 +390,10 @@ export const landingCopy: Record<Locale, {
     finalCtaTitle: "Your next international opportunity starts with the right document.",
     logoutBanner: "You have signed out. Come back anytime to continue your applications.",
     shareLabel: "Share",
+    shareLinkedIn: "Share on LinkedIn",
+    shareWhatsApp: "Share on WhatsApp",
+    shareCopyText: "Copy text",
+    shareCopied: "Text copied",
     honestyLine: "Technology to compete better. No promise of interviews, hiring or employment.",
     truthCards: [
       ["The problem", "Many resumes are rejected before they reach the recruiter because they do not match the role or ATS filters."],
@@ -425,6 +470,10 @@ export const landingCopy: Record<Locale, {
     finalCtaTitle: "Tu próxima oportunidad internacional empieza con el documento correcto.",
     logoutBanner: "Has cerrado sesión. Vuelve cuando quieras para seguir con tus candidaturas.",
     shareLabel: "Compartir",
+    shareLinkedIn: "Compartir en LinkedIn",
+    shareWhatsApp: "Compartir en WhatsApp",
+    shareCopyText: "Copiar texto",
+    shareCopied: "Texto copiado",
     honestyLine: "Tecnología para competir mejor. Sin promesa de entrevista, contratación o empleo.",
     truthCards: [
       ["El problema", "Muchos currículums se rechazan antes de llegar al reclutador porque no conectan con la vacante ni con los filtros ATS."],
@@ -501,6 +550,10 @@ export const landingCopy: Record<Locale, {
     finalCtaTitle: "Votre prochaine opportunité internationale commence par le bon document.",
     logoutBanner: "Vous êtes déconnecté. Revenez quand vous voulez pour poursuivre vos candidatures.",
     shareLabel: "Partager",
+    shareLinkedIn: "Partager sur LinkedIn",
+    shareWhatsApp: "Partager sur WhatsApp",
+    shareCopyText: "Copier le texte",
+    shareCopied: "Texte copié",
     honestyLine: "Technologie pour mieux concourir. Aucune promesse d'entretien, d'embauche ou d'emploi.",
     truthCards: [
       ["Le problème", "De nombreux CV sont rejetés avant d'atteindre le recruteur car ils ne correspondent pas au poste ni aux filtres ATS."],

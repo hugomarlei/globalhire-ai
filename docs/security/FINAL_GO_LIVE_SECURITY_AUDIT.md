@@ -25,7 +25,7 @@ Foram aplicadas **correções pontuais de segurança operacional** nesta auditor
 | Segredo no código-fonte (valores reais) | **Não encontrado** |
 | Service role no client | **Não encontrado** |
 | Webhook Stripe sem validação de assinatura | **Não** — validação presente |
-| Admin exposto sem gate | **Não** — `requireAdmin()` |
+| Admin exposto sem gate | **Não** — `requireAdmin()` com allowlist `ADMIN_EMAILS` no servidor |
 | Rotas `(app)` sem utilizador | **Não** — `requireUser()` no layout |
 | Sentry a quebrar build sem token | **Não** — upload de source maps condicional |
 | Endpoint debug Stripe em produção | **Removido** nesta auditoria |
@@ -67,6 +67,7 @@ Foram aplicadas **correções pontuais de segurança operacional** nesta auditor
 - `next.config.ts` — CSP, HSTS, X-Frame-Options, Sentry condicional
 - `lib/supabase-server.ts`, `lib/supabase-browser.ts` — separação anon vs service role
 - `lib/auth.ts` — `requireUser`, `requireAdmin`
+- `lib/admin-access.ts` — allowlist `ADMIN_EMAILS` para rotas admin
 - `lib/security.ts` — `rejectInvalidOrigin`, `getClientIp`
 - `lib/sentry-privacy.ts`, `sentry.server.config.ts`, `instrumentation*.ts`
 - `lib/stripe.ts`, `lib/stripe-subscription.ts`, `lib/stripe-price-fetch.ts`

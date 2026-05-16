@@ -608,7 +608,7 @@ Evidências: `lib/auth.ts`, `middleware.ts`, `app/(auth)/login/page.tsx`, `app/(
 ### 8.2 Autorização
 
 - Usuários acessam apenas próprios dados via RLS e filtros `.eq("user_id", user.id)`.
-- Admin usa `requireAdmin()`, verificando `profiles.is_admin` ou `ADMIN_EMAILS`.
+- Admin usa `requireAdmin()`, verificando **somente** `ADMIN_EMAILS` no servidor (ver `lib/admin-access.ts`).
 - Bloqueio de usuário por admin atualiza `profiles.is_blocked`.
 - APIs de exclusão granular aplicam `eq("user_id", user.id)` mesmo usando service role.
 
@@ -915,7 +915,7 @@ Evidência: `.env.example`, `lib/groq.ts`, `lib/stripe.ts`, `lib/turnstile.ts`.
 | `NEXT_PUBLIC_STRIPE_PRO_PRICE_ID` | Price Pro | Pública/não secreta | `lib/plans.ts` |
 | `NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID` | Price Elite | Pública/não secreta | `lib/plans.ts` |
 | `NEXT_PUBLIC_APP_URL` | URL canônica | Pública | `lib/app-url.ts` |
-| `ADMIN_EMAILS` | Admin por e-mail | Sensível operacional | `lib/auth.ts` |
+| `ADMIN_EMAILS` | Admin por e-mail | Sensível operacional | `lib/admin-access.ts`, `lib/auth.ts` |
 | `ADMIN_BYPASS_EMAILS` | Bypass teste | Sensível operacional | `lib/plans.ts` |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Site key captcha | Pública | `components/turnstile-widget.tsx` |
 | `TURNSTILE_SECRET_KEY` | Secret captcha | Secreta crítica | `lib/turnstile.ts` |

@@ -126,7 +126,7 @@ export const appNavStrings: Record<Locale, AppNavStrings> = {
     toolCover: "Carta de apresentação",
     toolLinkedin: "Resumo LinkedIn",
     toolRecruiter: "Mensagem para recrutador",
-    toolInterview: "Simular entrevista",
+    toolInterview: "Guia para entrevista",
     toolTranslate: "Traduzir currículo",
     atsScore: "ATS Score",
     keywords: "Palavras-chave",
@@ -150,7 +150,7 @@ export const appNavStrings: Record<Locale, AppNavStrings> = {
     toolCover: "Cover letter",
     toolLinkedin: "LinkedIn summary",
     toolRecruiter: "Recruiter message",
-    toolInterview: "Interview prep",
+    toolInterview: "Interview guide",
     toolTranslate: "Translate resume",
     atsScore: "ATS Score",
     keywords: "Keywords",
@@ -174,7 +174,7 @@ export const appNavStrings: Record<Locale, AppNavStrings> = {
     toolCover: "Carta de presentación",
     toolLinkedin: "Resumen LinkedIn",
     toolRecruiter: "Mensaje al reclutador",
-    toolInterview: "Simular entrevista",
+    toolInterview: "Guía para entrevista",
     toolTranslate: "Traducir CV",
     atsScore: "ATS Score",
     keywords: "Palabras clave",
@@ -198,7 +198,7 @@ export const appNavStrings: Record<Locale, AppNavStrings> = {
     toolCover: "Lettre de motivation",
     toolLinkedin: "Résumé LinkedIn",
     toolRecruiter: "Message recruteur",
-    toolInterview: "Simulation d'entretien",
+    toolInterview: "Guide d’entretien",
     toolTranslate: "Traduire le CV",
     atsScore: "ATS Score",
     keywords: "Mots-clés",
@@ -658,6 +658,9 @@ export type SocialAuthStrings = {
   linkedinLabel: string;
   facebookLabel: string;
   error: string;
+  errorLinkedIn: string;
+  errorFacebook: string;
+  providerSetupHint: string;
 };
 
 export const socialAuthCopy: Record<Locale, SocialAuthStrings> = {
@@ -667,7 +670,12 @@ export const socialAuthCopy: Record<Locale, SocialAuthStrings> = {
     googleLabel: "Continuar com Google",
     linkedinLabel: "Continuar com LinkedIn",
     facebookLabel: "Continuar com Facebook",
-    error: "Login social ainda não configurado. Use e-mail e senha por enquanto."
+    error: "Não foi possível continuar com Google. Tente e-mail e senha ou tente novamente.",
+    errorLinkedIn:
+      "LinkedIn ainda não está ativo neste ambiente. Configure o provider no Supabase (veja docs/social-auth-setup.md) ou use e-mail e senha.",
+    errorFacebook:
+      "Facebook ainda não está ativo neste ambiente. Configure o provider no Supabase (veja docs/social-auth-setup.md) ou use e-mail e senha.",
+    providerSetupHint: "Google, LinkedIn e Facebook usam OAuth via Supabase. Credenciais ficam apenas no painel Supabase."
   },
   en: {
     orLogin: "or continue with",
@@ -675,7 +683,12 @@ export const socialAuthCopy: Record<Locale, SocialAuthStrings> = {
     googleLabel: "Continue with Google",
     linkedinLabel: "Continue with LinkedIn",
     facebookLabel: "Continue with Facebook",
-    error: "Social login is not configured yet. Please use email and password."
+    error: "Could not continue with Google. Try email and password or try again.",
+    errorLinkedIn:
+      "LinkedIn is not enabled in this environment. Configure the provider in Supabase (see docs/social-auth-setup.md) or use email and password.",
+    errorFacebook:
+      "Facebook is not enabled in this environment. Configure the provider in Supabase (see docs/social-auth-setup.md) or use email and password.",
+    providerSetupHint: "Google, LinkedIn, and Facebook use Supabase OAuth. Credentials live only in the Supabase dashboard."
   },
   es: {
     orLogin: "o entra con",
@@ -683,7 +696,12 @@ export const socialAuthCopy: Record<Locale, SocialAuthStrings> = {
     googleLabel: "Continuar con Google",
     linkedinLabel: "Continuar con LinkedIn",
     facebookLabel: "Continuar con Facebook",
-    error: "El login social aún no está configurado. Usa correo y contraseña."
+    error: "No se pudo continuar con Google. Usa correo y contraseña o inténtalo de nuevo.",
+    errorLinkedIn:
+      "LinkedIn no está activo en este entorno. Configura el provider en Supabase (docs/social-auth-setup.md) o usa correo y contraseña.",
+    errorFacebook:
+      "Facebook no está activo en este entorno. Configura el provider en Supabase (docs/social-auth-setup.md) o usa correo y contraseña.",
+    providerSetupHint: "Google, LinkedIn y Facebook usan OAuth de Supabase. Las credenciales solo están en el panel de Supabase."
   },
   fr: {
     orLogin: "ou continuer avec",
@@ -691,7 +709,12 @@ export const socialAuthCopy: Record<Locale, SocialAuthStrings> = {
     googleLabel: "Continuer avec Google",
     linkedinLabel: "Continuer avec LinkedIn",
     facebookLabel: "Continuer avec Facebook",
-    error: "La connexion sociale n'est pas encore configurée. Utilisez e-mail et mot de passe."
+    error: "Impossible de continuer avec Google. Utilisez e-mail et mot de passe ou réessayez.",
+    errorLinkedIn:
+      "LinkedIn n'est pas actif dans cet environnement. Configurez le provider dans Supabase (voir docs/social-auth-setup.md) ou utilisez e-mail et mot de passe.",
+    errorFacebook:
+      "Facebook n'est pas actif dans cet environnement. Configurez le provider dans Supabase (voir docs/social-auth-setup.md) ou utilisez e-mail et mot de passe.",
+    providerSetupHint: "Google, LinkedIn et Facebook passent par l'OAuth Supabase. Les identifiants restent dans le tableau de bord Supabase."
   }
 };
 

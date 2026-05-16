@@ -100,7 +100,9 @@ export async function POST(request: NextRequest) {
       targetCountry: parsed.data.targetCountry,
       optimizationInstruction: intensity.instruction,
       planLabel: intensity.label,
-      intensityPercent: intensity.percent
+      intensityPercent: intensity.percent,
+      outputLength: parsed.data.outputLength,
+      outputTone: parsed.data.outputTone
     });
 
     const completion = await groq.chat.completions.create({

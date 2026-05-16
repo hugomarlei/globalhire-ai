@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { MailCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
@@ -23,11 +24,15 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
   const [captchaReset, setCaptchaReset] = useState(0);
+  const [awaitingEmailConfirmation, setAwaitingEmailConfirmation] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendNotice, setResendNotice] = useState("");
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setLoading(true);
     setMessage("");
+    setResendNotice("");
     trackEvent("signup_started", { method: "password" });
     const captchaResponse = await fetch("/api/security/turnstile", {
       method: "POST",
@@ -42,7 +47,7 @@ export default function SignupPage() {
       return;
     }
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -58,10 +63,67 @@ export default function SignupPage() {
       return;
     }
 
-    setMessage(t.accountCreated);
     trackEvent("signup_completed", { method: "password" });
-    router.push("/dashboard");
-    router.refresh();
+
+    if (data.session) {
+      router.push("/dashboard");
+      router.refresh();
+      return;
+    }
+
+    setAwaitingEmailConfirmation(true);
+  }
+
+  async function resendConfirmationEmail() {
+    if (!email || resendLoading) return;
+    setResendLoading(true);
+    setResendNotice("");
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: `${getAppUrl()}/dashboard`
+      }
+    });
+    setResendLoading(false);
+    setResendNotice(error ? t.resendError : t.resendSuccess);
+  }
+
+  if (awaitingEmailConfirmation) {
+    return (
+      <main className="grid flex-1 place-items-center px-4 py-10">
+        <Card className="w-full max-w-md">
+          <div className="flex flex-col items-center text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary">
+              <MailCheck size={28} aria-hidden />
+            </div>
+            <h1 className="mt-5 text-2xl font-semibold text-foreground">{t.confirmEmailTitle}</h1>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">{t.confirmEmailMessage}</p>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">{t.confirmEmailHint}</p>
+            {email ? (
+              <p className="mt-4 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm font-medium text-foreground" data-clarity-mask="true">
+                {email}
+              </p>
+            ) : null}
+          </div>
+          <div className="mt-8 grid gap-3">
+            <Button href="/login" className="w-full bg-primary text-primary-foreground hover:brightness-105">
+              {t.goToLogin}
+            </Button>
+            <button
+              type="button"
+              onClick={resendConfirmationEmail}
+              disabled={resendLoading || !email}
+              className="text-sm font-medium text-brand-700 underline-offset-2 hover:underline disabled:cursor-not-allowed disabled:opacity-60 dark:text-brand-200"
+            >
+              {resendLoading ? t.resendSending : t.resendEmail}
+            </button>
+            {resendNotice ? <p className="text-center text-sm text-muted-foreground">{resendNotice}</p> : null}
+          </div>
+        </Card>
+      </main>
+    );
   }
 
   return (
@@ -84,8 +146,8 @@ export default function SignupPage() {
             <input data-clarity-mask="true" className={inputClass} type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
           </Field>
           <TurnstileWidget action="signup" onVerify={setTurnstileToken} resetSignal={captchaReset} />
-          {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
-          <Button type="submit" className="bg-primary text-primary-foreground hover:brightness-105">
+          {message ? <p className="text-sm text-destructive">{message}</p> : null}
+          <Button type="submit" className="w-full bg-primary text-primary-foreground hover:brightness-105" disabled={loading}>
             {loading ? t.submitting : t.submit}
           </Button>
         </form>
