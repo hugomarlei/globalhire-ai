@@ -15,7 +15,7 @@ export const plans = {
       "Carta de apresentação",
       "Resumo LinkedIn",
       "Mensagem para recrutador",
-      "Simular entrevista",
+      "Guia para entrevista",
       "Traduzir currículo",
       "ATS Score e palavras-chave"
     ]
@@ -34,7 +34,7 @@ export const plans = {
     price: "R$79/mes",
     monthlyLimit: 9999,
     stripePriceEnv: "NEXT_PUBLIC_STRIPE_PRO_PRICE_ID",
-    features: ["Gerações ilimitadas", "Tudo do Starter", "Mensagem para recrutador", "Simular entrevista", "Traduzir currículo", "ATS Score e palavras-chave"]
+    features: ["Gerações ilimitadas", "Tudo do Starter", "Mensagem para recrutador", "Guia para entrevista", "Traduzir currículo", "ATS Score e palavras-chave"]
   },
   elite: {
     id: "elite",
@@ -85,7 +85,7 @@ export const generationTypeLabels: Record<GenerationType, string> = {
   cover_letter: "Carta de apresentação",
   linkedin_summary: "Resumo LinkedIn",
   recruiter_message: "Mensagem para recrutador",
-  interview_prep: "Simular entrevista",
+  interview_prep: "Guia para entrevista",
   translate_resume: "Traduzir currículo"
 };
 

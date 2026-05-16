@@ -60,7 +60,7 @@ export const dashboardCopy: Record<Locale, {
       cover_letter: "Gerar carta de apresentação",
       linkedin_summary: "Gerar resumo de LinkedIn",
       recruiter_message: "Mensagem para recrutador",
-      interview_prep: "Simular entrevista",
+      interview_prep: "Guia para entrevista",
       translate_resume: "Traduzir/adaptar currículo"
     },
     themeTitle: "Aparência",
@@ -95,7 +95,7 @@ export const dashboardCopy: Record<Locale, {
       cover_letter: "Generate cover letter",
       linkedin_summary: "Generate LinkedIn summary",
       recruiter_message: "Recruiter message",
-      interview_prep: "Interview simulation",
+      interview_prep: "Interview guide",
       translate_resume: "Translate/adapt resume"
     },
     themeTitle: "Appearance",
@@ -130,7 +130,7 @@ export const dashboardCopy: Record<Locale, {
       cover_letter: "Generar carta de presentación",
       linkedin_summary: "Generar resumen de LinkedIn",
       recruiter_message: "Mensaje para reclutador",
-      interview_prep: "Simular entrevista",
+      interview_prep: "Guía para entrevista",
       translate_resume: "Traducir/adaptar currículum"
     },
     themeTitle: "Apariencia",
@@ -165,7 +165,7 @@ export const dashboardCopy: Record<Locale, {
       cover_letter: "Générer une lettre de motivation",
       linkedin_summary: "Générer un résumé LinkedIn",
       recruiter_message: "Message au recruteur",
-      interview_prep: "Simuler un entretien",
+      interview_prep: "Guide d’entretien",
       translate_resume: "Traduire/adapter le CV"
     },
     themeTitle: "Apparence",
