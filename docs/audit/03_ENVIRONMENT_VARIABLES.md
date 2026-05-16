@@ -18,7 +18,7 @@ Fonte analisada: `.env.example`, `lib/*`, rotas API e documentação.
 | `NEXT_PUBLIC_STRIPE_PRO_PRICE_ID` | Price ID Pro | Sim para checkout | Server/Frontend | Pública, não secreta. |
 | `NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID` | Price ID Elite | Sim para checkout | Server/Frontend | Pública, não secreta. |
 | `NEXT_PUBLIC_APP_URL` | URL canônica | Sim produção | Server/Frontend | Pública. Deve ser `https://www.globalhireai.com.br`. |
-| `ADMIN_EMAILS` | Admin por e-mail | Sim para admin fallback | Server/Vercel | Sensível operacional. |
+| `ADMIN_EMAILS` | Allowlist exclusiva para rotas `/admin` (servidor) | Sim para aceder ao painel admin | Server/Vercel | Sensível operacional. |
 | `ADMIN_BYPASS_EMAILS` | Bypass plano Elite | Dev/teste | Server/Vercel | Sensível; remover/restringir em produção pública. |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Site key Turnstile | Sim se captcha ativo | Frontend | Pública. |
 | `TURNSTILE_SECRET_KEY` | Secret Turnstile | Sim produção | Server/Vercel | Secreto crítico. |

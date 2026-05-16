@@ -32,12 +32,14 @@ Documentar como acessos administrativos e operacionais devem ser controlados.
 
 IMPLEMENTADO:
 
-- `ADMIN_EMAILS` libera acesso administrativo.
-- `ADMIN_BYPASS_EMAILS` permite testar recursos pagos sem cobrança.
+- **`ADMIN_EMAILS`** (servidor) é a **única** fonte de verdade para `/admin`, `/admin/growth` e `/api/admin/*`. Lista separada por vírgulas, case-insensitive. Se vazia, **ninguém** tem acesso admin (fail closed).
+- A coluna `profiles.is_admin` **não** é usada para autorizar estas rotas (evita admin por flag errada na base).
+- `ADMIN_BYPASS_EMAILS` continua separado: apenas simula plano Elite para testes (ver `lib/plans.ts`).
 
-Risco:
+Risco residual:
 
-- Configuração por env é simples e adequada para MVP, mas não gera trilha completa de auditoria.
+- Lista em variável de ambiente não gera, por si só, trilha completa de auditoria.
+- Erro de configuração (`ADMIN_EMAILS` vazio ou errado) bloqueia ou expõe admin conforme o valor.
 
 PENDENTE:
 
