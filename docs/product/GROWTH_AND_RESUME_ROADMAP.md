@@ -46,7 +46,7 @@
 | **4** | Humanização IA (prompts recruiter/cover/LinkedIn + tonelength). | Alto | Baixo–médio (só prompts + UI seletores). | Pendente |
 | **5** | PDF profissional server-side ou pipeline estável; remover dependência de `about:blank` onde existir. | Alto | Médio–alto | Pendente |
 | **6** | AI Review (scoring + sugestões + “aplicar”). | Alto | Médio | Pendente |
-| **7** | Renomear “Simular entrevista” → “Guia para entrevista” + UX do guia (cards). | Médio | Baixo | Pendente |
+| **7** | Renomear “Simular entrevista” → “Guia para entrevista” + UX do guia (cards). | Médio | Baixo | **Parcialmente entregue na Fase 2 limitada** (i18n + cartões + prompt); refinamentos posteriores opcionais. |
 | **8** | Cockpit **persistido** (Supabase `growth_*` tables) + automações leves se ainda fizer sentido. | Médio | Médio | Opcional / posterior |
 
 **Ordem ideal:** 1 → 2 → 3 → 4 em paralelo controlado com 5; 6 após preview estável; 7 a qualquer momento com baixo custo; 8 só se o MVP localStorage ficar pequeno para a operação.
