@@ -1,6 +1,7 @@
 import type { GenerationType } from "@/lib/types";
 
 export type PlanId = "free" | "starter" | "pro" | "elite";
+export type PlanFeature = GenerationType | "ats_score" | "keywords" | "resume_builder" | "resume_ai_writer";
 
 export const plans = {
   free: {
@@ -69,7 +70,7 @@ export const planRank: Record<PlanId, number> = {
   elite: 3
 };
 
-export const featureMinimumPlan: Record<GenerationType | "ats_score" | "keywords", PlanId> = {
+export const featureMinimumPlan: Record<PlanFeature, PlanId> = {
   ats_resume: "free",
   cover_letter: "free",
   linkedin_summary: "free",
@@ -77,7 +78,9 @@ export const featureMinimumPlan: Record<GenerationType | "ats_score" | "keywords
   interview_prep: "free",
   translate_resume: "free",
   ats_score: "free",
-  keywords: "free"
+  keywords: "free",
+  resume_builder: "free",
+  resume_ai_writer: "free"
 };
 
 export const generationTypeLabels: Record<GenerationType, string> = {
@@ -89,7 +92,7 @@ export const generationTypeLabels: Record<GenerationType, string> = {
   translate_resume: "Traduzir currículo"
 };
 
-export function canUseFeature(planId: PlanId, feature: GenerationType | "ats_score" | "keywords") {
+export function canUseFeature(planId: PlanId, feature: PlanFeature) {
   return planRank[planId] >= planRank[featureMinimumPlan[feature]];
 }
 

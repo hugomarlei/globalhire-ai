@@ -10,6 +10,7 @@ SaaS em Next.js para criar curriculos ATS, cartas de apresentacao, resumo de Lin
 - Backend seguro para Groq usando `GROQ_API_KEY` apenas no servidor.
 - Historico de geracoes salvo no Supabase.
 - Exportacao para PDF pelo navegador.
+- Construtor de curriculos em `/resumes` com CRUD, templates, cor principal, preview em tempo real, pontuacao ATS e assistente de escrita com Groq.
 - Stripe Checkout, assinatura mensal e webhook para atualizar plano.
 - Bloqueio por limite de uso mensal.
 - Painel admin para ver usuarios, geracoes, planos, receita estimada e bloquear usuarios.
@@ -72,6 +73,30 @@ http://localhost:3000
 10. No menu **Authentication > URL Configuration**, coloque:
     - Site URL local: `http://localhost:3000`
     - Depois no deploy: sua URL da Vercel.
+
+### Tabela de curriculos
+
+O construtor usa a tabela `public.resumes`, incluida em `supabase/schema.sql` e na migracao `supabase/migrations/202605260001_add_resumes.sql`.
+
+Para projetos existentes, aplique a migracao antes de usar `/resumes`. Ela cria:
+
+- `id`, `user_id`, `title`, `data`, `created_at`, `updated_at`.
+- RLS para cada usuario ler, criar, atualizar e excluir apenas os proprios curriculos.
+- Trigger de `updated_at` e indice por usuario.
+
+O campo `data` guarda o curriculo estruturado em JSON: dados pessoais, resumo, experiencias, educacao, habilidades, template, cor, idioma e descricao da vaga alvo.
+
+## Construtor de curriculos
+
+1. Acesse `/resumes`.
+2. Clique em **Criar curriculo**.
+3. Preencha informacoes pessoais, resumo, experiencias, educacao e habilidades.
+4. Cole a descricao da vaga para orientar a pontuacao ATS e as sugestoes de IA.
+5. Escolha template e cor principal.
+6. Use **Obter ajuda de escrita** em resumo, experiencia ou educacao para gerar bullets com Groq.
+7. Clique em **Salvar** e depois em **PDF** para exportar pelo navegador.
+
+As sugestoes de IA usam `POST /api/ai/suggest-description` e retornam apenas bullets JSON. O prompt exige o idioma selecionado e proibe inventar empresas, cargos, metricas, diplomas ou tecnologias.
 
 ## Como configurar Groq
 
