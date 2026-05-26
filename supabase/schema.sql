@@ -78,6 +78,15 @@ create table if not exists public.documents (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.resumes (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  title text not null,
+  data jsonb not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -118,11 +127,16 @@ drop trigger if exists documents_updated_at on public.documents;
 create trigger documents_updated_at before update on public.documents
 for each row execute procedure public.touch_updated_at();
 
+drop trigger if exists resumes_updated_at on public.resumes;
+create trigger resumes_updated_at before update on public.resumes
+for each row execute procedure public.touch_updated_at();
+
 alter table public.profiles enable row level security;
 alter table public.subscriptions enable row level security;
 alter table public.generations enable row level security;
 alter table public.usage_limits enable row level security;
 alter table public.documents enable row level security;
+alter table public.resumes enable row level security;
 alter table public.rate_limits enable row level security;
 
 drop policy if exists "Users can read own profile" on public.profiles;
@@ -171,6 +185,24 @@ drop policy if exists "Users can delete own generations" on public.generations;
 create policy "Users can delete own generations" on public.generations
 for delete using (auth.uid() = user_id);
 
+drop policy if exists "Users can read own resumes" on public.resumes;
+create policy "Users can read own resumes" on public.resumes
+for select using (auth.uid() = user_id);
+
+drop policy if exists "Users can insert own resumes" on public.resumes;
+create policy "Users can insert own resumes" on public.resumes
+for insert with check (auth.uid() = user_id);
+
+drop policy if exists "Users can update own resumes" on public.resumes;
+create policy "Users can update own resumes" on public.resumes
+for update using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+drop policy if exists "Users can delete own resumes" on public.resumes;
+create policy "Users can delete own resumes" on public.resumes
+for delete using (auth.uid() = user_id);
+
 create index if not exists generations_user_created_idx on public.generations(user_id, created_at desc);
 create index if not exists subscriptions_user_idx on public.subscriptions(user_id);
 create index if not exists rate_limits_reset_at_idx on public.rate_limits(reset_at);
+create index if not exists resumes_user_updated_idx on public.resumes(user_id, updated_at desc);

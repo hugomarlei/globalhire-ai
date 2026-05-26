@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { BarChart3, BookOpenText, BriefcaseBusiness, ChevronDown, FileClock, Gauge, Globe2, Languages, LayoutDashboard, LifeBuoy, Linkedin, LogOut, MailPlus, Menu, MessageSquareText, MessagesSquare, Settings, ShieldCheck, UserCircle, Video } from "lucide-react";
+import { BarChart3, BookOpenText, BriefcaseBusiness, ChevronDown, FileClock, FileText, Gauge, Globe2, Languages, LayoutDashboard, LifeBuoy, Linkedin, LogOut, MailPlus, Menu, MessageSquareText, MessagesSquare, Settings, ShieldCheck, UserCircle, Video } from "lucide-react";
 import { brandIcon } from "@/lib/brand-assets";
 import { dashboardCopy, locales, navCopy, type Locale } from "@/lib/i18n";
 import { appNavStrings } from "@/lib/i18n-app-wide";
@@ -105,6 +105,7 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
     {
       label: n.documents,
       items: [
+        { href: "/resumes", label: "Currículos", Icon: FileText },
         { href: "/historico", label: n.history, Icon: FileClock },
         { href: "/historico?tab=documentos", label: n.myDocuments, Icon: MessageSquareText }
       ]
