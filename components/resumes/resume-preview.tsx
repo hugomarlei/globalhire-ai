@@ -62,6 +62,18 @@ export function ResumePreview({ data, printable = false }: { data: ResumeData; p
                 </div>
               ))}
             </div>
+            {data.certifications.length ? (
+              <div>
+                <h2 className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">Certifications</h2>
+                {data.certifications.filter((item) => item.name || item.issuer).map((item) => (
+                  <div key={item.id} className="mb-3">
+                    <p className="font-semibold">{item.name || "Certificação"}</p>
+                    <p className="text-white/85">{item.issuer}</p>
+                    <p className="text-xs text-white/70">{item.date}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -107,6 +119,20 @@ export function ResumePreview({ data, printable = false }: { data: ResumeData; p
         {!sidebar ? (
           <Section title="Habilidades" color={color}>
             <p className="text-sm leading-6 text-slate-700">{data.skills.join(" | ") || "Adicione habilidades relevantes"}</p>
+          </Section>
+        ) : null}
+
+        {!sidebar && data.certifications.length ? (
+          <Section title="Certificações" color={color}>
+            <div className="space-y-3">
+              {data.certifications.filter((item) => item.name || item.issuer || item.description).map((item) => (
+                <div key={item.id}>
+                  <h3 className="text-sm font-bold">{[item.name, item.issuer].filter(Boolean).join(" - ") || "Certificação"}</h3>
+                  <p className="text-xs text-slate-500">{[item.date, item.credentialUrl].filter(Boolean).join(" | ")}</p>
+                  {item.description ? <p className="mt-1 text-sm leading-6 text-slate-700">{item.description}</p> : null}
+                </div>
+              ))}
+            </div>
           </Section>
         ) : null}
       </div>

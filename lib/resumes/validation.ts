@@ -34,6 +34,14 @@ export const resumeDataSchema = z.object({
     end: z.string().max(40).default(""),
     description: z.string().max(3000).default("")
   })).max(20).default([]),
+  certifications: z.array(z.object({
+    id: z.string().min(1),
+    name: z.string().max(180).default(""),
+    issuer: z.string().max(180).default(""),
+    date: z.string().max(40).default(""),
+    credentialUrl: z.string().max(400).default(""),
+    description: z.string().max(3000).default("")
+  })).max(30).default([]),
   skills: z.array(z.string().max(80)).max(80).default([])
 });
 
@@ -48,10 +56,25 @@ export const resumeUpdateSchema = z.object({
 });
 
 export const suggestDescriptionSchema = z.object({
-  section: z.enum(["summary", "experience", "education"]),
+  section: z.enum(["summary", "experience", "education", "certification"]),
   role: z.string().max(160).default(""),
   company: z.string().max(160).default(""),
   currentDescription: z.string().max(6000).default(""),
   jobDescription: z.string().max(20000).default(""),
   language: z.string().min(2).max(40).default("pt-BR")
+});
+
+export const reviewResumeSchema = z.object({
+  data: resumeDataSchema,
+  language: z.string().min(2).max(40).default("pt-BR")
+});
+
+export const resumeChatSchema = z.object({
+  data: resumeDataSchema,
+  language: z.string().min(2).max(40).default("pt-BR"),
+  question: z.string().min(2).max(4000),
+  history: z.array(z.object({
+    role: z.enum(["user", "assistant"]),
+    content: z.string().max(4000)
+  })).max(10).default([])
 });

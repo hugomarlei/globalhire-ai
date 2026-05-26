@@ -18,7 +18,8 @@ export function calculateResumeScore(data: ResumeData) {
     data.summary.trim().length >= 180,
     data.experience.some((item) => item.role && item.company && item.description.length >= 120),
     data.education.some((item) => item.degree && item.school),
-    data.skills.length >= 6
+    data.skills.length >= 6,
+    data.certifications.length > 0 || text.length > 2200
   ];
   const completeness = checks.filter(Boolean).length / checks.length;
   const keywordMatch = jdWords.length ? matched.length / Math.min(jdWords.length, 45) : 0.6;

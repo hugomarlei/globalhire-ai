@@ -1,4 +1,4 @@
-import type { ResumeData, ResumeEducation, ResumeExperience, ResumeTemplateKey } from "@/lib/resumes/types";
+import type { ResumeCertification, ResumeData, ResumeEducation, ResumeExperience, ResumeTemplateKey } from "@/lib/resumes/types";
 
 export const resumeTemplates: Array<{ key: ResumeTemplateKey; label: string }> = [
   { key: "classic", label: "Classic" },
@@ -38,6 +38,17 @@ export function emptyEducation(): ResumeEducation {
   };
 }
 
+export function emptyCertification(): ResumeCertification {
+  return {
+    id: makeId(),
+    name: "",
+    issuer: "",
+    date: "",
+    credentialUrl: "",
+    description: ""
+  };
+}
+
 export function defaultResumeData(): ResumeData {
   return {
     language: "pt-BR",
@@ -56,6 +67,7 @@ export function defaultResumeData(): ResumeData {
     summary: "",
     experience: [emptyExperience()],
     education: [emptyEducation()],
+    certifications: [],
     skills: []
   };
 }
@@ -89,6 +101,9 @@ export function normalizeResumeData(input: unknown): ResumeData {
     education: Array.isArray(data.education) && data.education.length
       ? data.education.map((item) => ({ ...emptyEducation(), ...item, id: item.id || makeId() })).slice(0, 20)
       : base.education,
+    certifications: Array.isArray(data.certifications)
+      ? data.certifications.map((item) => ({ ...emptyCertification(), ...item, id: item.id || makeId() })).slice(0, 30)
+      : base.certifications,
     skills
   };
 }
@@ -104,6 +119,7 @@ export function resumeToPlainText(data: ResumeData) {
     data.summary,
     ...data.experience.flatMap((item) => [item.role, item.company, item.location, item.description]),
     ...data.education.flatMap((item) => [item.degree, item.school, item.location, item.description]),
+    ...data.certifications.flatMap((item) => [item.name, item.issuer, item.date, item.description]),
     data.skills.join(", ")
   ];
 

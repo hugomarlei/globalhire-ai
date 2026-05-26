@@ -4,8 +4,7 @@ import { createClient } from "@/lib/supabase-server";
 import { buildRateLimitKey, cooldownLimit } from "@/lib/rate-limit";
 import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
 import { suggestDescriptionSchema } from "@/lib/resumes/validation";
-import { canUseFeature, effectivePlanFromSubscription, featureMinimumPlan, plans } from "@/lib/plans";
-import { getLatestActiveSubscription } from "@/lib/subscription-state";
+import { assertResumeAiAccess } from "@/lib/resumes/ai-access";
 
 function parseJsonArray(value: string) {
   try {
@@ -36,17 +35,8 @@ export async function POST(request: NextRequest) {
     const parsed = suggestDescriptionSchema.safeParse(await request.json());
     if (!parsed.success) return NextResponse.json({ error: parsed.error.errors[0]?.message || "Dados invalidos." }, { status: 400 });
 
-    const [{ data: profile }, subscription] = await Promise.all([
-      supabase.from("profiles").select("plan,is_blocked").eq("id", user.id).single(),
-      getLatestActiveSubscription(supabase, user.id)
-    ]);
-    if (profile?.is_blocked) return NextResponse.json({ error: "Conta bloqueada." }, { status: 403 });
-    const planId = effectivePlanFromSubscription(profile?.plan, subscription?.plan, subscription?.status, user.email);
-    if (!canUseFeature(planId, "resume_ai_writer")) {
-      return NextResponse.json({
-        error: `Este assistente esta disponivel a partir do plano ${plans[featureMinimumPlan.resume_ai_writer].name}.`
-      }, { status: 403 });
-    }
+    const accessError = await assertResumeAiAccess(supabase, user, "resume_ai_writer");
+    if (accessError) return accessError;
 
     if (!process.env.GROQ_API_KEY) {
       return NextResponse.json({ error: "GROQ_API_KEY nao configurada no servidor." }, { status: 500 });

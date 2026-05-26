@@ -10,7 +10,7 @@ SaaS em Next.js para criar curriculos ATS, cartas de apresentacao, resumo de Lin
 - Backend seguro para Groq usando `GROQ_API_KEY` apenas no servidor.
 - Historico de geracoes salvo no Supabase.
 - Exportacao para PDF pelo navegador.
-- Construtor de curriculos em `/resumes` com CRUD, templates, cor principal, preview em tempo real, pontuacao ATS e assistente de escrita com Groq.
+- Construtor de curriculos em `/resumes` com CRUD, importacao PDF/DOCX, templates, cor principal, preview em tempo real, pontuacao ATS, certificacoes, revisao de IA, chat com IA e assistente de escrita com Groq.
 - Stripe Checkout, assinatura mensal e webhook para atualizar plano.
 - Bloqueio por limite de uso mensal.
 - Painel admin para ver usuarios, geracoes, planos, receita estimada e bloquear usuarios.
@@ -90,13 +90,19 @@ O campo `data` guarda o curriculo estruturado em JSON: dados pessoais, resumo, e
 
 1. Acesse `/resumes`.
 2. Clique em **Criar curriculo**.
-3. Preencha informacoes pessoais, resumo, experiencias, educacao e habilidades.
-4. Cole a descricao da vaga para orientar a pontuacao ATS e as sugestoes de IA.
-5. Escolha template e cor principal.
-6. Use **Obter ajuda de escrita** em resumo, experiencia ou educacao para gerar bullets com Groq.
-7. Clique em **Salvar** e depois em **PDF** para exportar pelo navegador.
+3. Opcionalmente importe um PDF/DOCX existente. O app extrai o texto e preenche nome, contato, experiencias, educacao, habilidades e certificacoes quando consegue identificar essas secoes.
+4. Preencha ou ajuste informacoes pessoais, resumo, experiencias, educacao, certificacoes e habilidades.
+5. Cole a descricao da vaga para orientar a pontuacao ATS e as sugestoes de IA.
+6. Escolha template e cor principal.
+7. Reordene experiencias, educacao e certificacoes arrastando os cards; use os controles para expandir, contrair ou excluir entradas.
+8. Use **Obter ajuda de escrita** em resumo, experiencia, educacao ou certificacao para gerar bullets com Groq.
+9. Abra **Revisao de IA** para avaliar estrutura e organizacao, conteudo e clareza, e posicionamento de cargo. O usuario pode aceitar ou rejeitar as sugestoes.
+10. Use **Falar com a IA** para conversar sobre ajustes de carreira e texto dentro do editor.
+11. Clique em **Salvar** e depois em **PDF** para exportar pelo navegador.
 
 As sugestoes de IA usam `POST /api/ai/suggest-description` e retornam apenas bullets JSON. O prompt exige o idioma selecionado e proibe inventar empresas, cargos, metricas, diplomas ou tecnologias.
+`POST /api/ai/review-resume` retorna um relatorio estruturado e uma versao melhorada conservadora do JSON do curriculo.
+`POST /api/ai/resume-chat` responde perguntas abertas sobre o curriculo, respeitando o idioma escolhido e as mesmas regras de nao inventar dados.
 
 ## Como configurar Groq
 

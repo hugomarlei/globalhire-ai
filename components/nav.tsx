@@ -92,7 +92,8 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
         { href: "/gerador?tipo=linkedin_summary", label: n.toolLinkedin, Icon: Linkedin },
         { href: "/gerador?tipo=recruiter_message", label: n.toolRecruiter, Icon: MessagesSquare },
         { href: "/gerador?tipo=interview_prep", label: n.toolInterview, Icon: Video },
-        { href: "/gerador?tipo=translate_resume", label: n.toolTranslate, Icon: Languages }
+        { href: "/gerador?tipo=translate_resume", label: n.toolTranslate, Icon: Languages },
+        { href: "/resumes", label: "Construtor de currículos", Icon: FileText }
       ]
     },
     {
@@ -105,7 +106,6 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
     {
       label: n.documents,
       items: [
-        { href: "/resumes", label: "Currículos", Icon: FileText },
         { href: "/historico", label: n.history, Icon: FileClock },
         { href: "/historico?tab=documentos", label: n.myDocuments, Icon: MessageSquareText }
       ]

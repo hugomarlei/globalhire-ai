@@ -30,6 +30,15 @@ export type ResumeEducation = {
   description: string;
 };
 
+export type ResumeCertification = {
+  id: string;
+  name: string;
+  issuer: string;
+  date: string;
+  credentialUrl: string;
+  description: string;
+};
+
 export type ResumeData = {
   language: string;
   targetRole: string;
@@ -40,6 +49,7 @@ export type ResumeData = {
   summary: string;
   experience: ResumeExperience[];
   education: ResumeEducation[];
+  certifications: ResumeCertification[];
   skills: string[];
 };
 
