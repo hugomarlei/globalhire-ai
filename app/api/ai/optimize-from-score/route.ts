@@ -6,6 +6,7 @@ import { groq, GROQ_MODEL } from "@/lib/groq";
 import { canUseFeature, effectivePlanFromSubscription, optimizationIntensity, plans } from "@/lib/plans";
 import { buildRateLimitKey, cooldownLimit } from "@/lib/rate-limit";
 import { parseAiOutput } from "@/lib/document-format";
+import { buildQualityRevisionPrompt, evaluateGeneratedAsset } from "@/lib/ai-output-quality";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { getLatestActiveSubscription } from "@/lib/subscription-state";
 import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
@@ -126,7 +127,7 @@ Obrigatório: use estes achados para reescrever o currículo de forma mais forte
         {
           role: "system",
           content:
-            "Você é um especialista sênior em ATS e currículo internacional. Reescreva com base nos achados do score, sem inventar fatos. Preserve cabeçalho com telefone, e-mail e localização quando existirem no currículo. Use apenas o idioma solicitado no pedido."
+            "Você é um especialista sênior em ATS, currículo internacional e recrutamento. Reescreva com base nos achados do score para gerar melhoria real, não maquiagem textual. Preserve fatos, cabeçalho, telefone, e-mail e localização quando existirem. Incorpore lacunas de palavras-chave somente quando forem compatíveis com a experiência do candidato. Use apenas o idioma solicitado e entregue um currículo limpo para ATS e convincente para recrutador humano."
         },
         { role: "user", content: prompt }
       ],
@@ -136,8 +137,56 @@ Obrigatório: use estes achados para reescrever o currículo de forma mais forte
     const rawOutput = completion.choices[0]?.message?.content?.trim() || "";
     if (!rawOutput) return NextResponse.json({ error: "A IA não retornou conteúdo." }, { status: 500 });
 
-    const { document, recommendations } = parseAiOutput(rawOutput);
+    let { document, recommendations } = parseAiOutput(rawOutput);
     if (!document) return NextResponse.json({ error: "A IA não retornou um currículo válido." }, { status: 500 });
+    let quality = evaluateGeneratedAsset({
+      type: "ats_resume",
+      resume: parsed.data.resume,
+      jobDescription: parsed.data.jobDescription,
+      document,
+      recommendations
+    });
+
+    if (quality.shouldRevise) {
+      const revision = await groq.chat.completions.create({
+        model: GROQ_MODEL,
+        messages: [
+          {
+            role: "system",
+            content:
+              "Você é um auditor e rewriter sênior de currículos ATS. Corrija a versão reprovada com melhoria real, alinhamento à vaga e preservação estrita de fatos."
+          },
+          {
+            role: "user",
+            content: buildQualityRevisionPrompt({
+              type: "ats_resume",
+              resume: parsed.data.resume,
+              jobDescription: parsed.data.jobDescription,
+              document,
+              recommendations,
+              quality,
+              language: parsed.data.language
+            })
+          }
+        ],
+        temperature: 0.18
+      });
+      const revised = parseAiOutput(revision.choices[0]?.message?.content?.trim() || "");
+      if (revised.document) {
+        const revisedQuality = evaluateGeneratedAsset({
+          type: "ats_resume",
+          resume: parsed.data.resume,
+          jobDescription: parsed.data.jobDescription,
+          document: revised.document,
+          recommendations: revised.recommendations
+        });
+        if (revisedQuality.score >= quality.score) {
+          document = revised.document;
+          recommendations = revised.recommendations;
+          quality = revisedQuality;
+        }
+      }
+    }
     const appliedImprovements = scoreAppliedImprovements(recommendations);
 
     await supabase.from("generations").insert({
@@ -150,7 +199,7 @@ Obrigatório: use estes achados para reescrever o currículo de forma mais forte
       output: document
     });
 
-    return NextResponse.json({ output: document, appliedImprovements, saved: true });
+    return NextResponse.json({ output: document, appliedImprovements, saved: true, quality });
   } catch (error) {
     console.error("score_optimize_error", error);
     return NextResponse.json({ error: "Erro interno ao otimizar o currículo." }, { status: 500 });

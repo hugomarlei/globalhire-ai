@@ -19,11 +19,11 @@ export function normalizeVercelHost(raw?: string | null): string | null {
 }
 
 /**
- * Public https origins for the current Vercel Preview deployment only
- * (browser Origin must match one of these on preview).
+ * Public https origins for the current Vercel deployment.
+ * Vercel production deployments also expose a unique deployment URL, and requests
+ * from that URL must pass CSRF when QA uses it directly.
  */
 export function listVercelPreviewPublicOrigins(): string[] {
-  if (process.env.VERCEL_ENV !== "preview") return [];
   const hosts = new Set<string>();
   for (const key of ["VERCEL_URL", "VERCEL_BRANCH_URL"] as const) {
     const host = normalizeVercelHost(process.env[key]);

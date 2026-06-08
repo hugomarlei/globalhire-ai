@@ -6,6 +6,7 @@ import { groq, GROQ_MODEL } from "@/lib/groq";
 import { canUseFeature, effectivePlanFromSubscription, featureMinimumPlan, optimizationIntensity, plans } from "@/lib/plans";
 import { buildRateLimitKey, cooldownLimit } from "@/lib/rate-limit";
 import { parseAiOutput } from "@/lib/document-format";
+import { buildQualityRevisionPrompt, evaluateGeneratedAsset } from "@/lib/ai-output-quality";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { getLatestActiveSubscription } from "@/lib/subscription-state";
 import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
         {
           role: "system",
           content:
-            "Voce e um estrategista senior de carreira internacional. Seu trabalho e adaptar documentos ao alvo da vaga, nao apenas reescrever texto. Preserve somente fatos verdadeiros. Preserve telefone, e-mail e cidade/localizacao do candidato quando constarem no material de entrada (pode reformatar para ATS, nao omitir por omissao). O documento final deve estar inteiramente no idioma solicitado no pedido, sem misturar outro idioma."
+            "Voce e um estrategista senior de carreira internacional, ATS e recrutamento. Seu trabalho e entregar melhoria real, nao reescrita cosmetica. Adapte documentos ao alvo da vaga, preserve somente fatos verdadeiros e incorpore palavras-chave apenas quando sustentadas pelo historico do candidato. Preserve telefone, e-mail e cidade/localizacao quando constarem no material de entrada. O documento final deve estar inteiramente no idioma solicitado, limpo para ATS e convincente para recrutador humano."
         },
         { role: "user", content: prompt }
       ],
@@ -121,9 +122,58 @@ export async function POST(request: NextRequest) {
     const rawOutput = completion.choices[0]?.message?.content?.trim() || "";
     if (!rawOutput) return NextResponse.json({ error: "A IA nao retornou conteudo." }, { status: 500 });
 
-    const { document, recommendations } = parseAiOutput(rawOutput);
-    const appliedImprovements = scoreAppliedImprovements(recommendations);
+    let { document, recommendations } = parseAiOutput(rawOutput);
     if (!document) return NextResponse.json({ error: "A IA nao retornou um documento valido." }, { status: 500 });
+    let quality = evaluateGeneratedAsset({
+      type: parsed.data.type,
+      resume: parsed.data.resume,
+      jobDescription: parsed.data.jobDescription,
+      document,
+      recommendations
+    });
+
+    if (quality.shouldRevise) {
+      const revision = await groq.chat.completions.create({
+        model: GROQ_MODEL,
+        messages: [
+          {
+            role: "system",
+            content:
+              "Voce e um auditor e rewriter senior de curriculos, ATS e assets de candidatura. Corrija apenas com fatos sustentados. Entregue uma versao mais forte, especifica, humana e alinhada a vaga."
+          },
+          {
+            role: "user",
+            content: buildQualityRevisionPrompt({
+              type: parsed.data.type,
+              resume: parsed.data.resume,
+              jobDescription: parsed.data.jobDescription,
+              document,
+              recommendations,
+              quality,
+              language: parsed.data.language
+            })
+          }
+        ],
+        temperature: 0.18
+      });
+      const revised = parseAiOutput(revision.choices[0]?.message?.content?.trim() || "");
+      if (revised.document) {
+        const revisedQuality = evaluateGeneratedAsset({
+          type: parsed.data.type,
+          resume: parsed.data.resume,
+          jobDescription: parsed.data.jobDescription,
+          document: revised.document,
+          recommendations: revised.recommendations
+        });
+        if (revisedQuality.score >= quality.score) {
+          document = revised.document;
+          recommendations = revised.recommendations;
+          quality = revisedQuality;
+        }
+      }
+    }
+
+    const appliedImprovements = scoreAppliedImprovements(recommendations);
 
     await supabase.from("generations").insert({
       user_id: user.id,
@@ -139,7 +189,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       output: document,
       appliedImprovements,
-      recommendations: appliedImprovements
+      recommendations: appliedImprovements,
+      quality
     });
   } catch (error) {
     console.error("ai_generate_error", error);

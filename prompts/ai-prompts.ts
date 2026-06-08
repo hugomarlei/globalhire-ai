@@ -65,6 +65,25 @@ const labels: Record<GenerationType, string> = {
   translate_resume: "tradução e adaptação internacional do currículo"
 };
 
+const transformationQualityGate = `
+=== Porta de qualidade antes de responder ===
+Antes de entregar, avalie internamente o documento final contra estes criterios. Nao mostre esta auditoria ao usuario; use-a para revisar e melhorar a propria saida antes de responder.
+
+Meta minima: o documento final deve atingir pelo menos 90% de aderencia a estes criterios:
+1. Melhoria real: o material precisa ficar mais claro, competitivo e orientado ao cargo do que o curriculo/base. Se for apenas sinonimo, reorganizacao pequena ou maquiagem textual, reescreva novamente.
+2. Alinhamento com a vaga: extraia responsabilidades, senioridade, competencias, ferramentas, palavras-chave ATS e contexto da descricao da vaga. Use somente os termos que forem sustentados pelo historico real do candidato.
+3. Escrita ATS e humana: use secoes padrao, cargos claros, palavras-chave naturais e bullets escaneaveis. Evite texto com cheiro de IA: frases genericas, promessas vazias, adjetivos sem prova, repeticao mecanica e buzzwords sem evidencias.
+4. Valor para recrutador: cada bloco importante deve responder "por que esta pessoa faz sentido para esta vaga?" com evidencia, escopo, impacto, ferramentas, stakeholders, processos ou contexto.
+5. Transformacao do curriculo: reposicione resumo, competencias e experiencias para destacar o que mais combina com a vaga; reduza informacao pouco relevante sem apagar fatos importantes.
+6. Golden rule de curriculo forte: bullets devem preferir acao + contexto + impacto/escopo + ferramenta/metodo quando houver base. Quando numero nao existir, nao invente; use impacto qualitativo concreto ou placeholder seguro.
+7. Veracidade: nao crie empresas, cargos, certificacoes, diplomas, senioridade, tecnologias, idiomas, resultados, premios ou metricas. Se uma lacuna impedir otimizacao, use formulacao honesta ou placeholder explicito.
+8. Aceitacao por ATS e empresa: mantenha formato limpo, sem tabelas, sem arte, sem excesso de simbolos, sem keyword stuffing e sem afirmacoes que parecam fraudulentas.
+9. Prova de especificidade: substitua responsabilidades vagas por bullets com verbos fortes e contexto real. Inclua termos e experiencias condizentes com perfil, trajetoria e curriculo do candidato.
+10. Revisao final: compare mentalmente o resultado com curriculos fortes e atuais usados em candidaturas internacionais: densidade suficiente, leitura rapida, ordem estrategica, linguagem natural e evidencia verificavel.
+
+Se qualquer criterio critico falhar, corrija o documento final antes de responder. Nunca diga que algo foi melhorado se a melhoria nao aparece no documento final.
+`.trim();
+
 const deliveryGuidance: Record<GenerationType, string> = {
   ats_resume: `
 Entrega: currículo ATS internacional.
@@ -73,21 +92,28 @@ Estrutura recomendada quando houver dados suficientes:
 NOME DO PROFISSIONAL
 Target Role: cargo-alvo alinhado à vaga
 Contacto / cabeçalho: telefone, e-mail, cidade/localização e links profissionais exatamente como constarem no currículo de origem (ajuste só formatação ATS, não apague dados reais).
-Professional Summary
-Core Skills
-Professional Experience
-Education
-Certifications
-Languages
+Resumo profissional / Professional Summary
+Competências principais / Core Skills
+Experiência profissional / Professional Experience
+Formação / Education
+Certificações / Certifications
+Idiomas / Languages
+
+Use os títulos no idioma final solicitado. Os rótulos em inglês acima são apenas referência quando o idioma final for inglês.
 
 Regras especificas:
 - Cabeçalho: preserve telefone, e-mail, cidade ou região e links que o candidato já forneceu. Não omita por conveniência. Não invente dados que não existam na fonte.
 - O resumo profissional deve ter 4 a 6 linhas densas, conectando experiencia real ao cargo-alvo.
 - Core Skills deve refletir palavras-chave importantes da vaga, mas somente quando compatíveis com a experiência do candidato.
 - Reescreva bullets com linguagem forte, orientada a impacto, escopo, ferramentas, stakeholders, resultados e senioridade.
-- Cada experiência relevante deve ter bullets suficientes para vender o candidato. Não resuma demais.
+- Cada experiência relevante deve ter bullets suficientes para vender o candidato, normalmente 3 a 6 por cargo relevante quando houver base factual. Não resuma demais.
+- Não apague experiências profissionais do currículo original para encurtar a resposta. Preserve todas as empresas/cargos reais; compacte cargos menos aderentes com 2 a 3 bullets, mas não remova histórico técnico/comercial relevante.
+- Para vagas técnicas B2B/industriais, preserve e reposicione experiências com automação, vendas técnicas, aplicação, manutenção, confiabilidade, treinamento técnico, válvulas, motores, CLP, inversores, bombas, sistemas pneumáticos, IIoT ou relacionamento com clientes industriais.
+- Inclua uma hierarquia clara: cargos mais aderentes a vaga devem receber mais densidade; cargos menos aderentes devem ser preservados de forma mais compacta.
+- O resultado deve parecer um curriculo escrito por um bom resume writer humano: direto, verificavel, denso e sem promessas exageradas.
 - Se houver descrição da vaga, priorize experiências e habilidades mais alinhadas a ela.
 - Se o currículo tiver muitas informações irrelevantes para a vaga, reduza o peso delas sem apagar fatos importantes.
+- Nunca escreva seções depreciativas como "Nenhum certificado relevante", "sem certificações relevantes" ou equivalentes. Se não houver certificações, omita a seção.
 - Localização: não invente cidade ou país. Se o candidato indicou cidade no material de origem, mantenha-a (pode normalizar capitalização). Se não houver cidade, use país/região ou "disponível para remoto" apenas quando isso já estiver implícito ou for o país-alvo informado.
 `,
   cover_letter: `
@@ -186,9 +212,12 @@ Regras de qualidade:
 - Se a entrega for currículo ATS, priorize esta estrutura quando houver informação suficiente: Professional Summary, Core Skills, Professional Experience, Education, Certifications, Languages.
 - Cada bullet de experiencia deve tentar conectar acao, contexto e impacto. Quando nao houver numero, mantenha a frase forte e honesta.
 - As melhorias aplicadas devem explicar quais transformações você já fez no documento final.
-- Cada melhoria aplicada deve começar com um impacto estimado entre colchetes, no formato "[12%]". Esse percentual representa a melhora estimada daquela alteração para a vaga-alvo.
+- Cada melhoria aplicada deve começar com um impacto estimado entre colchetes, no formato "[12%]". Esse percentual representa a melhora estimada daquela alteração para a vaga-alvo, nao uma garantia de entrevista ou contratacao.
+- Cada melhoria aplicada deve citar uma mudanca verificavel do documento final: exemplo, "reposicionei X", "incorporei Y", "densifiquei Z". Nao liste boas praticas genericas.
 - O documento final deve ser completo o bastante para candidatura. Evite respostas curtas demais.
 - Insira uma linha em branco entre a linha de localizacao/availability e a secao de resumo profissional, quando ambas existirem.
+
+${transformationQualityGate}
 
 ${guidance}
 

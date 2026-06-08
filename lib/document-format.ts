@@ -23,6 +23,14 @@ function extractImprovementSection(value: string) {
   );
 }
 
+function stripNonDocumentSections(value: string) {
+  return value
+    .replace(/<APPLIED_IMPROVEMENTS>\s*[\s\S]*?<\/APPLIED_IMPROVEMENTS>/gi, "")
+    .replace(/<RECOMMENDATIONS>\s*[\s\S]*?<\/RECOMMENDATIONS>/gi, "")
+    .replace(/\n\s*(?:#{1,6}\s*)?(?:\*\*)?(?:Melhorias aplicadas|Melhorias recomendadas|Recomendacoes|Recomendações|Recommendations|Applied Improvements)(?:\*\*)?\s*:?\s*\n[\s\S]*$/i, "")
+    .trim();
+}
+
 function unescapeJsonLikeString(value: string) {
   return value
     .replace(/\\n/g, "\n")
@@ -49,7 +57,7 @@ function extractMalformedJsonField(value: string, field: string) {
 }
 
 export function normalizeDocumentText(value: string) {
-  return value
+  return stripNonDocumentSections(value)
     .replace(/\r\n/g, "\n")
     .replace(/^\s*```(?:text|markdown)?\s*/i, "")
     .replace(/\s*```\s*$/i, "")
@@ -59,7 +67,7 @@ export function normalizeDocumentText(value: string) {
         .replace(/^\s*{\s*$/, "")
         .replace(/^\s*["']?(?:final_document|document)["']?\s*:\s*["']?/i, "")
         .replace(/^\s*["']?(?:recommendations|melhorias_recomendadas)["']?\s*:\s*\[?/i, "")
-        .replace(/^\s*<\/?(?:DOCUMENT_FINAL|RECOMMENDATIONS)>\s*$/i, "")
+        .replace(/^\s*<\/?(?:DOCUMENT_FINAL|RECOMMENDATIONS|APPLIED_IMPROVEMENTS)>\s*$/i, "")
         .replace(/^\s*\+\s?/, "")
         .replace(/^\s*[-*]\s+/, "• ")
         .replace(/^#{1,6}\s+/, "")

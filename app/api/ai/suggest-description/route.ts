@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         {
           role: "system",
           content:
-            "Voce e um resume writer senior. Responda apenas com JSON valido: array de strings. Use estritamente o idioma solicitado. Nao invente empresas, cargos, metricas, diplomas ou tecnologias. Quando faltar dado, escreva de forma honesta e especifica sem criar fatos."
+            "Voce e um resume writer senior especialista em ATS e recrutamento internacional. Responda apenas com JSON valido: array de strings. Use estritamente o idioma solicitado. Nao invente empresas, cargos, metricas, diplomas, senioridade ou tecnologias. Quando faltar dado, escreva de forma honesta e especifica sem criar fatos. Cada bullet deve melhorar o curriculo de verdade: acao, contexto, impacto/escopo e termos da vaga apenas quando forem sustentados pelo input."
         },
         {
           role: "user",
@@ -64,7 +64,10 @@ export async function POST(request: NextRequest) {
               "Retorne somente um array JSON de strings.",
               "Nao misture idiomas.",
               "Nao invente fatos, numeros, ferramentas ou responsabilidades nao sustentadas pelo input.",
-              "Incorpore termos relevantes da vaga somente quando forem compatíveis com o input."
+              "Incorpore termos relevantes da vaga somente quando forem compatíveis com o input.",
+              "Evite bullets genericos que parecam IA: nada de buzzwords sem prova, adjetivos soltos ou frase que poderia servir para qualquer pessoa.",
+              "Antes de responder, compare os bullets com a descricao atual. Se nao houver ganho claro de ATS, clareza ou valor para recrutador, reescreva.",
+              "Quando uma metrica seria util mas nao existe no input, use placeholder seguro como [insira metrica] somente se isso nao soar falso."
             ]
           })
         }

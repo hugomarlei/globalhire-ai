@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase-server";
 import { groq, GROQ_MODEL } from "@/lib/groq";
 import { canUseFeature, effectivePlanFromSubscription, featureMinimumPlan, optimizationIntensity, plans } from "@/lib/plans";
 import { parseAiOutput } from "@/lib/document-format";
+import { buildQualityRevisionPrompt, evaluateGeneratedAsset } from "@/lib/ai-output-quality";
 import { buildRateLimitKey, cooldownLimit } from "@/lib/rate-limit";
 import type { GenerationType } from "@/lib/types";
 import { verifyTurnstileToken } from "@/lib/turnstile";
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: "Você regenera documentos profissionais mantendo contexto, fatos verdadeiros e melhorando a versão anterior. Preserve telefone, e-mail e cidade/localização quando constarem no documento de origem. Mantenha um único idioma, o mesmo do pedido."
+          content: "Você regenera documentos profissionais mantendo contexto e fatos verdadeiros, mas precisa entregar uma versão materialmente melhor que a anterior. Preserve telefone, e-mail e cidade/localização quando constarem no documento de origem. Evite reescrita cosmética, buzzwords vazias e frases genéricas de IA. Mantenha um único idioma, o mesmo do pedido, com formato limpo para ATS e leitura humana."
         },
         { role: "user", content: prompt }
       ],
@@ -128,8 +129,56 @@ export async function POST(request: NextRequest) {
     });
 
     const rawOutput = completion.choices[0]?.message?.content?.trim() || "";
-    const { document, recommendations } = parseAiOutput(rawOutput);
+    let { document, recommendations } = parseAiOutput(rawOutput);
     if (!document) return NextResponse.json({ error: "A IA não retornou um documento válido." }, { status: 500 });
+    let quality = evaluateGeneratedAsset({
+      type,
+      resume: original.input_resume,
+      jobDescription: original.job_description || "",
+      document,
+      recommendations
+    });
+
+    if (quality.shouldRevise) {
+      const revision = await groq.chat.completions.create({
+        model: GROQ_MODEL,
+        messages: [
+          {
+            role: "system",
+            content:
+              "Você é um auditor e rewriter sênior de assets de candidatura. Gere uma versão materialmente melhor, sem inventar fatos e sem repetir a versão anterior."
+          },
+          {
+            role: "user",
+            content: buildQualityRevisionPrompt({
+              type,
+              resume: original.input_resume,
+              jobDescription: original.job_description || "",
+              document,
+              recommendations,
+              quality,
+              language: original.language
+            })
+          }
+        ],
+        temperature: 0.2
+      });
+      const revised = parseAiOutput(revision.choices[0]?.message?.content?.trim() || "");
+      if (revised.document) {
+        const revisedQuality = evaluateGeneratedAsset({
+          type,
+          resume: original.input_resume,
+          jobDescription: original.job_description || "",
+          document: revised.document,
+          recommendations: revised.recommendations
+        });
+        if (revisedQuality.score >= quality.score) {
+          document = revised.document;
+          recommendations = revised.recommendations;
+          quality = revisedQuality;
+        }
+      }
+    }
 
     const { data: inserted } = await supabase
       .from("generations")
@@ -148,7 +197,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       output: document,
       generation: inserted,
-      appliedImprovements: scoreAppliedImprovements(recommendations)
+      appliedImprovements: scoreAppliedImprovements(recommendations),
+      quality
     });
   } catch (error) {
     console.error("regenerate_error", error);

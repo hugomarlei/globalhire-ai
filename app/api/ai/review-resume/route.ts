@@ -3,7 +3,8 @@ import { groq, GROQ_MODEL } from "@/lib/groq";
 import { createClient } from "@/lib/supabase-server";
 import { buildRateLimitKey, cooldownLimit } from "@/lib/rate-limit";
 import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
-import { normalizeResumeData, resumeToPlainText } from "@/lib/resumes/defaults";
+import { mergeResumeData, normalizeResumeData, resumeToPlainText } from "@/lib/resumes/defaults";
+import { calculateResumeScore } from "@/lib/resumes/score";
 import { reviewResumeSchema } from "@/lib/resumes/validation";
 import { assertResumeAiAccess } from "@/lib/resumes/ai-access";
 
@@ -44,27 +45,40 @@ export async function POST(request: NextRequest) {
     if (!process.env.GROQ_API_KEY) return NextResponse.json({ error: "GROQ_API_KEY nao configurada no servidor." }, { status: 500 });
 
     const data = normalizeResumeData(parsed.data.data);
+    const plainText = resumeToPlainText(data);
+    if (plainText.trim().length < 120) {
+      return NextResponse.json({ error: "Adicione dados reais do curriculo antes de revisar com IA." }, { status: 400 });
+    }
+    const localScore = calculateResumeScore(data);
     const completion = await groq.chat.completions.create({
       model: GROQ_MODEL,
       messages: [
         {
           role: "system",
           content:
-            "Voce e um revisor senior de curriculos. Responda apenas com JSON valido. Use estritamente o idioma do documento. Nao invente experiencias, empresas, certificados, metricas ou ferramentas."
+            "Voce e um revisor senior de curriculos, ATS e recrutamento internacional. Responda apenas com JSON valido. Use estritamente o idioma do documento. Nao invente experiencias, empresas, certificados, metricas, idiomas, senioridade ou ferramentas. Sua revisao deve transformar o curriculo quando houver base factual: melhorar posicionamento, densidade, clareza, palavras-chave compativeis e aderencia a vaga-alvo, sem maquiagem superficial."
         },
         {
           role: "user",
           content: JSON.stringify({
             language: parsed.data.language,
             resume: data,
-            plainText: resumeToPlainText(data),
+            plainText,
+            qualityGate: [
+              "Avalie internamente se a versao melhorada seria aceita por ATS e recrutador humano.",
+              "Compare mentalmente com curriculos fortes: secoes limpas, resumo especifico, skills aderentes e experiencia com acao + contexto + impacto.",
+              "Se improvedData ficar quase igual ao original, revise novamente antes de responder.",
+              "Use palavras-chave da vaga apenas se data.targetJobDescription existir e forem condizentes com o historico do candidato.",
+              "Nao apresente melhoria que nao apareca em improvedData."
+            ],
             expectedJson: {
               categories: [
                 { key: "structure", title: "Estrutura e organização", score: 0, suggestions: ["..."] },
                 { key: "clarity", title: "Conteúdo e clareza", score: 0, suggestions: ["..."] },
-                { key: "positioning", title: "Posicionamento de cargo", score: 0, suggestions: ["..."] }
+                { key: "positioning", title: "Posicionamento de cargo", score: 0, suggestions: ["..."] },
+                { key: "atsHumanFit", title: "ATS e leitura humana", score: 0, suggestions: ["..."] }
               ],
-              improvedData: "ResumeData JSON com melhorias conservadoras, mantendo todos os fatos verdadeiros"
+              improvedData: "ResumeData JSON com melhorias verificaveis e substanciais, mantendo todos os fatos verdadeiros"
             }
           })
         }
@@ -74,11 +88,27 @@ export async function POST(request: NextRequest) {
 
     const raw = completion.choices[0]?.message?.content?.trim() || "";
     const reviewed = parseJson(raw);
-    if (!reviewed?.categories) return NextResponse.json({ error: "A IA nao retornou uma revisao valida." }, { status: 500 });
+    if (!reviewed?.categories) {
+      return NextResponse.json({
+        categories: [
+          {
+            key: "structure",
+            title: "Estrutura e organização",
+            score: localScore.score,
+            suggestions: [
+              "A revisão automática não voltou estruturada nesta tentativa.",
+              localScore.recommendations[0] || "Revise contato, resumo, experiências, habilidades e cargo-alvo antes de exportar.",
+              "Tente novamente depois de preencher mais contexto da vaga-alvo."
+            ]
+          }
+        ],
+        improvedData: data
+      });
+    }
 
     return NextResponse.json({
       categories: reviewed.categories,
-      improvedData: reviewed.improvedData ? normalizeResumeData(reviewed.improvedData) : data
+      improvedData: reviewed.improvedData ? mergeResumeData(data, reviewed.improvedData) : data
     });
   } catch (error) {
     console.error("resume_review_error", error);
