@@ -61,13 +61,13 @@ export const dashboardCopy: Record<Locale, {
       linkedin_summary: "Gerar resumo de LinkedIn",
       recruiter_message: "Mensagem para recrutador",
       interview_prep: "Guia para entrevista",
-      translate_resume: "Traduzir/adaptar currículo"
+      translate_resume: "Traduzir currículo"
     },
     themeTitle: "Aparência",
     themeLight: "Claro",
     themeDark: "Escuro",
     themeSystem: "Sistema (dispositivo)",
-    historyDownloadText: "Baixar texto (.txt)",
+    historyDownloadText: "Baixar PDF",
     historyExportUnavailable: "Não há texto salvo para exportar."
   },
   en: {
@@ -96,13 +96,13 @@ export const dashboardCopy: Record<Locale, {
       linkedin_summary: "Generate LinkedIn summary",
       recruiter_message: "Recruiter message",
       interview_prep: "Interview guide",
-      translate_resume: "Translate/adapt resume"
+      translate_resume: "Translate resume"
     },
     themeTitle: "Appearance",
     themeLight: "Light",
     themeDark: "Dark",
     themeSystem: "System",
-    historyDownloadText: "Download text (.txt)",
+    historyDownloadText: "Download PDF",
     historyExportUnavailable: "No saved text to export."
   },
   es: {
@@ -131,13 +131,13 @@ export const dashboardCopy: Record<Locale, {
       linkedin_summary: "Generar resumen de LinkedIn",
       recruiter_message: "Mensaje para reclutador",
       interview_prep: "Guía para entrevista",
-      translate_resume: "Traducir/adaptar currículum"
+      translate_resume: "Traducir currículum"
     },
     themeTitle: "Apariencia",
     themeLight: "Claro",
     themeDark: "Oscuro",
     themeSystem: "Sistema (dispositivo)",
-    historyDownloadText: "Descargar texto (.txt)",
+    historyDownloadText: "Descargar PDF",
     historyExportUnavailable: "No hay texto guardado para exportar."
   },
   fr: {
@@ -166,13 +166,13 @@ export const dashboardCopy: Record<Locale, {
       linkedin_summary: "Générer un résumé LinkedIn",
       recruiter_message: "Message au recruteur",
       interview_prep: "Guide d’entretien",
-      translate_resume: "Traduire/adapter le CV"
+      translate_resume: "Traduire le CV"
     },
     themeTitle: "Apparence",
     themeLight: "Clair",
     themeDark: "Sombre",
     themeSystem: "Système (appareil)",
-    historyDownloadText: "Télécharger le texte (.txt)",
+    historyDownloadText: "Télécharger PDF",
     historyExportUnavailable: "Aucun texte enregistré à exporter."
   }
 };

@@ -165,8 +165,12 @@ Cada secao deve ter titulo em MAIUSCULAS curtas (sem emoji). Sugestao de secoes 
 `,
   translate_resume: `
 Entrega: tradução e adaptação internacional do currículo.
-Objetivo: não apenas traduzir, mas adaptar convenções, tom e termos do país-alvo.
+Objetivo: traduzir integralmente o currículo e adaptar convenções, tom e termos do país-alvo sem cortar histórico.
 Regras especificas:
+- Esta entrega NÃO usa descrição da vaga. Não solicite vaga, não invente cargo-alvo e não otimize para uma vaga específica.
+- Preserve TODAS as experiências, empresas, cargos, datas, localidades, formação, certificações, idiomas, links e dados de contacto do currículo original.
+- Não resuma o currículo para caber em uma resposta curta. Se houver muitas experiências, traduza todas e mantenha a estrutura completa.
+- Pode compactar apenas frases redundantes dentro da mesma experiência, mas nunca remover uma experiência/cargo/empresa real.
 - Preserve os dados de contacto e localização do original, salvo pedido explícito de anonimização; não apague cidade ou telefone reais.
 - Adapte nomes de cargos sem distorcer senioridade.
 - Mantenha o documento denso e pronto para candidatura.
@@ -195,10 +199,10 @@ Regras de qualidade:
 - Plano aplicado: ${args.planLabel || "Starter/Free"}. Intensidade de otimização esperada: ${args.intensityPercent || "50%"}.
 - Instrução de intensidade: ${args.optimizationInstruction || "Aplique melhoria moderada, fiel ao currículo original e alinhada à vaga quando houver descrição."}
 - Seja especifico, profissional e orientado a resultado.
-- Antes de escrever, analise mentalmente a descrição da vaga e identifique cargo-alvo, responsabilidades, senioridade, competências técnicas, competências comportamentais, palavras-chave ATS e contexto do país.
-- Adapte o documento ao texto da vaga. Não apenas reescreva o currículo com sinônimos.
-- Reordene informacoes, destaque experiencias mais relevantes e incorpore palavras-chave reais da vaga quando forem verdadeiras para o candidato.
-- Otimize para ATS quando fizer sentido, usando palavras-chave da vaga sem exagero e sem keyword stuffing.
+${args.type === "translate_resume" ? "- Antes de escrever, identifique estrutura, idioma original, cargos, empresas, datas, formação, certificações, idiomas e dados de contato para preservar tudo na tradução." : "- Antes de escrever, analise mentalmente a descrição da vaga e identifique cargo-alvo, responsabilidades, senioridade, competências técnicas, competências comportamentais, palavras-chave ATS e contexto do país."}
+${args.type === "translate_resume" ? "- Traduza e adapte convenções linguísticas do país-alvo sem transformar o currículo em outro perfil e sem cortar experiências." : "- Adapte o documento ao texto da vaga. Não apenas reescreva o currículo com sinônimos."}
+${args.type === "translate_resume" ? "- Preserve a ordem e o conteúdo essencial do histórico original; ajuste termos profissionais para soarem naturais no idioma final." : "- Reordene informacoes, destaque experiencias mais relevantes e incorpore palavras-chave reais da vaga quando forem verdadeiras para o candidato."}
+${args.type === "translate_resume" ? "- Mantenha formato ATS limpo, mas priorize fidelidade e completude da tradução." : "- Otimize para ATS quando fizer sentido, usando palavras-chave da vaga sem exagero e sem keyword stuffing."}
 - Nunca invente empresas, cargos, diplomas, certificações ou métricas que não estejam no currículo.
 - Quando faltarem metricas, sugira marcadores com espacos seguros como "[insira metrica]".
 - Adapte tom, vocabulário e convenções para o país-alvo.
@@ -242,7 +246,6 @@ documento final completo, limpo, adaptado a vaga e pronto para uso
 Curriculo/base do usuario:
 ${args.resume}
 
-Descricao da vaga ou contexto:
-${args.jobDescription || "Não informado. Trabalhe com base no currículo e no objetivo internacional."}
+${args.type === "translate_resume" ? "Contexto de tradução: não há descrição de vaga nesta entrega. Traduza e adapte o currículo completo ao idioma e país-alvo." : `Descricao da vaga ou contexto:\n${args.jobDescription || "Não informado. Trabalhe com base no currículo e no objetivo internacional."}`}
 `.trim();
 }

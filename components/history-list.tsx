@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Clock, Copy, Download, Eye, FilePlus2, RefreshCw, Search, Trash2 } from "lucide-react";
+import { Clock, Copy, Download, FilePlus2, RefreshCw, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button, Card, inputClass } from "@/components/ui";
 import { useLanguage } from "@/components/language-provider";
@@ -9,6 +9,7 @@ import { dashboardCopy } from "@/lib/i18n";
 import { historyListCopy, historyTypeShortLabel, intlLocaleForUi } from "@/lib/i18n-history-ats";
 import { trackEvent } from "@/lib/analytics";
 import { TurnstileWidget } from "@/components/turnstile-widget";
+import { buildResumePdfPrintDocument } from "@/lib/resume-pdf-templates";
 
 type HistoryItem = {
   id: string;
@@ -32,7 +33,6 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
   const [deleting, setDeleting] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
   const [captchaReset, setCaptchaReset] = useState(0);
-  const [docOpenById, setDocOpenById] = useState<Record<string, boolean>>({});
   const visibleItems = useMemo(() => items.filter((item) => !deletedIds.includes(item.id)), [deletedIds, items]);
   const types = useMemo(() => Array.from(new Set(visibleItems.map((item) => item.type))), [visibleItems]);
   const filtered = useMemo(() => {
@@ -93,6 +93,44 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
 
     setDeletedIds((current) => [...current, id]);
     setNotice(h.deleteSuccess);
+  }
+
+  function exportPdf(item: HistoryItem) {
+    const text = (item.output || "").trim();
+    if (!text) return;
+    const html = buildResumePdfPrintDocument({
+      template: "executive",
+      title: historyTypeShortLabel(locale, item.type),
+      body: text
+    });
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("aria-hidden", "true");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    iframe.style.opacity = "0";
+    iframe.style.pointerEvents = "none";
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentDocument;
+    const win = iframe.contentWindow;
+    if (!doc || !win) {
+      iframe.remove();
+      return;
+    }
+    doc.open();
+    doc.write(html);
+    doc.close();
+    const cleanup = () => iframe.remove();
+    win.addEventListener("afterprint", cleanup, { once: true });
+    window.setTimeout(cleanup, 120_000);
+    requestAnimationFrame(() => {
+      win.focus();
+      win.print();
+    });
   }
 
   const dateLocale = intlLocaleForUi(locale);
@@ -184,10 +222,10 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                     {copy.historyDownloadText}
                   </button>
                 ) : (
-                  <a href={`/api/history/${item.id}/export`} download rel="noopener noreferrer" className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
+                  <button type="button" onClick={() => exportPdf(item)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
                     <Download size={16} />
                     {copy.historyDownloadText}
-                  </a>
+                  </button>
                 )}
                 {mode === "documents" ? (
                   <button type="button" onClick={() => regenerate(item.id)} disabled={regenerating === item.id} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50">
@@ -200,27 +238,6 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                   {deleting === item.id ? h.deleting : h.delete}
                 </button>
               </div>
-            </div>
-            <div className="min-h-0 border-t border-border px-4 py-3">
-              <button
-                type="button"
-                className="focus-ring inline-flex w-full cursor-pointer items-center gap-2 rounded-md px-1 py-2 text-left text-sm font-semibold text-foreground hover:bg-muted"
-                aria-expanded={Boolean(docOpenById[item.id])}
-                onClick={() =>
-                  setDocOpenById((prev) => ({
-                    ...prev,
-                    [item.id]: !prev[item.id]
-                  }))
-                }
-              >
-                <Eye size={16} className="shrink-0 opacity-90" aria-hidden />
-                {h.openDocument}
-              </button>
-              {docOpenById[item.id] ? (
-                <pre data-clarity-mask="true" className="mt-3 max-h-72 min-h-0 overflow-y-auto overflow-x-auto whitespace-pre-wrap rounded-md border border-border bg-muted p-4 text-sm leading-6 text-foreground">
-                  {item.output}
-                </pre>
-              ) : null}
             </div>
           </Card>
         ))}

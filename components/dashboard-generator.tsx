@@ -16,6 +16,11 @@ import type { GenerationType } from "@/lib/types";
 import { buildResumePdfPrintDocument } from "@/lib/resume-pdf-templates";
 import { VOICE_CONTROLLED_GENERATION_TYPES, type OutputLength, type OutputTone } from "@/prompts/ai-prompts";
 import { InterviewGuideOutput } from "@/components/interview-guide-output";
+import { DocumentPreviewShell } from "@/components/application-workspace";
+import { ResumePreview } from "@/components/resumes/resume-preview";
+import { defaultResumeData } from "@/lib/resumes/defaults";
+import { importResumeText } from "@/lib/resumes/import";
+import type { ResumeData } from "@/lib/resumes/types";
 
 type AppliedImprovement = {
   text: string;
@@ -41,6 +46,12 @@ const generatedEventByType: Record<GenerationType, string> = {
 };
 
 const PREFS = "globalhire-preferences";
+
+function generatorTemplateToResumeTemplate(template: PdfTemplateKey): ResumeData["template"] {
+  if (template === "modern") return "modern";
+  if (template === "compact") return "classic";
+  return "professional";
+}
 
 export function DashboardGenerator({
   hasPaidPlan,
@@ -77,6 +88,17 @@ export function DashboardGenerator({
   const context = genUi.byType[type];
   const visibleTypes = allowedTypes?.length ? ALL_GENERATION_TYPES.filter((t) => allowedTypes.includes(t)) : ALL_GENERATION_TYPES;
   const showVoiceControls = VOICE_CONTROLLED_GENERATION_TYPES.includes(type);
+  const usesJobDescription = type !== "translate_resume";
+  const showDocumentPreview = type === "ats_resume" || type === "translate_resume";
+  const previewResumeData = useMemo(() => {
+    const base = {
+      ...defaultResumeData(),
+      language,
+      targetJobDescription: usesJobDescription ? jobDescription : "",
+      template: generatorTemplateToResumeTemplate(pdfTemplate)
+    };
+    return importResumeText(output || resume, base);
+  }, [jobDescription, language, output, pdfTemplate, resume, usesJobDescription]);
 
   useEffect(() => {
     try {
@@ -170,7 +192,7 @@ export function DashboardGenerator({
     setOutput("");
     setAppliedImprovements([]);
     trackEvent("generation_started", { type, language, target_country: targetCountry });
-    if (jobDescription.trim().length > 0) {
+    if (usesJobDescription && jobDescription.trim().length > 0) {
       trackEvent("job_description_added", { type, chars_bucket: jobDescription.length > 2000 ? "2000+" : "under_2000" });
     }
 
@@ -179,7 +201,7 @@ export function DashboardGenerator({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         resume,
-        jobDescription,
+        jobDescription: usesJobDescription ? jobDescription : "",
         language,
         targetCountry,
         type,
@@ -283,9 +305,9 @@ export function DashboardGenerator({
         <div className="rounded-3xl border border-border bg-card p-5 text-card-foreground shadow-sm dark:border-white/10 dark:bg-card/85">
           <div className="grid gap-5 lg:grid-cols-[0.76fr_1.24fr] lg:items-center">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-primary">Workspace de geração</p>
-              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Gerador de Currículo ATS</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Escolha a entrega, insira o contexto e acompanhe a versão final no painel de saída.</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">Workspace de entregas</p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Central de candidatura</h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Escolha a entrega, insira a base profissional e acompanhe o documento final com o template selecionado.</p>
             </div>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {visibleTypes.map((item) => (
@@ -332,9 +354,11 @@ export function DashboardGenerator({
             <Field label={context.resumeLabel}>
               <textarea data-clarity-mask="true" className={cn(textareaClass, "min-h-[140px]")} value={resume} onChange={(e) => setResume(e.target.value)} placeholder={context.resumePlaceholder} />
             </Field>
-            <Field label={copy.jobDescription}>
-              <textarea data-clarity-mask="true" className={textareaClass} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder={context.jobPlaceholder} />
-            </Field>
+            {usesJobDescription ? (
+              <Field label={copy.jobDescription}>
+                <textarea data-clarity-mask="true" className={textareaClass} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder={context.jobPlaceholder} />
+              </Field>
+            ) : null}
 
             <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               <Field label={copy.outputLanguage}>
@@ -503,12 +527,24 @@ export function DashboardGenerator({
 
           <div
             className={cn(
-              "mt-5 min-h-[420px] rounded-2xl border border-border/80 bg-gradient-to-b from-card via-card to-muted/15 p-5 shadow-inner sm:p-6",
+              "mt-5 min-h-[420px] rounded-2xl border border-border/80 bg-gradient-to-b from-card via-card to-muted/15 p-4 shadow-inner sm:p-5",
               type === "ats_resume" && "ring-1 ring-primary/10"
             )}
           >
             {type === "interview_prep" ? (
               <InterviewGuideOutput text={output} loading={loading} skeletonLabel={genUi.preparingOutput} emptyLabel={context.empty} />
+            ) : showDocumentPreview ? (
+              <div data-clarity-mask="true" className="relative">
+                {loading ? (
+                  <div className="absolute inset-x-4 top-4 z-10 rounded-xl border border-border bg-card/95 p-3 text-sm font-medium text-muted-foreground shadow-sm backdrop-blur">
+                    {genUi.preparingOutput}
+                  </div>
+                ) : null}
+                <DocumentPreviewShell>
+                  <ResumePreview data={previewResumeData} />
+                </DocumentPreviewShell>
+                {!output && !resume && !loading ? <p className="mt-3 text-sm text-muted-foreground">{context.empty}</p> : null}
+              </div>
             ) : (
               <pre
                 data-clarity-mask="true"

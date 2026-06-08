@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { BarChart3, FileClock, FileText, Gauge, Globe2, LayoutDashboard, LifeBuoy, LogOut, Menu, RefreshCw, Settings, ShieldCheck, UserCircle } from "lucide-react";
+import { BarChart3, ChevronDown, FileClock, FileText, Gauge, Globe2, LayoutDashboard, LifeBuoy, LogOut, Menu, RefreshCw, Settings, ShieldCheck, UserCircle } from "lucide-react";
+import { useState } from "react";
 import { brandIcon } from "@/lib/brand-assets";
 import { dashboardCopy, locales, navCopy, type Locale } from "@/lib/i18n";
 import { appNavStrings } from "@/lib/i18n-app-wide";
@@ -74,6 +75,7 @@ export function PublicNav() {
 }
 
 export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; email?: string }) {
+  const [accountOpen, setAccountOpen] = useState(false);
   const { locale } = useLanguage();
   const copy = navCopy[locale];
   const n = appNavStrings[locale];
@@ -154,24 +156,34 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
             </div>
           ) : null}
           <div className="mt-4">
-            <p className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{n.account}</p>
-            <div className="mb-2 rounded-2xl border border-border bg-muted/45 px-3 py-2 text-xs text-muted-foreground">
-              <span className="block truncate">{email || n.account}</span>
-            </div>
-            <div className="grid gap-1">
-              {accountLinks.map(({ href, label, Icon }) => (
-                <Link key={href} href={href} className={dropLink}>
-                  <Icon size={17} className="text-primary" />
-                  {label}
-                </Link>
-              ))}
-              <form action="/api/auth/signout" method="post">
-                <button type="submit" className={`${dropLink} w-full`}>
-                  <LogOut size={17} className="text-primary" />
-                  {copy.logout}
-                </button>
-              </form>
-            </div>
+            <button
+              type="button"
+              onClick={() => setAccountOpen((current) => !current)}
+              className="focus-ring flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-muted/45 px-3 py-3 text-left text-xs text-muted-foreground transition hover:bg-muted"
+              aria-expanded={accountOpen}
+            >
+              <span className="min-w-0">
+                <span className="block text-[11px] font-semibold uppercase tracking-wide text-primary">{n.account}</span>
+                <span className="block truncate">{email || n.account}</span>
+              </span>
+              <ChevronDown size={16} className={`shrink-0 transition ${accountOpen ? "rotate-180" : ""}`} />
+            </button>
+            {accountOpen ? (
+              <div className="mt-2 grid gap-1">
+                {accountLinks.map(({ href, label, Icon }) => (
+                  <Link key={href} href={href} className={dropLink}>
+                    <Icon size={17} className="text-primary" />
+                    {label}
+                  </Link>
+                ))}
+                <form action="/api/auth/signout" method="post">
+                  <button type="submit" className={`${dropLink} w-full`}>
+                    <LogOut size={17} className="text-primary" />
+                    {copy.logout}
+                  </button>
+                </form>
+              </div>
+            ) : null}
           </div>
         </nav>
       </aside>

@@ -53,7 +53,7 @@ export function ResumePreview({ data, printable = false }: { data: ResumeData; p
               <p className="leading-6">{data.skills.join(" | ") || "Adicione habilidades relevantes"}</p>
             </div>
             <div>
-              <h2 className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">Education</h2>
+              <h2 className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">Formação</h2>
               {data.education.filter((item) => item.degree || item.school).map((item) => (
                 <div key={item.id} className="mb-3">
                   <p className="font-semibold">{item.degree || "Formação"}</p>
@@ -103,7 +103,7 @@ export function ResumePreview({ data, printable = false }: { data: ResumeData; p
         </Section>
 
         {!sidebar ? (
-          <Section title="Educação" color={color}>
+          <Section title="Formação" color={color}>
             <div className="space-y-3">
               {data.education.filter((item) => item.degree || item.school || item.description).map((item) => (
                 <div key={item.id}>

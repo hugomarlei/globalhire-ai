@@ -95,13 +95,13 @@ const ptByType: Record<GenerationType, GenBlock> = {
     empty: "Seu guia aparecerá aqui em cartões, pronto para revisar antes da conversa."
   },
   translate_resume: {
-    title: "Tradução e Adaptação Internacional",
-    subtitle: "Adapte o currículo para o idioma, país e convenções do mercado-alvo.",
+    title: "Tradução de currículo",
+    subtitle: "Traduza o currículo completo para o idioma e convenções do mercado-alvo.",
     resumeLabel: "Currículo original",
     resumePlaceholder: "Cole o currículo que deseja traduzir e adaptar.",
-    jobPlaceholder: "Opcional: cole uma vaga para adaptar termos, senioridade e palavras-chave.",
-    cta: "Traduzir e adaptar",
-    empty: "Seu currículo traduzido e adaptado aparecerá aqui."
+    jobPlaceholder: "",
+    cta: "Traduzir currículo",
+    empty: "Seu currículo traduzido aparecerá aqui."
   }
 };
 
@@ -152,13 +152,13 @@ const enByType: Record<GenerationType, GenBlock> = {
     empty: "Your guide will appear here in cards, ready to review before the interview."
   },
   translate_resume: {
-    title: "International translation & adaptation",
-    subtitle: "Adapt your resume to the language, country and market conventions.",
+    title: "Resume translation",
+    subtitle: "Translate the full resume to the target language and market conventions.",
     resumeLabel: "Original resume",
     resumePlaceholder: "Paste the resume you want to translate and adapt.",
-    jobPlaceholder: "Optional: paste a job to tune seniority, terms and keywords.",
-    cta: "Translate & adapt",
-    empty: "Your translated and adapted resume will appear here."
+    jobPlaceholder: "",
+    cta: "Translate resume",
+    empty: "Your translated resume will appear here."
   }
 };
 
@@ -209,13 +209,13 @@ const esByType: Record<GenerationType, GenBlock> = {
     empty: "Tu guía aparecerá aquí en tarjetas, lista para repasar antes de la entrevista."
   },
   translate_resume: {
-    title: "Traducción y adaptación internacional",
-    subtitle: "Adapta el CV al idioma, país y convenciones del mercado objetivo.",
+    title: "Traducción de CV",
+    subtitle: "Traduce el CV completo al idioma y convenciones del mercado objetivo.",
     resumeLabel: "CV original",
     resumePlaceholder: "Pega el CV que deseas traducir y adaptar.",
-    jobPlaceholder: "Opcional: pega una vacante para afinar senioridad, términos y palabras clave.",
-    cta: "Traducir y adaptar",
-    empty: "Tu CV traducido y adaptado aparecerá aquí."
+    jobPlaceholder: "",
+    cta: "Traducir CV",
+    empty: "Tu CV traducido aparecerá aquí."
   }
 };
 
@@ -267,13 +267,13 @@ const frByType: Record<GenerationType, GenBlock> = {
     empty: "Votre guide apparaîtra ici en cartes, prêt à relire avant l’entretien."
   },
   translate_resume: {
-    title: "Traduction et adaptation internationale",
-    subtitle: "Adaptez le CV à la langue, au pays et aux conventions du marché cible.",
+    title: "Traduction de CV",
+    subtitle: "Traduisez le CV complet vers la langue et les conventions du marché cible.",
     resumeLabel: "CV d'origine",
     resumePlaceholder: "Collez le CV à traduire et adapter.",
-    jobPlaceholder: "Optionnel : collez une offre pour ajuster seniorité, termes et mots-clés.",
-    cta: "Traduire et adapter",
-    empty: "Votre CV traduit et adapté apparaîtra ici."
+    jobPlaceholder: "",
+    cta: "Traduire le CV",
+    empty: "Votre CV traduit apparaîtra ici."
   }
 };
 

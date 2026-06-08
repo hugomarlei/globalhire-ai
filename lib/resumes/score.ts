@@ -7,6 +7,14 @@ function words(value: string) {
 
 export function calculateResumeScore(data: ResumeData) {
   const text = resumeToPlainText(data);
+  if (!text.trim()) {
+    return {
+      score: 0,
+      matched: [],
+      missing: [],
+      recommendations: ["Comece preenchendo contato, resumo, experiência e habilidades para calcular a prontidão ATS."]
+    };
+  }
   const jdWords = words(data.targetJobDescription).filter((word) => !["para", "com", "and", "the", "uma", "por", "das", "dos"].includes(word));
   const resumeWords = new Set(words(text));
   const matched = jdWords.filter((word) => resumeWords.has(word));
@@ -22,8 +30,8 @@ export function calculateResumeScore(data: ResumeData) {
     data.certifications.length > 0 || text.length > 2200
   ];
   const completeness = checks.filter(Boolean).length / checks.length;
-  const keywordMatch = jdWords.length ? matched.length / Math.min(jdWords.length, 45) : 0.6;
-  const score = Math.max(18, Math.min(98, Math.round(completeness * 62 + keywordMatch * 28 + Math.min(text.length / 6000, 1) * 10)));
+  const keywordMatch = jdWords.length ? matched.length / Math.min(jdWords.length, 45) : 0.25;
+  const score = Math.min(98, Math.round(completeness * 62 + keywordMatch * 28 + Math.min(text.length / 6000, 1) * 10));
 
   const recommendations = [
     !checks[0] ? "Complete nome e e-mail no cabeçalho." : "",

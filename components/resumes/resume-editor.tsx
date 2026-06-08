@@ -172,10 +172,6 @@ export function ResumeEditor({ id, initialTitle, initialData, isDraft = false }:
 
   async function save() {
     setNotice("");
-    if (!id && !readyToCreate) {
-      setNotice("Complete contato, cargo-alvo, resumo, experiência e pelo menos 6 habilidades antes de salvar o currículo.");
-      return;
-    }
     const response = await fetch(id ? `/api/resumes/${id}` : "/api/resumes", {
       method: id ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
@@ -289,16 +285,37 @@ export function ResumeEditor({ id, initialTitle, initialData, isDraft = false }:
   return (
     <div className="space-y-5">
       <div className="rounded-3xl border border-border bg-card p-5 shadow-sm">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary">Workspace de currículo</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Construtor de candidatura</h1>
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
-            {isDraft ? "Rascunho local: nada será salvo até você clicar em Salvar." : "Importe, edite, revise com IA e acompanhe a versão final em tempo real."}
-          </p>
+        <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">Workspace de currículo</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Construtor de candidatura</h1>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+              {isDraft ? "Rascunho local: salve quando quiser; campos incompletos ficam como pendência, não como bloqueio." : "Importe, edite, revise com IA e acompanhe a versão final em tempo real."}
+            </p>
+          </div>
+          <div className="min-w-[220px] rounded-2xl border border-primary/25 bg-primary/5 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">Pontuação ATS</p>
+            <div className="mt-2 flex items-center gap-3">
+              <span className="text-3xl font-bold text-primary">{analysis.score}</span>
+              <span className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                <span className="block h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${analysis.score}%` }} />
+              </span>
+            </div>
+            <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted-foreground">{analysis.recommendations[0]}</p>
+          </div>
         </div>
       </div>
 
-      {notice ? <p className="rounded-md border border-border bg-card p-3 text-sm text-card-foreground print:hidden">{notice}</p> : null}
+      {notice ? (
+        <div className="fixed bottom-5 right-5 z-50 max-w-sm rounded-2xl border border-border bg-card p-4 text-sm text-card-foreground shadow-2xl print:hidden">
+          <div className="flex items-start justify-between gap-3">
+            <p>{notice}</p>
+            <button type="button" onClick={() => setNotice("")} className="focus-ring rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Fechar aviso">
+              <X size={15} />
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,0.92fr)_minmax(620px,1.08fr)]">
         <div className="space-y-4 print:hidden">
@@ -364,15 +381,6 @@ export function ResumeEditor({ id, initialTitle, initialData, isDraft = false }:
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-                <h2 className="mb-3 text-sm font-semibold">Pontuação ATS</h2>
-                <div className="flex items-center gap-3">
-                  <div className="text-3xl font-bold text-primary">{analysis.score}</div>
-                  <div className="h-3 flex-1 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary" style={{ width: `${analysis.score}%` }} /></div>
-                </div>
-                <p className="mt-2 text-xs text-muted-foreground">{analysis.recommendations[0]}</p>
-              </section>
-
               <SectionAccordion title="Contato" description="Dados básicos usados no cabeçalho do currículo." done={Boolean(data.personal.name && data.personal.email)}>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {(Object.keys(personalLabels) as Array<keyof ResumeData["personal"]>).map((field) => (
@@ -411,13 +419,13 @@ export function ResumeEditor({ id, initialTitle, initialData, isDraft = false }:
                 ))}
               </SectionAccordion>
 
-              <SectionAccordion title="Educação" description="Formação acadêmica e técnica." done={data.education.some((item) => Boolean(item.degree || item.school))}>
+              <SectionAccordion title="Formação" description="Formação acadêmica e técnica." done={data.education.some((item) => Boolean(item.degree || item.school))}>
                 <div className="flex items-center justify-between gap-2">
-                  <h2 className="text-sm font-semibold">Educação</h2>
-                  <button type="button" onClick={() => patch({ education: [...data.education, emptyEducation()] })} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs hover:bg-muted"><Plus size={14} /> Adicionar educação</button>
+                  <h2 className="text-sm font-semibold">Formação</h2>
+                  <button type="button" onClick={() => patch({ education: [...data.education, emptyEducation()] })} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs hover:bg-muted"><Plus size={14} /> Adicionar formação</button>
                 </div>
                 {data.education.map((item, index) => (
-                  <FloatingCard key={item.id} title={item.degree || `Educação ${index + 1}`} subtitle={item.school} collapsed={Boolean(collapsed[item.id])} onToggle={() => toggle(item.id)} onDelete={() => patch({ education: data.education.filter((_, eduIndex) => eduIndex !== index) })} onDragStart={() => setDragging({ list: "education", index })} onDrop={() => dropOn("education", index)}>
+                  <FloatingCard key={item.id} title={item.degree || `Formação ${index + 1}`} subtitle={item.school} collapsed={Boolean(collapsed[item.id])} onToggle={() => toggle(item.id)} onDelete={() => patch({ education: data.education.filter((_, eduIndex) => eduIndex !== index) })} onDragStart={() => setDragging({ list: "education", index })} onDrop={() => dropOn("education", index)}>
                     <div className="grid gap-3 sm:grid-cols-2">
                       {(["degree", "school", "location", "start", "end"] as const).map((field) => <Field key={field} label={{ degree: "Curso / grau", school: "Instituição", location: "Local", start: "Início", end: "Fim" }[field]}><input className={inputClass} value={item[field]} onChange={(event) => patch({ education: data.education.map((edu, eduIndex) => eduIndex === index ? { ...edu, [field]: event.target.value } : edu) })} /></Field>)}
                     </div>
