@@ -102,6 +102,9 @@ export type AppNavStrings = {
   toolRecruiter: string;
   toolInterview: string;
   toolTranslate: string;
+  atsAnalysis: string;
+  resumeBuilder: string;
+  resumeRewrite: string;
   atsScore: string;
   keywords: string;
   history: string;
@@ -128,6 +131,9 @@ export const appNavStrings: Record<Locale, AppNavStrings> = {
     toolRecruiter: "Mensagem para recrutador",
     toolInterview: "Guia para entrevista",
     toolTranslate: "Traduzir currículo",
+    atsAnalysis: "Análise ATS",
+    resumeBuilder: "Construtor de currículo",
+    resumeRewrite: "Reescrita de currículo",
     atsScore: "ATS Score",
     keywords: "Palavras-chave",
     history: "Histórico",
@@ -152,6 +158,9 @@ export const appNavStrings: Record<Locale, AppNavStrings> = {
     toolRecruiter: "Recruiter message",
     toolInterview: "Interview guide",
     toolTranslate: "Translate resume",
+    atsAnalysis: "ATS analysis",
+    resumeBuilder: "Resume builder",
+    resumeRewrite: "Resume rewrite",
     atsScore: "ATS Score",
     keywords: "Keywords",
     history: "History",
@@ -176,6 +185,9 @@ export const appNavStrings: Record<Locale, AppNavStrings> = {
     toolRecruiter: "Mensaje al reclutador",
     toolInterview: "Guía para entrevista",
     toolTranslate: "Traducir CV",
+    atsAnalysis: "Análisis ATS",
+    resumeBuilder: "Constructor de CV",
+    resumeRewrite: "Reescritura de CV",
     atsScore: "ATS Score",
     keywords: "Palabras clave",
     history: "Historial",
@@ -200,6 +212,9 @@ export const appNavStrings: Record<Locale, AppNavStrings> = {
     toolRecruiter: "Message recruteur",
     toolInterview: "Guide d’entretien",
     toolTranslate: "Traduire le CV",
+    atsAnalysis: "Analyse ATS",
+    resumeBuilder: "Constructeur de CV",
+    resumeRewrite: "Réécriture de CV",
     atsScore: "ATS Score",
     keywords: "Mots-clés",
     history: "Historique",
@@ -917,4 +932,3 @@ export function deliveryLabel(locale: Locale, type: GenerationType): string {
 export function pdfTemplateLabel(locale: Locale, key: PdfTemplateKey): string {
   return generatorUiCopy[locale].pdfTemplates[key];
 }
-

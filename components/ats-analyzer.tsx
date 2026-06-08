@@ -199,31 +199,24 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
   const showUpgradeOnError = optimizationError.toLowerCase().includes(a.limitKeyword);
 
   return (
-    <div className="grid gap-6">
-      <div className="rounded-lg border border-border bg-card p-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div className="grid gap-5">
+      <section className="rounded-3xl border border-border bg-card p-5 shadow-sm dark:bg-card/85">
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Workspace ATS</p>
+        <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-semibold text-foreground">{isKeywordMode ? a.titleKeywords : a.titleScore}</h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{isKeywordMode ? a.leadKeywords : a.leadScore}</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">{isKeywordMode ? a.analyzerTitleKeywords : a.analyzerTitleScore}</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Compare currículo e vaga, veja lacunas reais e gere uma versão otimizada quando houver contexto suficiente.</p>
           </div>
-          <div className="flex gap-2">
-            <Link
-              href="/ats-score"
-              className={`focus-ring rounded-md px-3 py-2 text-sm font-semibold ${!isKeywordMode ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
-            >
-              {a.tabScore}
-            </Link>
-            <Link
-              href="/ats-score?modo=keywords#keywords"
-              className={`focus-ring rounded-md px-3 py-2 text-sm font-semibold ${isKeywordMode ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
-            >
-              {a.tabKeywords}
-            </Link>
+          <div className="flex flex-wrap gap-2">
+            {["Currículo", "Vaga-alvo", "Score", "Otimização"].map((item, index) => (
+              <span key={item} className="rounded-full border border-border bg-muted/40 px-3 py-1 text-xs font-semibold text-muted-foreground">
+                {index + 1}. {item}
+              </span>
+            ))}
           </div>
         </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
+      </section>
+      <div className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr]">
         <Card>
           <div className="flex items-center gap-2">
             <SearchCheck className="text-brand-500" size={22} />

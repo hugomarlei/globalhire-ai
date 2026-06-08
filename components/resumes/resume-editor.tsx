@@ -2,18 +2,20 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronDown, ChevronUp, Download, FileText, GripVertical, MessageCircle, Plus, Save, Sparkles, Trash2, Upload, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, GripVertical, Plus, Trash2, Upload, X } from "lucide-react";
+import { AIInlineButton, DocumentPreviewShell, ExportBar, ProgressHeader, SectionAccordion, TemplatePicker } from "@/components/application-workspace";
 import { Button, cn, inputClass, textareaClass } from "@/components/ui";
-import { emptyCertification, emptyEducation, emptyExperience, resumeColors, resumeTemplates } from "@/lib/resumes/defaults";
+import { emptyCertification, emptyEducation, emptyExperience, mergeResumeData, resumeTemplates, resumeToPlainText } from "@/lib/resumes/defaults";
 import { importResumeText } from "@/lib/resumes/import";
 import { calculateResumeScore } from "@/lib/resumes/score";
 import type { ResumeData } from "@/lib/resumes/types";
 import { ResumePreview } from "@/components/resumes/resume-preview";
 
 type Props = {
-  id: string;
+  id?: string;
   initialTitle: string;
   initialData: ResumeData;
+  isDraft?: boolean;
 };
 
 type ReviewResult = {
@@ -21,7 +23,6 @@ type ReviewResult = {
   improvedData: ResumeData;
 };
 
-type ChatMessage = { role: "user" | "assistant"; content: string };
 type ListName = "experience" | "education" | "certifications";
 
 const personalLabels: Record<keyof ResumeData["personal"], string> = {
@@ -99,7 +100,7 @@ function FloatingCard({
       onDragStart={onDragStart}
       onDragOver={(event) => event.preventDefault()}
       onDrop={onDrop}
-      className="rounded-md border border-border bg-background p-3 shadow-sm"
+      className="rounded-xl border border-border bg-background/70 p-3 shadow-sm transition hover:border-primary/25 hover:bg-muted/35"
     >
       <div className="flex items-start justify-between gap-2">
         <button type="button" onClick={onToggle} className="focus-ring flex min-w-0 flex-1 items-start gap-2 text-left">
@@ -110,10 +111,10 @@ function FloatingCard({
           </span>
         </button>
         <div className="flex shrink-0 gap-1">
-          <button type="button" onClick={onToggle} className="focus-ring rounded-md border border-border p-2 hover:bg-muted" aria-label={collapsed ? "Expandir" : "Contrair"}>
+          <button type="button" onClick={onToggle} className="focus-ring rounded-lg border border-border p-2 hover:bg-muted" aria-label={collapsed ? "Expandir" : "Contrair"}>
             {collapsed ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
           </button>
-          <button type="button" onClick={onDelete} className="focus-ring rounded-md border border-border p-2 hover:bg-muted" aria-label="Excluir">
+          <button type="button" onClick={onDelete} className="focus-ring rounded-lg border border-border p-2 hover:bg-muted" aria-label="Excluir">
             <Trash2 size={15} />
           </button>
         </div>
@@ -130,7 +131,7 @@ function reorder<T>(items: T[], from: number, to: number) {
   return copy;
 }
 
-export function ResumeEditor({ id, initialTitle, initialData }: Props) {
+export function ResumeEditor({ id, initialTitle, initialData, isDraft = false }: Props) {
   const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
   const [data, setData] = useState<ResumeData>(initialData);
@@ -141,13 +142,18 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
   const [activeTab, setActiveTab] = useState<"editor" | "review">("editor");
   const [review, setReview] = useState<ReviewResult | null>(null);
   const [reviewing, setReviewing] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatInput, setChatInput] = useState("");
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
-  const [chatLoading, setChatLoading] = useState(false);
   const [importing, setImporting] = useState(false);
   const [isPending, startTransition] = useTransition();
   const analysis = useMemo(() => calculateResumeScore(data), [data]);
+  const readinessItems = [
+    { label: "Contato", done: Boolean(data.personal.name && data.personal.email) },
+    { label: "Cargo-alvo", done: Boolean(data.targetRole) },
+    { label: "Resumo", done: Boolean(data.summary) },
+    { label: "Experiência", done: data.experience.some((item) => Boolean(item.role || item.company || item.description)) },
+    { label: "Habilidades", done: data.skills.length >= 6 }
+  ];
+  const nextAction = readinessItems.find((item) => !item.done)?.label || (data.targetJobDescription ? "Revisar com IA" : "Colar vaga-alvo");
+  const readyToCreate = readinessItems.every((item) => item.done);
 
   function patch(next: Partial<ResumeData>) {
     setData((current) => ({ ...current, ...next }));
@@ -166,13 +172,21 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
 
   async function save() {
     setNotice("");
-    const response = await fetch(`/api/resumes/${id}`, {
-      method: "PUT",
+    if (!id && !readyToCreate) {
+      setNotice("Complete contato, cargo-alvo, resumo, experiência e pelo menos 6 habilidades antes de salvar o currículo.");
+      return;
+    }
+    const response = await fetch(id ? `/api/resumes/${id}` : "/api/resumes", {
+      method: id ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, data })
     });
     const body = await response.json();
     setNotice(response.ok ? "Currículo salvo." : body.error || "Não foi possível salvar.");
+    if (response.ok && !id && body.resume?.id) {
+      router.replace(`/resumes/${body.resume.id}`);
+      return;
+    }
     if (response.ok) router.refresh();
   }
 
@@ -223,38 +237,30 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
   }
 
   async function reviewWithAi() {
-    setReviewing(true);
     setNotice("");
-    const response = await fetch("/api/ai/review-resume", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ data, language: data.language })
-    });
-    const body = await response.json();
-    setReviewing(false);
-    if (!response.ok) {
-      setNotice(body.error || "Não consegui revisar o currículo.");
+    if (resumeToPlainText(data).trim().length < 120) {
+      setNotice("Adicione dados reais do currículo antes de solicitar a revisão com IA.");
       return;
     }
-    setReview(body);
-    setActiveTab("review");
-  }
-
-  async function sendChat() {
-    if (!chatInput.trim()) return;
-    const question = chatInput.trim();
-    const nextHistory: ChatMessage[] = [...chatHistory, { role: "user", content: question }];
-    setChatHistory(nextHistory);
-    setChatInput("");
-    setChatLoading(true);
-    const response = await fetch("/api/ai/resume-chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ data, language: data.language, question, history: chatHistory.slice(-8) })
-    });
-    const body = await response.json();
-    setChatLoading(false);
-    setChatHistory([...nextHistory, { role: "assistant", content: response.ok ? body.answer : body.error || "Não consegui responder agora." }]);
+    setReviewing(true);
+    try {
+      const response = await fetch("/api/ai/review-resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data, language: data.language })
+      });
+      const body = await response.json();
+      if (!response.ok) {
+        setNotice(body.error || "Não consegui revisar o currículo.");
+        return;
+      }
+      setReview(body);
+      setActiveTab("review");
+    } catch {
+      setNotice("Não consegui conectar à revisão com IA. Tente novamente em alguns segundos.");
+    } finally {
+      setReviewing(false);
+    }
   }
 
   function dropOn(list: ListName, index: number) {
@@ -263,37 +269,38 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
     setDragging(null);
   }
 
+  async function copyResume() {
+    await navigator.clipboard.writeText(resumeToPlainText(data));
+    setNotice("Currículo copiado em texto simples.");
+  }
+
+  function downloadTxt() {
+    const blob = new Blob([resumeToPlainText(data)], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${(title || "curriculo").replace(/[^\w-]+/g, "-").toLowerCase()}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const completeness = Math.round((readinessItems.filter((item) => item.done).length / readinessItems.length) * 100);
+
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="rounded-3xl border border-border bg-card p-5 shadow-sm">
         <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-foreground">Construtor de currículo</h1>
-          <p className="text-sm text-muted-foreground">Importe, edite, revise com IA e acompanhe a versão final em tempo real.</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary">Workspace de currículo</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Construtor de candidatura</h1>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+            {isDraft ? "Rascunho local: nada será salvo até você clicar em Salvar." : "Importe, edite, revise com IA e acompanhe a versão final em tempo real."}
+          </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={() => setChatOpen(true)} className="h-10 rounded-md bg-card px-3 text-card-foreground ring-1 ring-border hover:bg-muted">
-            <MessageCircle size={16} /> Falar com a IA
-          </Button>
-          <Button onClick={reviewWithAi} disabled={reviewing} className="h-10 rounded-md bg-card px-3 text-card-foreground ring-1 ring-border hover:bg-muted">
-            <Sparkles size={16} /> Revisão de IA
-          </Button>
-          <Button onClick={() => startTransition(save)} disabled={isPending} className="h-10 rounded-md px-3">
-            <Save size={16} /> Salvar
-          </Button>
-          <Button onClick={() => window.print()} className="h-10 rounded-md bg-foreground px-3 text-background hover:bg-foreground/90">
-            <Download size={16} /> PDF
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex gap-2 print:hidden">
-        <button type="button" onClick={() => setActiveTab("editor")} className={cn("focus-ring rounded-md px-3 py-2 text-sm", activeTab === "editor" ? "bg-primary text-primary-foreground" : "border border-border bg-card text-card-foreground")}>Editor</button>
-        <button type="button" onClick={() => setActiveTab("review")} className={cn("focus-ring rounded-md px-3 py-2 text-sm", activeTab === "review" ? "bg-primary text-primary-foreground" : "border border-border bg-card text-card-foreground")}>Revisão de IA</button>
       </div>
 
       {notice ? <p className="rounded-md border border-border bg-card p-3 text-sm text-card-foreground print:hidden">{notice}</p> : null}
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,0.95fr)_minmax(620px,1.05fr)]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,0.92fr)_minmax(620px,1.08fr)]">
         <div className="space-y-4 print:hidden">
           {activeTab === "review" ? (
             <section className="rounded-md border border-border bg-card p-4">
@@ -302,9 +309,6 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
                   <h2 className="text-sm font-semibold">Relatório de revisão</h2>
                   <p className="text-xs text-muted-foreground">Aceite para aplicar as melhorias conservadoras sugeridas pela IA.</p>
                 </div>
-                <Button onClick={reviewWithAi} disabled={reviewing} className="h-10 rounded-md px-3">
-                  <Sparkles size={16} /> Revisar
-                </Button>
               </div>
               {review ? (
                 <div className="space-y-3">
@@ -320,7 +324,7 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
                     </div>
                   ))}
                   <div className="flex flex-wrap gap-2">
-                    <Button onClick={() => { setData(review.improvedData); setNotice("Sugestões aplicadas. Revise e salve o currículo."); }} className="h-10 rounded-md px-3">
+                    <Button onClick={() => { setData((current) => mergeResumeData(current, review.improvedData)); setNotice("Sugestões aplicadas. Revise e salve o currículo."); }} className="h-10 rounded-md px-3">
                       <Check size={16} /> Aceitar sugestões
                     </Button>
                     <button type="button" onClick={() => setReview(null)} className="focus-ring inline-flex h-10 items-center gap-2 rounded-md border border-border px-3 text-sm hover:bg-muted">
@@ -334,21 +338,20 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
             </section>
           ) : (
             <>
-              <section className="rounded-md border border-border bg-card p-4">
-                <div className="mb-3 flex items-center gap-2 text-sm font-semibold"><FileText size={16} /> Configuração</div>
+              <SectionAccordion title="Configuração da candidatura" description="Defina idioma, cargo-alvo e o contexto que orienta ATS/IA." done={Boolean(data.targetRole)}>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Field label="Título interno"><input className={inputClass} value={title} onChange={(event) => setTitle(event.target.value)} /></Field>
                   <Field label="Idioma final"><input className={inputClass} value={data.language} onChange={(event) => patch({ language: event.target.value })} /></Field>
                   <Field label="Cargo-alvo"><input className={inputClass} value={data.targetRole} onChange={(event) => patch({ targetRole: event.target.value })} /></Field>
-                  <Field label="Template"><select className={inputClass} value={data.template} onChange={(event) => patch({ template: event.target.value as ResumeData["template"] })}>{resumeTemplates.map((template) => <option key={template.key} value={template.key}>{template.label}</option>)}</select></Field>
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {resumeColors.map((color) => <button key={color} type="button" aria-label={`Cor ${color}`} onClick={() => patch({ primaryColor: color })} className={cn("size-8 rounded-full border-2", data.primaryColor === color ? "border-foreground" : "border-transparent")} style={{ backgroundColor: color }} />)}
                 </div>
                 <Field label="Descrição da vaga para orientar IA e ATS score"><textarea className={cn(textareaClass, "mt-3 min-h-28")} value={data.targetJobDescription} onChange={(event) => patch({ targetJobDescription: event.target.value })} /></Field>
-              </section>
+              </SectionAccordion>
 
-              <section className="rounded-md border border-border bg-card p-4">
+              <SectionAccordion title="Template do documento" description="Escolha visualmente a estrutura antes de exportar." done={Boolean(data.template)}>
+                <TemplatePicker value={data.template} items={resumeTemplates} onChange={(template) => patch({ template: template as ResumeData["template"] })} />
+              </SectionAccordion>
+
+              <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <div>
                     <h2 className="text-sm font-semibold">Importar currículo existente</h2>
@@ -361,7 +364,7 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
                 </div>
               </section>
 
-              <section className="rounded-md border border-border bg-card p-4">
+              <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
                 <h2 className="mb-3 text-sm font-semibold">Pontuação ATS</h2>
                 <div className="flex items-center gap-3">
                   <div className="text-3xl font-bold text-primary">{analysis.score}</div>
@@ -370,8 +373,7 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
                 <p className="mt-2 text-xs text-muted-foreground">{analysis.recommendations[0]}</p>
               </section>
 
-              <section className="rounded-md border border-border bg-card p-4">
-                <h2 className="mb-3 text-sm font-semibold">Informações pessoais</h2>
+              <SectionAccordion title="Contato" description="Dados básicos usados no cabeçalho do currículo." done={Boolean(data.personal.name && data.personal.email)}>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {(Object.keys(personalLabels) as Array<keyof ResumeData["personal"]>).map((field) => (
                     <Field key={field} label={personalLabels[field]}>
@@ -379,17 +381,21 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
                     </Field>
                   ))}
                 </div>
-              </section>
+              </SectionAccordion>
 
-              <section className="rounded-md border border-border bg-card p-4">
+              <SectionAccordion
+                title="Resumo profissional"
+                description="Síntese de posicionamento para recrutador e ATS."
+                done={Boolean(data.summary)}
+                actions={<AIInlineButton onClick={() => suggest("summary")} loading={suggesting === "summary-0"}>Melhorar resumo</AIInlineButton>}
+              >
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <h2 className="text-sm font-semibold">Resumo</h2>
-                  <button type="button" onClick={() => suggest("summary")} disabled={suggesting === "summary-0"} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs hover:bg-muted disabled:opacity-60"><Sparkles size={14} /> Obter ajuda de escrita</button>
                 </div>
                 <RichTextBox label="Resumo profissional" value={data.summary} onChange={(summary) => patch({ summary })} placeholder="Resumo profissional" />
-              </section>
+              </SectionAccordion>
 
-              <section className="space-y-3 rounded-md border border-border bg-card p-4">
+              <SectionAccordion title="Experiência" description="Cargos, empresas, datas e bullets de impacto." done={data.experience.some((item) => Boolean(item.role || item.company || item.description))}>
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="text-sm font-semibold">Experiência</h2>
                   <button type="button" onClick={() => patch({ experience: [...data.experience, emptyExperience()] })} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs hover:bg-muted"><Plus size={14} /> Adicionar experiência</button>
@@ -400,12 +406,12 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
                       {(["role", "company", "location", "start", "end"] as const).map((field) => <Field key={field} label={{ role: "Cargo", company: "Empresa", location: "Local", start: "Início", end: "Fim" }[field]}><input className={inputClass} value={item[field] as string} onChange={(event) => patch({ experience: data.experience.map((exp, expIndex) => expIndex === index ? { ...exp, [field]: event.target.value } : exp) })} /></Field>)}
                     </div>
                     <RichTextBox label="Descrição / bullets" value={item.description} onChange={(description) => patch({ experience: data.experience.map((exp, expIndex) => expIndex === index ? { ...exp, description } : exp) })} placeholder="Bullets ou descrição" />
-                    <button type="button" onClick={() => suggest("experience", index)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs hover:bg-muted"><Sparkles size={14} /> Obter ajuda de escrita</button>
+                    <AIInlineButton onClick={() => suggest("experience", index)} loading={suggesting === `experience-${index}`}>Reescrever experiência</AIInlineButton>
                   </FloatingCard>
                 ))}
-              </section>
+              </SectionAccordion>
 
-              <section className="space-y-3 rounded-md border border-border bg-card p-4">
+              <SectionAccordion title="Educação" description="Formação acadêmica e técnica." done={data.education.some((item) => Boolean(item.degree || item.school))}>
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="text-sm font-semibold">Educação</h2>
                   <button type="button" onClick={() => patch({ education: [...data.education, emptyEducation()] })} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs hover:bg-muted"><Plus size={14} /> Adicionar educação</button>
@@ -416,12 +422,12 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
                       {(["degree", "school", "location", "start", "end"] as const).map((field) => <Field key={field} label={{ degree: "Curso / grau", school: "Instituição", location: "Local", start: "Início", end: "Fim" }[field]}><input className={inputClass} value={item[field]} onChange={(event) => patch({ education: data.education.map((edu, eduIndex) => eduIndex === index ? { ...edu, [field]: event.target.value } : edu) })} /></Field>)}
                     </div>
                     <RichTextBox label="Descrição" value={item.description} onChange={(description) => patch({ education: data.education.map((edu, eduIndex) => eduIndex === index ? { ...edu, description } : edu) })} placeholder="Honras, cursos ou detalhes relevantes" />
-                    <button type="button" onClick={() => suggest("education", index)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs hover:bg-muted"><Sparkles size={14} /> Obter ajuda de escrita</button>
+                    <AIInlineButton onClick={() => suggest("education", index)} loading={suggesting === `education-${index}`}>Melhorar descrição</AIInlineButton>
                   </FloatingCard>
                 ))}
-              </section>
+              </SectionAccordion>
 
-              <section className="space-y-3 rounded-md border border-border bg-card p-4">
+              <SectionAccordion title="Certificações" description="Credenciais, cursos e evidências adicionais." done={data.certifications.some((item) => Boolean(item.name || item.issuer))} defaultOpen={false}>
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="text-sm font-semibold">Certificações</h2>
                   <button type="button" onClick={() => patch({ certifications: [...data.certifications, emptyCertification()] })} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs hover:bg-muted"><Plus size={14} /> Adicionar certificação</button>
@@ -432,49 +438,44 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
                       {(["name", "issuer", "date", "credentialUrl"] as const).map((field) => <Field key={field} label={{ name: "Certificação", issuer: "Emissor", date: "Data", credentialUrl: "URL da credencial" }[field]}><input className={inputClass} value={item[field]} onChange={(event) => patch({ certifications: data.certifications.map((cert, certIndex) => certIndex === index ? { ...cert, [field]: event.target.value } : cert) })} /></Field>)}
                     </div>
                     <RichTextBox label="Descrição" value={item.description} onChange={(description) => patch({ certifications: data.certifications.map((cert, certIndex) => certIndex === index ? { ...cert, description } : cert) })} placeholder="Detalhes relevantes da certificação" />
-                    <button type="button" onClick={() => suggest("certification", index)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs hover:bg-muted"><Sparkles size={14} /> Obter ajuda de escrita</button>
+                    <AIInlineButton onClick={() => suggest("certification", index)} loading={suggesting === `certification-${index}`}>Melhorar descrição</AIInlineButton>
                   </FloatingCard>
                 ))}
-              </section>
+              </SectionAccordion>
 
-              <section className="rounded-md border border-border bg-card p-4">
-                <h2 className="mb-3 text-sm font-semibold">Habilidades</h2>
+              <SectionAccordion title="Habilidades" description="Competências separadas por vírgula." done={data.skills.length >= 6}>
                 <Field label="Habilidades separadas por vírgula"><textarea className={cn(textareaClass, "min-h-24")} value={data.skills.join(", ")} onChange={(event) => patch({ skills: splitSkills(event.target.value) })} placeholder="React, Tailwind, Liderança..." /></Field>
-              </section>
+              </SectionAccordion>
+
+              <SectionAccordion
+                title="Revisar e exportar"
+                description="Etapa final: validar prontidão ATS, aplicar revisão com IA e gerar a entrega."
+                done={readyToCreate}
+              >
+                <div className="space-y-4">
+                  <ProgressHeader
+                    score={analysis.score}
+                    completeness={completeness}
+                    status="Prontidão ATS"
+                    nextStep={nextAction}
+                    items={readinessItems}
+                    action={<AIInlineButton onClick={reviewWithAi} loading={reviewing}>Revisar currículo</AIInlineButton>}
+                  />
+                  <div className="rounded-2xl border border-border bg-muted/25 p-3">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Entrega</p>
+                    <ExportBar onSave={() => startTransition(save)} onPdf={() => window.print()} onCopy={copyResume} onTxt={downloadTxt} saving={isPending} />
+                  </div>
+                </div>
+              </SectionAccordion>
             </>
           )}
         </div>
 
-        <div className="min-w-0 overflow-auto rounded-md border border-border bg-slate-100 p-3 print:overflow-visible print:border-0 print:bg-white print:p-0">
+        <DocumentPreviewShell>
           <ResumePreview data={data} />
-        </div>
+        </DocumentPreviewShell>
       </div>
 
-      {chatOpen ? (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4 print:hidden">
-          <div className="flex max-h-[82vh] w-full max-w-2xl flex-col rounded-md border border-border bg-card text-card-foreground shadow-xl">
-            <div className="flex items-center justify-between gap-3 border-b border-border p-4">
-              <div>
-                <h2 className="font-semibold">Falar com a IA</h2>
-                <p className="text-xs text-muted-foreground">A resposta respeita o idioma do currículo: {data.language}.</p>
-              </div>
-              <button type="button" onClick={() => setChatOpen(false)} className="focus-ring rounded-md border border-border p-2 hover:bg-muted"><X size={16} /></button>
-            </div>
-            <div className="min-h-0 flex-1 space-y-3 overflow-auto p-4">
-              {chatHistory.length ? chatHistory.map((message, index) => (
-                <div key={index} className={cn("rounded-md p-3 text-sm", message.role === "user" ? "ml-8 bg-primary text-primary-foreground" : "mr-8 bg-muted text-foreground")}>{message.content}</div>
-              )) : <p className="text-sm text-muted-foreground">Pergunte sobre posicionamento, bullets, resumo ou adaptação para a vaga.</p>}
-              {chatLoading ? <p className="text-sm text-muted-foreground">A IA está pensando...</p> : null}
-            </div>
-            <div className="border-t border-border p-4">
-              <textarea className={cn(textareaClass, "min-h-24")} value={chatInput} onChange={(event) => setChatInput(event.target.value)} placeholder="Escreva sua pergunta..." />
-              <div className="mt-3 flex justify-end">
-                <Button onClick={sendChat} disabled={chatLoading || !chatInput.trim()} className="h-10 rounded-md px-3">Enviar</Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { AdminBlockButton } from "@/components/admin-block-button";
-import { Button, Card } from "@/components/ui";
+import { Card } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase-server";
 import { adminDashboardCopy } from "@/lib/i18n-admin";
@@ -60,16 +60,6 @@ export default async function AdminPage() {
         <h1 className="text-3xl font-semibold text-foreground">{d.title}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{d.lead}</p>
       </div>
-
-      <Card className="border-primary/25 bg-primary/5">
-        <h2 className="text-xl font-semibold text-foreground">{d.growthCardTitle}</h2>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{d.growthCardLead}</p>
-        <div className="mt-4">
-          <Button href="/admin/growth" className="h-10 rounded-xl px-4">
-            {d.growthCardCta}
-          </Button>
-        </div>
-      </Card>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

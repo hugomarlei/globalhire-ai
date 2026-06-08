@@ -279,17 +279,38 @@ export function DashboardGenerator({
 
   return (
     <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
+      <section className="lg:col-span-12">
+        <div className="rounded-3xl border border-border bg-card p-5 text-card-foreground shadow-sm dark:border-white/10 dark:bg-card/85">
+          <div className="grid gap-5 lg:grid-cols-[0.76fr_1.24fr] lg:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">Workspace de geração</p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Gerador de Currículo ATS</h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Escolha a entrega, insira o contexto e acompanhe a versão final no painel de saída.</p>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {visibleTypes.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setType(item)}
+                  className={cn(
+                    "focus-ring rounded-xl border px-3 py-2.5 text-left transition hover:-translate-y-0.5",
+                    type === item
+                      ? "border-primary bg-primary text-primary-foreground shadow-glow dark:shadow-glow-dark"
+                      : "border-border bg-background text-foreground hover:bg-muted dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]"
+                  )}
+                >
+                  <span className="block text-sm font-semibold">{copy.deliveryTypes[item]}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
       <div className="space-y-5 lg:col-span-5">
         <Card className="border-border/90 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{genUi.formColumnTitle}</p>
-          <div className="mt-4 flex items-center gap-2">
-            <Sparkles className="text-brand-500" size={22} />
-            <div>
-              <h1 className="text-xl font-semibold text-foreground sm:text-2xl">{context.title}</h1>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{context.subtitle}</p>
-            </div>
-          </div>
-          <div className="mt-6 grid gap-5">
+          <div className="mt-4 grid gap-5">
             <div className="rounded-xl border border-border/70 bg-muted/25 p-4">
               <Field label={genUi.uploadPdfDocx}>
                 <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-primary/35 bg-card/80 p-4 text-sm text-foreground transition hover:bg-muted/40">
@@ -349,16 +370,6 @@ export function DashboardGenerator({
                 </select>
               </Field>
             </div>
-
-            <Field label={copy.deliveryType}>
-              <select className={inputClass} value={type} onChange={(e) => setType(e.target.value as GenerationType)}>
-                {visibleTypes.map((item) => (
-                  <option key={item} value={item}>
-                    {copy.deliveryTypes[item]}
-                  </option>
-                ))}
-              </select>
-            </Field>
 
             {showVoiceControls ? (
               <div className="grid gap-4 rounded-xl border border-primary/20 bg-primary/5 p-4 sm:grid-cols-2">

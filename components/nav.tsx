@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { BarChart3, BookOpenText, BriefcaseBusiness, ChevronDown, FileClock, FileText, Gauge, Globe2, Languages, LayoutDashboard, LifeBuoy, Linkedin, LogOut, MailPlus, Menu, MessageSquareText, MessagesSquare, Settings, ShieldCheck, UserCircle, Video } from "lucide-react";
+import { BarChart3, FileClock, FileText, Gauge, Globe2, LayoutDashboard, LifeBuoy, LogOut, Menu, RefreshCw, Settings, ShieldCheck, UserCircle } from "lucide-react";
 import { brandIcon } from "@/lib/brand-assets";
 import { dashboardCopy, locales, navCopy, type Locale } from "@/lib/i18n";
 import { appNavStrings } from "@/lib/i18n-app-wide";
@@ -73,10 +73,6 @@ export function PublicNav() {
   );
 }
 
-function initials(email?: string) {
-  return (email || "GH").slice(0, 2).toUpperCase();
-}
-
 export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; email?: string }) {
   const { locale } = useLanguage();
   const copy = navCopy[locale];
@@ -87,27 +83,15 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
     {
       label: n.tools,
       items: [
-        { href: "/gerador", label: n.toolAts, Icon: BriefcaseBusiness },
-        { href: "/gerador?tipo=cover_letter", label: n.toolCover, Icon: MailPlus },
-        { href: "/gerador?tipo=linkedin_summary", label: n.toolLinkedin, Icon: Linkedin },
-        { href: "/gerador?tipo=recruiter_message", label: n.toolRecruiter, Icon: MessagesSquare },
-        { href: "/gerador?tipo=interview_prep", label: n.toolInterview, Icon: Video },
-        { href: "/gerador?tipo=translate_resume", label: n.toolTranslate, Icon: Languages },
-        { href: "/resumes", label: "Construtor de currículos", Icon: FileText }
-      ]
-    },
-    {
-      label: n.analyze,
-      items: [
-        { href: "/ats-score", label: n.atsScore, Icon: Gauge },
-        { href: "/ats-score?modo=keywords#keywords", label: n.keywords, Icon: BookOpenText }
+        { href: "/ats-score", label: n.atsAnalysis, Icon: Gauge },
+        { href: "/resumes", label: n.resumeBuilder, Icon: FileText },
+        { href: "/gerador", label: n.resumeRewrite, Icon: RefreshCw }
       ]
     },
     {
       label: n.documents,
       items: [
-        { href: "/historico", label: n.history, Icon: FileClock },
-        { href: "/historico?tab=documentos", label: n.myDocuments, Icon: MessageSquareText }
+        { href: "/historico", label: n.history, Icon: FileClock }
       ]
     }
   ];
@@ -120,43 +104,38 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
     { href: "/privacidade", label: n.privacy, Icon: ShieldCheck }
   ];
 
-  const navItem = "rounded-lg px-3 py-2 text-muted-foreground transition hover:bg-muted hover:text-foreground";
+  const navItem = "rounded-xl px-3 py-2 text-muted-foreground transition hover:bg-muted hover:text-foreground";
   const dropPanel =
     "rounded-xl border border-border bg-card p-2 text-card-foreground shadow-lg backdrop-blur-md dark:shadow-soft";
   const dropLink =
     "flex items-center gap-3 rounded-lg px-3 py-3 text-muted-foreground transition hover:bg-muted hover:text-foreground";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/80 bg-background/80 text-foreground shadow-[0_1px_0_rgba(0,0,0,0.04)] backdrop-blur-xl dark:bg-background/70 dark:shadow-[0_1px_0_rgba(255,255,255,0.04)]">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-        <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-foreground">
+    <>
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-border/80 bg-background/88 px-4 py-5 text-foreground shadow-[1px_0_0_rgba(0,0,0,0.04)] backdrop-blur-xl dark:bg-background/82 lg:flex">
+        <Link href="/dashboard" className="flex items-center gap-3 rounded-2xl px-2 py-2 font-semibold text-foreground">
           <Image
             src={brandIcon.nav}
             alt=""
-            width={36}
-            height={36}
-            className="size-9 rounded-2xl bg-card/40 shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_8px_28px_rgba(0,0,0,0.12)] ring-1 ring-black/5 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_12px_40px_rgba(0,0,0,0.35)] dark:ring-white/10"
+            width={40}
+            height={40}
+            className="size-10 rounded-2xl bg-card/40 shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_8px_28px_rgba(0,0,0,0.12)] ring-1 ring-black/5 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_12px_40px_rgba(0,0,0,0.35)] dark:ring-white/10"
             priority
           />
           <span>
             <span className="block leading-5">GlobalHire AI</span>
-            <span className="hidden text-[11px] font-medium text-muted-foreground sm:block">{n.tagline}</span>
+            <span className="block text-[11px] font-medium text-muted-foreground">{n.tagline}</span>
           </span>
         </Link>
-        <nav className="hidden items-center gap-1 text-sm lg:flex">
+        <nav className="mt-7 grid flex-1 gap-1 overflow-y-auto pb-4 pr-1 text-sm">
           <Link href="/dashboard" className={`inline-flex items-center gap-1 ${navItem}`}>
             <LayoutDashboard size={16} />
             {copy.dashboard}
           </Link>
           {groups.map((group) => (
-            <div key={group.label} className="group relative">
-              <button type="button" className={`focus-ring inline-flex items-center gap-1 ${navItem}`}>
-                {group.label}
-                <ChevronDown size={15} />
-              </button>
-              <div
-                className={`invisible absolute left-0 top-full z-50 w-64 translate-y-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 ${dropPanel}`}
-              >
+            <div key={group.label} className="mt-4">
+              <p className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{group.label}</p>
+              <div className="grid gap-1">
                 {group.items.map(({ href, label, Icon }) => (
                   <Link key={href} href={href} className={dropLink}>
                     <Icon size={17} className="text-primary" />
@@ -167,39 +146,26 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
             </div>
           ))}
           {isAdmin ? (
-            <>
+            <div className="mt-4">
+              <p className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Admin</p>
               <Link href="/admin" className={navItem}>
                 {copy.admin}
               </Link>
-              <Link href="/admin/growth" className={navItem}>
-                {copy.adminGrowth}
-              </Link>
-            </>
+            </div>
           ) : null}
-        </nav>
-        <div className="hidden items-center gap-3 lg:flex">
-          <ThemeToggle labels={themeLabels} />
-          <LanguageSelector />
-          <div className="group relative">
-            <button
-              type="button"
-              className="focus-ring inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 py-1 pl-1 pr-3 text-sm text-foreground transition hover:bg-muted"
-            >
-              <span className="grid size-8 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{initials(email)}</span>
-              {n.account}
-              <ChevronDown size={15} />
-            </button>
-            <div
-              className={`invisible absolute right-0 top-full z-50 w-64 translate-y-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 ${dropPanel}`}
-            >
-              <p className="px-3 py-2 text-xs text-muted-foreground">{email}</p>
+          <div className="mt-4">
+            <p className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{n.account}</p>
+            <div className="mb-2 rounded-2xl border border-border bg-muted/45 px-3 py-2 text-xs text-muted-foreground">
+              <span className="block truncate">{email || n.account}</span>
+            </div>
+            <div className="grid gap-1">
               {accountLinks.map(({ href, label, Icon }) => (
                 <Link key={href} href={href} className={dropLink}>
                   <Icon size={17} className="text-primary" />
                   {label}
                 </Link>
               ))}
-              <form action="/api/auth/signout" method="post" className="border-t border-border pt-2">
+              <form action="/api/auth/signout" method="post">
                 <button type="submit" className={`${dropLink} w-full`}>
                   <LogOut size={17} className="text-primary" />
                   {copy.logout}
@@ -207,8 +173,19 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
               </form>
             </div>
           </div>
-        </div>
-        <details className="group relative lg:hidden">
+        </nav>
+      </aside>
+
+      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/85 text-foreground shadow-[0_1px_0_rgba(0,0,0,0.04)] backdrop-blur-xl dark:bg-background/75 lg:hidden">
+        <div className="flex items-center justify-between gap-3 px-4 py-4">
+          <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-foreground">
+            <Image src={brandIcon.nav} alt="" width={36} height={36} className="size-9 rounded-2xl bg-card/40 shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_8px_28px_rgba(0,0,0,0.12)] ring-1 ring-black/5" priority />
+            <span>
+              <span className="block leading-5">GlobalHire AI</span>
+              <span className="hidden text-[11px] font-medium text-muted-foreground sm:block">{n.tagline}</span>
+            </span>
+          </Link>
+          <details className="group relative">
           <summary className="focus-ring flex list-none items-center gap-2 rounded-xl border border-border bg-muted/60 px-3 py-2 text-sm text-foreground">
             <Menu size={18} />
             {n.menu}
@@ -228,10 +205,6 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
                 <Link href="/admin" className={dropLink}>
                   <ShieldCheck size={17} className="text-primary" />
                   {copy.admin}
-                </Link>
-                <Link href="/admin/growth" className={dropLink}>
-                  <BarChart3 size={17} className="text-primary" />
-                  {copy.adminGrowth}
                 </Link>
               </div>
             ) : null}
@@ -263,7 +236,8 @@ export function AppNav({ isAdmin = false, email = "" }: { isAdmin?: boolean; ema
             </div>
           </div>
         </details>
-      </div>
-    </header>
+        </div>
+      </header>
+    </>
   );
 }

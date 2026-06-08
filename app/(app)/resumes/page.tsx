@@ -1,27 +1,25 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui";
+import { ArrowRight, Trash2 } from "lucide-react";
+import { Button, Card } from "@/components/ui";
+import { ResumeEditor } from "@/components/resumes/resume-editor";
 import { createClient } from "@/lib/supabase-server";
 import { defaultResumeData, normalizeResumeData } from "@/lib/resumes/defaults";
 import { calculateResumeScore } from "@/lib/resumes/score";
 
-async function createResume() {
+async function deleteResume(formData: FormData) {
   "use server";
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+
   const supabase = await createClient();
   const {
     data: { user }
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data, error } = await supabase
-    .from("resumes")
-    .insert({ user_id: user.id, title: "Novo currículo", data: defaultResumeData() })
-    .select("id")
-    .single();
-
-  if (error || !data) redirect("/resumes?erro=create");
-  redirect(`/resumes/${data.id}`);
+  await supabase.from("resumes").delete().eq("id", id).eq("user_id", user.id);
+  redirect("/resumes");
 }
 
 export default async function ResumesPage() {
@@ -39,43 +37,51 @@ export default async function ResumesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Meus currículos</h1>
-          <p className="text-sm text-muted-foreground">Crie, personalize, pontue e exporte currículos por vaga.</p>
-        </div>
-        <form action={createResume}>
-          <Button type="submit" className="h-10 rounded-md px-3">
-            <Plus size={16} /> Criar currículo
-          </Button>
-        </form>
-      </div>
+      <ResumeEditor initialTitle="Novo currículo" initialData={defaultResumeData()} isDraft />
 
-      {resumes?.length ? (
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {resumes.map((resume) => {
-            const data = normalizeResumeData(resume.data);
-            const score = calculateResumeScore(data).score;
-            return (
-              <Link key={resume.id} href={`/resumes/${resume.id}`} className="rounded-md border border-border bg-card p-4 text-card-foreground transition hover:bg-muted/60">
-                <div className="mb-3 flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h2 className="truncate font-semibold">{resume.title}</h2>
-                    <p className="truncate text-sm text-muted-foreground">{data.targetRole || data.personal.headline || "Sem cargo-alvo"}</p>
+      <Card className="rounded-xl p-4 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Currículos salvos</h2>
+            <p className="text-sm text-muted-foreground">Abra versões anteriores ou exclua rascunhos que não devem continuar.</p>
+          </div>
+          <span className="rounded-md bg-muted px-2 py-1 text-xs font-semibold text-muted-foreground">{resumes?.length || 0} salvos</span>
+        </div>
+
+        {resumes?.length ? (
+          <div className="mt-4 grid gap-2">
+            {resumes.map((resume) => {
+              const data = normalizeResumeData(resume.data);
+              const score = calculateResumeScore(data).score;
+              return (
+                <div key={resume.id} className="grid gap-3 rounded-md border border-border bg-background p-3 sm:grid-cols-[1fr_auto] sm:items-center">
+                  <Link href={`/resumes/${resume.id}`} className="min-w-0 group">
+                    <p className="truncate text-sm font-semibold text-foreground">{resume.title || data.personal.name || "Currículo sem título"}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Score {score} · {data.targetRole || "sem cargo-alvo"} · atualizado em {new Date(resume.updated_at || resume.created_at).toLocaleDateString("pt-BR")}
+                    </p>
+                  </Link>
+                  <div className="flex gap-2">
+                    <Button href={`/resumes/${resume.id}`} className="h-9 rounded-md px-3">
+                      Abrir <ArrowRight size={14} />
+                    </Button>
+                    <form action={deleteResume}>
+                      <input type="hidden" name="id" value={resume.id} />
+                      <button type="submit" className="focus-ring inline-flex h-9 items-center gap-2 rounded-md border border-red-400/30 px-3 text-sm text-red-700 hover:bg-red-500/10 dark:border-red-400/20 dark:text-red-100">
+                        <Trash2 size={14} /> Excluir
+                      </button>
+                    </form>
                   </div>
-                  <span className="rounded-md bg-primary/10 px-2 py-1 text-xs font-bold text-primary">{score}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">Atualizado em {new Date(resume.updated_at || resume.created_at).toLocaleDateString("pt-BR")}</p>
-              </Link>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="rounded-md border border-dashed border-border bg-card p-8 text-center">
-          <h2 className="font-semibold text-card-foreground">Nenhum currículo ainda</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Comece com um currículo vazio e ajuste para cada vaga.</p>
-        </div>
-      )}
+              );
+            })}
+          </div>
+        ) : (
+          <p className="mt-4 rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
+            Nenhum currículo salvo ainda. Complete o rascunho acima e clique em Salvar quando estiver pronto.
+          </p>
+        )}
+      </Card>
     </div>
   );
 }

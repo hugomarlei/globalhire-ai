@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Clock, Copy, Download, Eye, FilePlus2, FolderOpen, RefreshCw, Search, Trash2 } from "lucide-react";
+import { Clock, Copy, Download, Eye, FilePlus2, RefreshCw, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button, Card, inputClass } from "@/components/ui";
 import { useLanguage } from "@/components/language-provider";
@@ -112,31 +112,26 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
             <Clock size={16} />
             {h.tabHistory}
           </Link>
-          <Link
-            href="/historico?tab=documentos"
-            className={`focus-ring inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${mode === "documents" ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
-          >
-            <FolderOpen size={16} />
-            {h.tabDocuments}
-          </Link>
-          <Button href="/gerador" className="bg-primary text-primary-foreground hover:brightness-105">
-            <FilePlus2 size={17} />
-            {h.createNew}
-          </Button>
+          {mode === "history" ? (
+            <Button href="/gerador" className="bg-primary text-primary-foreground hover:brightness-105">
+              <FilePlus2 size={17} />
+              {h.createNew}
+            </Button>
+          ) : null}
         </div>
       </div>
 
-      <Card>
+      <Card className="rounded-xl p-3 shadow-sm">
         <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
           <label className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={17} />
-            <input data-clarity-mask="true" className={`${inputClass} pl-10`} value={query} onChange={(event) => setQuery(event.target.value)} placeholder={h.searchPlaceholder} />
+            <input data-clarity-mask="true" className={`${inputClass} h-10 min-h-10 pl-10`} value={query} onChange={(event) => setQuery(event.target.value)} placeholder={h.searchPlaceholder} />
           </label>
           <div className="flex max-w-full gap-2 overflow-x-auto">
             <button
               type="button"
               onClick={() => setFilter("all")}
-              className={`focus-ring shrink-0 rounded-md px-3 py-2 text-sm font-semibold ${filter === "all" ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+              className={`focus-ring shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold ${filter === "all" ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
             >
               {h.filterAll}
             </button>
@@ -145,22 +140,22 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                 key={type}
                 type="button"
                 onClick={() => setFilter(type)}
-                className={`focus-ring shrink-0 rounded-md px-3 py-2 text-sm font-semibold ${filter === type ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                className={`focus-ring shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold ${filter === type ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
               >
                 {historyTypeShortLabel(locale, type)}
               </button>
             ))}
           </div>
         </div>
-        <div className="mt-4">
+        {mode === "documents" ? <div className="mt-3">
           <TurnstileWidget action="regenerate" onVerify={setTurnstileToken} resetSignal={captchaReset} />
-        </div>
+        </div> : null}
       </Card>
       {notice ? <p className="rounded-md border border-border bg-card p-3 text-sm text-card-foreground">{notice}</p> : null}
 
-      <div className={mode === "documents" ? "grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3" : "grid gap-3"}>
+      <div className={mode === "documents" ? "grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3" : "relative grid gap-0 border-l border-border pl-4"}>
         {filtered.map((item) => (
-          <Card key={item.id} className={`h-fit min-h-0 w-full min-w-0 self-start p-0`}>
+          <Card key={item.id} className={mode === "history" ? "relative mb-3 h-fit min-h-0 w-full min-w-0 self-start rounded-xl p-0 shadow-sm before:absolute before:-left-[23px] before:top-5 before:size-3 before:rounded-full before:border-2 before:border-background before:bg-primary" : "h-fit min-h-0 w-full min-w-0 self-start p-0"}>
             <div className={mode === "history" ? "grid gap-4 p-4 lg:grid-cols-[1fr_auto] lg:items-start" : "grid gap-4 p-4"}>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
@@ -173,7 +168,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                   {item.output}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className={mode === "history" ? "flex flex-wrap gap-1.5 lg:justify-end" : "flex flex-wrap gap-2"}>
                 <button type="button" onClick={() => copyText(item.id, item.output)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
                   <Copy size={16} />
                   {copied === item.id ? h.copied : h.copy}
@@ -194,10 +189,12 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                     {copy.historyDownloadText}
                   </a>
                 )}
-                <button type="button" onClick={() => regenerate(item.id)} disabled={regenerating === item.id} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50">
+                {mode === "documents" ? (
+                  <button type="button" onClick={() => regenerate(item.id)} disabled={regenerating === item.id} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50">
                   <RefreshCw className={regenerating === item.id ? "animate-spin" : ""} size={16} />
                   {regenerating === item.id ? h.regenerating : h.regenerate}
-                </button>
+                  </button>
+                ) : null}
                 <button type="button" onClick={() => deleteItem(item.id)} disabled={deleting === item.id} className="focus-ring inline-flex items-center gap-2 rounded-md border border-red-400/30 px-3 py-2 text-sm text-red-700 hover:bg-red-500/10 disabled:opacity-50 dark:border-red-400/20 dark:text-red-100 dark:hover:bg-red-500/10">
                   <Trash2 size={16} />
                   {deleting === item.id ? h.deleting : h.delete}

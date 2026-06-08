@@ -1,5 +1,5 @@
 /**
- * Server-side admin allowlist for `/admin`, `/admin/growth`, and `/api/admin/*`.
+ * Server-side admin allowlist for `/admin` and `/api/admin/*`.
  *
  * - Source of truth: `ADMIN_EMAILS` (comma-separated, case-insensitive).
  * - Empty or missing env → no one passes admin checks (fail closed).
