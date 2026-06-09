@@ -51,6 +51,7 @@ export type ResumeData = {
   education: ResumeEducation[];
   certifications: ResumeCertification[];
   skills: string[];
+  languages: string[];
 };
 
 export type ResumeRecord = {

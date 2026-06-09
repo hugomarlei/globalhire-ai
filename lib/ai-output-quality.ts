@@ -318,7 +318,7 @@ ${input.quality.missingJobKeywords.slice(0, 12).join(", ") || "Nenhuma lista dis
 Regras obrigatórias:
 - Entregue uma versão materialmente melhor, não uma paráfrase.
 - Preserve somente fatos sustentados pelo currículo/base.
-- Não remova empresas, cargos ou experiências do currículo/base. Reordene e compacte o que for menos aderente, mas preserve o histórico real.
+- Não remova empresas, cargos, experiências, formações, certificações ou idiomas do currículo/base. Reordene e compacte o que for menos aderente, mas preserve o histórico real.
 - Se a versão anterior removeu experiências, recoloque-as com bullets mais curtos e orientados à vaga.
 - Não transforme requisito da vaga em competência possuída. Se o currículo não comprova liderança de equipe, distribuidores, market share ou Key Accounts, trate como alvo/transferência, não como fato.
 - Incorpore termos da vaga apenas quando forem coerentes com a trajetória real.

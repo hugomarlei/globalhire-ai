@@ -25,7 +25,7 @@ const durationPattern = /\s*\((?:\d+\s*(?:months?|mois|meses?|ans?|years?)|curre
 const languageLinePattern = /\b(portugu[eê]s|ingl[eê]s|franc[eê]s|espanhol|alem[aã]o|italiano|english|french|spanish|german|native|nativo|bilingual|avancado|avançado|fluente|intermedi[aá]rio|b[aá]sico|professional working|full professional)\b/i;
 const jobDescriptionLinePattern =
   /\b(responsabilidades|requisitos|qualifica[cç][oõ]es|compet[eê]ncias comportamentais|market share|descri[cç][aã]o da vaga|profissional focado|principais responsabilidades)\b/i;
-const profileNoisePattern = /^(page \d+ of \d+|p[aá]gina \d+|contact|top skills|languages|idiomas|informations personnelles|nom|adresse e-mail|num[eé]ro de t[eé]l[eé]phone|adresse|date de naissance)$/i;
+const profileNoisePattern = /^(page \d+ of \d+|p[aá]gina \d+|informations personnelles|nom|adresse e-mail|num[eé]ro de t[eé]l[eé]phone|adresse|date de naissance)$/i;
 
 function unique(items: string[]) {
   return Array.from(new Set(items.map((item) => item.trim()).filter(Boolean)));
@@ -98,9 +98,22 @@ function parseSkills(lines: string[]) {
         .split(/[,;|•]/)
         .map(cleanLine)
     )
-  )
+    )
     .filter((item) => item.length >= 2 && item.length <= 80 && !jobDescriptionLinePattern.test(item) && !dateRangePattern.test(item))
     .slice(0, 40);
+}
+
+function parseLanguages(lines: string[]) {
+  return unique(
+    lines.flatMap((line) =>
+      line
+        .replace(bulletPattern, "")
+        .split(/[,;|•]/)
+        .map(cleanLine)
+    )
+  )
+    .filter((item) => item.length >= 2 && item.length <= 120 && !jobDescriptionLinePattern.test(item) && !dateRangePattern.test(item))
+    .slice(0, 20);
 }
 
 function looksLikeLocation(line: string) {
@@ -374,6 +387,7 @@ export function importResumeText(text: string, current?: ResumeData): ResumeData
     experience: experienceLines.length ? parseEntries(experienceLines, "experience") : base.experience,
     education: educationLines.length ? parseEntries(educationLines, "education") : base.education,
     certifications: certificationLines.length ? parseEntries(certificationLines, "certification") : base.certifications,
-    skills: skillLines.length || languageLines.length ? parseSkills([...skillLines, ...languageLines]) : base.skills
+    skills: skillLines.length ? parseSkills(skillLines) : base.skills,
+    languages: languageLines.length ? parseLanguages(languageLines) : base.languages
   });
 }

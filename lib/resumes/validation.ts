@@ -42,7 +42,8 @@ export const resumeDataSchema = z.object({
     credentialUrl: z.string().max(400).default(""),
     description: z.string().max(3000).default("")
   })).max(30).default([]),
-  skills: z.array(z.string().max(80)).max(80).default([])
+  skills: z.array(z.string().max(80)).max(80).default([]),
+  languages: z.array(z.string().max(80)).max(20).default([])
 });
 
 export const resumeCreateSchema = z.object({

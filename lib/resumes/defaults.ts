@@ -68,7 +68,8 @@ export function defaultResumeData(): ResumeData {
     experience: [emptyExperience()],
     education: [emptyEducation()],
     certifications: [],
-    skills: []
+    skills: [],
+    languages: []
   };
 }
 
@@ -78,9 +79,21 @@ export function normalizeResumeData(input: unknown): ResumeData {
 
   const data = input as Partial<ResumeData>;
   const template = resumeTemplates.some((item) => item.key === data.template) ? data.template! : base.template;
-  const skills = Array.isArray(data.skills)
-    ? data.skills.map((item) => String(item).trim()).filter(Boolean).slice(0, 80)
-    : [];
+  const toList = (value: unknown, limit: number) => {
+    if (Array.isArray(value)) {
+      return value.map((item) => String(item).trim()).filter(Boolean).slice(0, limit);
+    }
+    if (typeof value === "string") {
+      return value
+        .split(/[,;\n|•]/)
+        .map((item) => String(item).trim())
+        .filter(Boolean)
+        .slice(0, limit);
+    }
+    return [];
+  };
+  const skills = toList((data as { skills?: unknown }).skills, 80);
+  const languages = toList((data as { languages?: unknown }).languages, 20);
 
   return {
     ...base,
@@ -104,7 +117,8 @@ export function normalizeResumeData(input: unknown): ResumeData {
     certifications: Array.isArray(data.certifications)
       ? data.certifications.map((item) => ({ ...emptyCertification(), ...item, id: item.id || makeId() })).slice(0, 30)
       : base.certifications,
-    skills
+    skills,
+    languages
   };
 }
 
@@ -123,6 +137,26 @@ function meaningfulEducation(item: ResumeEducation) {
 
 function meaningfulCertification(item: ResumeCertification) {
   return hasValue(item.name) || hasValue(item.issuer) || hasValue(item.description);
+}
+
+function mergeIndexedItems<T extends { id: string }>(
+  baseItems: T[],
+  patchItems: T[],
+  emptyFactory: () => T,
+  mergeItem: (baseItem: T, patchItem: T) => T,
+  isMeaningful: (item: T) => boolean
+) {
+  const meaningfulPatch = patchItems.filter(isMeaningful);
+  if (!meaningfulPatch.length) return baseItems;
+
+  const merged: T[] = [];
+  const length = Math.max(baseItems.length, meaningfulPatch.length);
+  for (let index = 0; index < length; index += 1) {
+    const baseItem = baseItems[index] || emptyFactory();
+    const patchItem = meaningfulPatch[index];
+    merged.push(patchItem ? mergeItem(baseItem, patchItem) : baseItem);
+  }
+  return merged;
 }
 
 export function mergeResumeData(baseInput: ResumeData, patchInput: unknown): ResumeData {
@@ -146,42 +180,58 @@ export function mergeResumeData(baseInput: ResumeData, patchInput: unknown): Res
       links: mergeText(patch.personal.links, base.personal.links)
     },
     summary: mergeText(patch.summary, base.summary),
-    experience: patch.experience.some(meaningfulExperience)
-      ? patch.experience.filter(meaningfulExperience).map((item, index) => ({
-          ...(base.experience[index] || emptyExperience()),
-          ...item,
-          role: mergeText(item.role, base.experience[index]?.role || ""),
-          company: mergeText(item.company, base.experience[index]?.company || ""),
-          location: mergeText(item.location, base.experience[index]?.location || ""),
-          start: mergeText(item.start, base.experience[index]?.start || ""),
-          end: mergeText(item.end, base.experience[index]?.end || ""),
-          description: mergeText(item.description, base.experience[index]?.description || "")
-        }))
-      : base.experience,
-    education: patch.education.some(meaningfulEducation)
-      ? patch.education.filter(meaningfulEducation).map((item, index) => ({
-          ...(base.education[index] || emptyEducation()),
-          ...item,
-          degree: mergeText(item.degree, base.education[index]?.degree || ""),
-          school: mergeText(item.school, base.education[index]?.school || ""),
-          location: mergeText(item.location, base.education[index]?.location || ""),
-          start: mergeText(item.start, base.education[index]?.start || ""),
-          end: mergeText(item.end, base.education[index]?.end || ""),
-          description: mergeText(item.description, base.education[index]?.description || "")
-        }))
-      : base.education,
-    certifications: patch.certifications.some(meaningfulCertification)
-      ? patch.certifications.filter(meaningfulCertification).map((item, index) => ({
-          ...(base.certifications[index] || emptyCertification()),
-          ...item,
-          name: mergeText(item.name, base.certifications[index]?.name || ""),
-          issuer: mergeText(item.issuer, base.certifications[index]?.issuer || ""),
-          date: mergeText(item.date, base.certifications[index]?.date || ""),
-          credentialUrl: mergeText(item.credentialUrl, base.certifications[index]?.credentialUrl || ""),
-          description: mergeText(item.description, base.certifications[index]?.description || "")
-        }))
-      : base.certifications,
-    skills: patch.skills.length ? patch.skills : base.skills
+    experience: mergeIndexedItems(
+      base.experience,
+      patch.experience,
+      emptyExperience,
+      (baseItem, patchItem) => ({
+        ...baseItem,
+        ...patchItem,
+        id: patchItem.id || baseItem.id || makeId(),
+        role: mergeText(patchItem.role, baseItem.role),
+        company: mergeText(patchItem.company, baseItem.company),
+        location: mergeText(patchItem.location, baseItem.location),
+        start: mergeText(patchItem.start, baseItem.start),
+        end: mergeText(patchItem.end, baseItem.end),
+        description: mergeText(patchItem.description, baseItem.description)
+      }),
+      meaningfulExperience
+    ),
+    education: mergeIndexedItems(
+      base.education,
+      patch.education,
+      emptyEducation,
+      (baseItem, patchItem) => ({
+        ...baseItem,
+        ...patchItem,
+        id: patchItem.id || baseItem.id || makeId(),
+        degree: mergeText(patchItem.degree, baseItem.degree),
+        school: mergeText(patchItem.school, baseItem.school),
+        location: mergeText(patchItem.location, baseItem.location),
+        start: mergeText(patchItem.start, baseItem.start),
+        end: mergeText(patchItem.end, baseItem.end),
+        description: mergeText(patchItem.description, baseItem.description)
+      }),
+      meaningfulEducation
+    ),
+    certifications: mergeIndexedItems(
+      base.certifications,
+      patch.certifications,
+      emptyCertification,
+      (baseItem, patchItem) => ({
+        ...baseItem,
+        ...patchItem,
+        id: patchItem.id || baseItem.id || makeId(),
+        name: mergeText(patchItem.name, baseItem.name),
+        issuer: mergeText(patchItem.issuer, baseItem.issuer),
+        date: mergeText(patchItem.date, baseItem.date),
+        credentialUrl: mergeText(patchItem.credentialUrl, baseItem.credentialUrl),
+        description: mergeText(patchItem.description, baseItem.description)
+      }),
+      meaningfulCertification
+    ),
+    skills: patch.skills.length ? patch.skills : base.skills,
+    languages: patch.languages.length ? patch.languages : base.languages
   });
 }
 
@@ -197,7 +247,8 @@ export function resumeToPlainText(data: ResumeData) {
     ...data.experience.flatMap((item) => [item.role, item.company, item.location, item.description]),
     ...data.education.flatMap((item) => [item.degree, item.school, item.location, item.description]),
     ...data.certifications.flatMap((item) => [item.name, item.issuer, item.date, item.description]),
-    data.skills.join(", ")
+    data.skills.join(", "),
+    data.languages.join(", ")
   ];
 
   return parts.filter(Boolean).join("\n");

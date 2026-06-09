@@ -52,6 +52,12 @@ export function ResumePreview({ data, printable = false }: { data: ResumeData; p
               <h2 className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">Skills</h2>
               <p className="leading-6">{data.skills.join(" | ") || "Adicione habilidades relevantes"}</p>
             </div>
+            {data.languages.length ? (
+              <div>
+                <h2 className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">Idiomas</h2>
+                <p className="leading-6">{data.languages.join(" | ")}</p>
+              </div>
+            ) : null}
             <div>
               <h2 className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">Formação</h2>
               {data.education.filter((item) => item.degree || item.school).map((item) => (
@@ -119,6 +125,12 @@ export function ResumePreview({ data, printable = false }: { data: ResumeData; p
         {!sidebar ? (
           <Section title="Habilidades" color={color}>
             <p className="text-sm leading-6 text-slate-700">{data.skills.join(" | ") || "Adicione habilidades relevantes"}</p>
+          </Section>
+        ) : null}
+
+        {!sidebar && data.languages.length ? (
+          <Section title="Idiomas" color={color}>
+            <p className="text-sm leading-6 text-slate-700">{data.languages.join(" | ")}</p>
           </Section>
         ) : null}
 

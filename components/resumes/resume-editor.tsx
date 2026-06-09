@@ -469,6 +469,10 @@ export function ResumeEditor({ id, initialTitle, initialData, isDraft = false }:
                 <Field label="Habilidades separadas por vírgula"><textarea className={cn(textareaClass, "min-h-24")} value={data.skills.join(", ")} onChange={(event) => patch({ skills: splitSkills(event.target.value) })} placeholder="React, Tailwind, Liderança..." /></Field>
               </SectionAccordion>
 
+              <SectionAccordion title="Idiomas" description="Idiomas separados por vírgula." done={data.languages.length > 0}>
+                <Field label="Idiomas separados por vírgula"><textarea className={cn(textareaClass, "min-h-24")} value={data.languages.join(", ")} onChange={(event) => patch({ languages: splitSkills(event.target.value) })} placeholder="Português nativo, Inglês avançado, Francês intermediário..." /></Field>
+              </SectionAccordion>
+
               <SectionAccordion
                 title="Revisar e exportar"
                 description="Etapa final: validar prontidão ATS, aplicar revisão com IA e gerar a entrega."

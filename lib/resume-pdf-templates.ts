@@ -83,6 +83,12 @@ function renderCertifications(data: ResumeData) {
   );
 }
 
+function renderLanguages(data: ResumeData) {
+  const items = data.languages.filter(Boolean);
+  if (!items.length) return "";
+  return renderSection("Idiomas", `<p>${escapeHtml(items.join(" | "))}</p>`, data.primaryColor || "#0f766e");
+}
+
 /**
  * Print-optimized CSS for browser PDF export. Keeps logic out of the UI component
  * so new templates can be registered here without touching React.
@@ -199,6 +205,7 @@ export function buildStructuredResumePdfPrintDocument(opts: {
           <small>${escapeHtml(contact)}</small>
         </header>
         ${skills ? `<section><h2>Skills</h2><p>${escapeHtml(skills)}</p></section>` : ""}
+        ${opts.data.languages.length ? `<section><h2>Idiomas</h2><p>${escapeHtml(opts.data.languages.join(" | "))}</p></section>` : ""}
         ${opts.data.education.some((item) => item.degree || item.school)
           ? `<section><h2>Formação</h2>${opts.data.education.filter((item) => item.degree || item.school).map((item) => `
               <div class="side-item"><strong>${escapeHtml(item.degree || "Formação")}</strong><span>${escapeHtml(item.school)}</span><small>${escapeHtml([item.start, item.end].filter(Boolean).join(" - "))}</small></div>
@@ -221,6 +228,7 @@ export function buildStructuredResumePdfPrintDocument(opts: {
     ${renderExperience(opts.data)}
     ${isModern ? "" : renderEducation(opts.data)}
     ${isModern || !skills ? "" : renderSection("Habilidades", `<p>${escapeHtml(skills)}</p>`, color)}
+    ${isModern || !opts.data.languages.length ? "" : renderLanguages(opts.data)}
     ${isModern ? "" : renderCertifications(opts.data)}
   `;
 

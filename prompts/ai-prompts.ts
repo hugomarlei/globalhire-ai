@@ -175,6 +175,7 @@ const specs: Record<GenerationType, DeliverySpec> = {
       "Reorganize density by benchmark relevance: HIGH VALUE evidence gets more space, MEDIUM VALUE stays concise, LOW VALUE is compacted.",
       "Give more depth to roles closest to the target; compact weaker roles without erasing real history, employers, dates, locations or role titles.",
       "The final resume must be complete enough for export, not a shortened preview.",
+      "If languages exist in the source resume, preserve them as a dedicated section instead of folding them into skills.",
       "Omit empty or negative sections such as no relevant certifications."
     ]
   },
@@ -249,6 +250,7 @@ const specs: Record<GenerationType, DeliverySpec> = {
       "Do not cut long career histories; translate every role and compact only repeated wording inside a role.",
       "The final translated resume must be complete enough for export, not a sample or shortened version.",
       "Adapt job titles and section names to target-market conventions without changing seniority or scope.",
+      "If the source includes languages, keep them as a dedicated section instead of folding them into skills.",
       "Keep a clean ATS-readable structure and natural professional language."
     ]
   }
