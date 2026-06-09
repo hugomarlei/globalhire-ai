@@ -3,11 +3,18 @@ import type { GenerationType } from "@/lib/types";
 export type PlanId = "free" | "starter" | "pro" | "elite";
 export type PlanFeature = GenerationType | "ats_score" | "keywords" | "resume_builder" | "resume_ai_writer";
 
+export const planDisplayPrices = {
+  free: "R$0",
+  starter: "R$29/mês",
+  pro: "R$79/mês",
+  elite: "R$149/mês"
+} as const;
+
 export const plans = {
   free: {
     id: "free",
     name: "Free",
-    price: "R$0",
+    price: planDisplayPrices.free,
     monthlyLimit: 1,
     features: [
       "1 uso premium por mês",
@@ -24,7 +31,7 @@ export const plans = {
   starter: {
     id: "starter",
     name: "Starter",
-    price: "R$29/mes",
+    price: planDisplayPrices.starter,
     monthlyLimit: 10,
     stripePriceEnv: "NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID",
     features: ["10 gerações por mês", "Currículo ATS", "Carta de apresentação", "Resumo LinkedIn"]
@@ -32,7 +39,7 @@ export const plans = {
   pro: {
     id: "pro",
     name: "Pro",
-    price: "R$79/mes",
+    price: planDisplayPrices.pro,
     monthlyLimit: 9999,
     stripePriceEnv: "NEXT_PUBLIC_STRIPE_PRO_PRICE_ID",
     features: ["Gerações ilimitadas", "Tudo do Starter", "Mensagem para recrutador", "Guia para entrevista", "Traduzir currículo", "ATS Score e palavras-chave"]
@@ -40,16 +47,16 @@ export const plans = {
   elite: {
     id: "elite",
     name: "Elite",
-    price: "R$149/mes",
+    price: planDisplayPrices.elite,
     monthlyLimit: 9999,
     stripePriceEnv: "NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID",
     features: [
       "Tudo do Pro",
-      "Geração premium 110%",
-      "Máximo match com a vaga",
-      "Inserção inteligente de termos ATS",
-      "Adaptação intensa por país",
-      "Respostas para recrutadores"
+      "Otimização avançada e consistente",
+      "Ajuste forte ao contexto da vaga",
+      "Inclusão estratégica de palavras-chave ATS",
+      "Adaptação por país e idioma",
+      "Saídas prontas para recrutadores"
     ]
   }
 } satisfies Record<string, {
@@ -103,10 +110,10 @@ export function allowedGenerationTypes(planId: PlanId) {
 export function optimizationIntensity(planId: PlanId) {
   if (planId === "elite" || planId === "free") {
     return {
-      label: planId === "free" ? "Free premium preview" : "Elite",
-      percent: "110%",
+      label: planId === "free" ? "Free preview" : "Elite",
+      percent: "90%",
       instruction:
-        "Aplique otimização máxima: busque o maior match possível com a vaga, explore intensamente termos ATS compatíveis, reorganize experiências com agressividade estratégica e alinhe o currículo à descrição sem mentir ou criar fatos. Esta experiência deve mostrar o potencial premium do produto."
+        "Aplique otimização máxima com foco em evidências: priorize fatos do currículo, palavras-chave compatíveis com a vaga e reorganização estratégica do conteúdo sem inventar dados, sem exagerar promessas e sem sacrificar clareza."
     };
   }
 

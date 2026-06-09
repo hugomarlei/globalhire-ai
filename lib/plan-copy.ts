@@ -1,6 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 import type { PlanId } from "@/lib/plans";
-import { paidPlans, plans } from "@/lib/plans";
+import { paidPlans, planDisplayPrices, plans } from "@/lib/plans";
 import { formatStripePaidPlanPrice } from "@/lib/plan-price-display";
 import type { StripePriceCatalogJson } from "@/lib/stripe-price-catalog-types";
 
@@ -15,10 +15,10 @@ type PlanCopy = Omit<PlanDisplayRow, "id">;
 
 const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
   "pt-BR": {
-    free: { name: plans.free.name, price: plans.free.price, features: plans.free.features },
-    starter: { name: plans.starter.name, price: plans.starter.price, features: plans.starter.features },
-    pro: { name: plans.pro.name, price: plans.pro.price, features: plans.pro.features },
-    elite: { name: plans.elite.name, price: plans.elite.price, features: plans.elite.features }
+    free: { name: plans.free.name, price: planDisplayPrices.free, features: plans.free.features },
+    starter: { name: plans.starter.name, price: planDisplayPrices.starter, features: plans.starter.features },
+    pro: { name: plans.pro.name, price: planDisplayPrices.pro, features: plans.pro.features },
+    elite: { name: plans.elite.name, price: planDisplayPrices.elite, features: plans.elite.features }
   },
   en: {
     free: {
@@ -58,11 +58,11 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
       price: "R$149/mo",
       features: [
         "Everything in Pro",
-        "110% premium generation",
-        "Maximum job match",
-        "Smart ATS keyword insertion",
-        "Intensive country adaptation",
-        "Recruiter-ready replies"
+        "Advanced and consistent optimization",
+        "Strong alignment to the role context",
+        "Strategic ATS keyword inclusion",
+        "Country and language adaptation",
+        "Outputs ready for recruiters"
       ]
     }
   },
@@ -104,11 +104,11 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
       price: "R$149/mes",
       features: [
         "Todo lo de Pro",
-        "Generación premium 110%",
-        "Máximo encaje con la vacante",
-        "Inserción inteligente de términos ATS",
-        "Adaptación intensa por país",
-        "Respuestas para reclutadores"
+        "Optimización avanzada y consistente",
+        "Ajuste fuerte al contexto de la vacante",
+        "Inclusión estratégica de palabras clave ATS",
+        "Adaptación por país e idioma",
+        "Salidas listas para reclutadores"
       ]
     }
   },
@@ -150,11 +150,11 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
       price: "R$149/mois",
       features: [
         "Tout le pack Pro",
-        "Génération premium 110%",
-        "Adéquation maximale au poste",
-        "Insertion intelligente de termes ATS",
-        "Adaptation poussée par pays",
-        "Réponses prêtes pour recruteurs"
+        "Optimisation avancée et cohérente",
+        "Ajustement fort au contexte du poste",
+        "Intégration stratégique de mots-clés ATS",
+        "Adaptation par pays et langue",
+        "Livrables prêts pour recruteurs"
       ]
     }
   }
