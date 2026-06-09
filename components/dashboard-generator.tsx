@@ -314,8 +314,7 @@ export function DashboardGenerator({
           <div className="grid gap-5 lg:grid-cols-[0.76fr_1.24fr] lg:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-primary">Workspace de entregas</p>
-              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Central de candidatura</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Escolha a entrega, insira a base profissional e acompanhe o documento final com o template selecionado.</p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Ferramentas</h1>
             </div>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {visibleTypes.map((item) => (

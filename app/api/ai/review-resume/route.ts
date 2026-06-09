@@ -22,6 +22,32 @@ function parseJson(value: string) {
   }
 }
 
+function buildLocalReviewFallback(score: number, recommendations: string[]) {
+  return {
+    categories: [
+      {
+        key: "structure",
+        title: "Estrutura e organização",
+        score,
+        suggestions: recommendations.length
+          ? recommendations.slice(0, 3)
+          : ["Reforce contato, resumo, experiência e habilidades antes de tentar novamente."]
+      },
+      {
+        key: "clarity",
+        title: "Conteúdo e clareza",
+        score: Math.max(0, score - 4),
+        suggestions: [
+          "A revisão automática não respondeu desta vez.",
+          "O currículo original foi mantido.",
+          "Tente novamente quando a IA estiver disponível."
+        ]
+      }
+    ],
+    improvedData: null
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const originError = rejectInvalidOrigin(request);
@@ -50,61 +76,54 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Adicione dados reais do curriculo antes de revisar com IA." }, { status: 400 });
     }
     const localScore = calculateResumeScore(data);
-    const completion = await groq.chat.completions.create({
-      model: GROQ_MODEL,
-      messages: [
-        {
-          role: "system",
-          content:
-            "Voce e um revisor senior de curriculos, ATS e recrutamento internacional. Responda apenas com JSON valido. Use estritamente o idioma do documento. Nao invente experiencias, empresas, certificados, metricas, idiomas, senioridade ou ferramentas. Sua revisao deve transformar o curriculo quando houver base factual: melhorar posicionamento, densidade, clareza, palavras-chave compativeis e aderencia a vaga-alvo, sem maquiagem superficial."
-        },
-        {
-          role: "user",
-          content: JSON.stringify({
-            language: parsed.data.language,
-            resume: data,
-            plainText,
-            qualityGate: [
-              "Avalie internamente se a versao melhorada seria aceita por ATS e recrutador humano.",
-              "Compare mentalmente com curriculos fortes: secoes limpas, resumo especifico, skills aderentes e experiencia com acao + contexto + impacto.",
-              "Se improvedData ficar quase igual ao original, revise novamente antes de responder.",
-              "Use palavras-chave da vaga apenas se data.targetJobDescription existir e forem condizentes com o historico do candidato.",
-              "Nao apresente melhoria que nao apareca em improvedData."
-            ],
-            expectedJson: {
-              categories: [
-                { key: "structure", title: "Estrutura e organização", score: 0, suggestions: ["..."] },
-                { key: "clarity", title: "Conteúdo e clareza", score: 0, suggestions: ["..."] },
-                { key: "positioning", title: "Posicionamento de cargo", score: 0, suggestions: ["..."] },
-                { key: "atsHumanFit", title: "ATS e leitura humana", score: 0, suggestions: ["..."] }
-              ],
-              improvedData: "ResumeData JSON com melhorias verificaveis e substanciais, mantendo todos os fatos verdadeiros"
-            }
-          })
-        }
-      ],
-      max_completion_tokens: 6000,
-      temperature: 0.2
-    });
-
-    const raw = completion.choices[0]?.message?.content?.trim() || "";
-    const reviewed = parseJson(raw);
-    if (!reviewed?.categories) {
-      return NextResponse.json({
-        categories: [
+    let raw = "";
+    try {
+      const completion = await groq.chat.completions.create({
+        model: GROQ_MODEL,
+        messages: [
           {
-            key: "structure",
-            title: "Estrutura e organização",
-            score: localScore.score,
-            suggestions: [
-              "A revisão automática não voltou estruturada nesta tentativa.",
-              localScore.recommendations[0] || "Revise contato, resumo, experiências, habilidades e cargo-alvo antes de exportar.",
-              "Tente novamente depois de preencher mais contexto da vaga-alvo."
-            ]
+            role: "system",
+            content:
+              "Voce e um revisor senior de curriculos, ATS e recrutamento internacional. Responda apenas com JSON valido. Use estritamente o idioma do documento. Nao invente experiencias, empresas, certificados, metricas, idiomas, senioridade ou ferramentas. Sua revisao deve transformar o curriculo quando houver base factual: melhorar posicionamento, densidade, clareza, palavras-chave compativeis e aderencia a vaga-alvo, sem maquiagem superficial."
+          },
+          {
+            role: "user",
+            content: JSON.stringify({
+              language: parsed.data.language,
+              resume: data,
+              plainText,
+              qualityGate: [
+                "Avalie internamente se a versao melhorada seria aceita por ATS e recrutador humano.",
+                "Compare mentalmente com curriculos fortes: secoes limpas, resumo especifico, skills aderentes e experiencia com acao + contexto + impacto.",
+                "Se improvedData ficar quase igual ao original, revise novamente antes de responder.",
+                "Use palavras-chave da vaga apenas se data.targetJobDescription existir e forem condizentes com o historico do candidato.",
+                "Nao apresente melhoria que nao apareca em improvedData."
+              ],
+              expectedJson: {
+                categories: [
+                  { key: "structure", title: "Estrutura e organização", score: 0, suggestions: ["..."] },
+                  { key: "clarity", title: "Conteúdo e clareza", score: 0, suggestions: ["..."] },
+                  { key: "positioning", title: "Posicionamento de cargo", score: 0, suggestions: ["..."] },
+                  { key: "atsHumanFit", title: "ATS e leitura humana", score: 0, suggestions: ["..."] }
+                ],
+                improvedData: "ResumeData JSON com melhorias verificaveis e substanciais, mantendo todos os fatos verdadeiros"
+              }
+            })
           }
         ],
-        improvedData: data
+        max_completion_tokens: 6000,
+        temperature: 0.2
       });
+      raw = completion.choices[0]?.message?.content?.trim() || "";
+    } catch (error) {
+      console.error("resume_review_groq_error", error);
+      const fallback = buildLocalReviewFallback(localScore.score, localScore.recommendations);
+      return NextResponse.json(fallback);
+    }
+
+    const reviewed = parseJson(raw);
+    if (!reviewed?.categories) {
+      return NextResponse.json(buildLocalReviewFallback(localScore.score, localScore.recommendations));
     }
 
     return NextResponse.json({

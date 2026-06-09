@@ -10,5 +10,5 @@ export default async function NewResumePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  return <ResumeEditor initialTitle="Novo currículo" initialData={defaultResumeData()} isDraft />;
+  return <ResumeEditor initialTitle="Novo currículo" initialData={defaultResumeData()} />;
 }

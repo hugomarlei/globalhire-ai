@@ -140,9 +140,6 @@ export default async function DashboardPage({
           <h1 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-foreground">
             Transforme currículo, vaga e score em uma candidatura pronta.
           </h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-            O painel agora organiza o trabalho em etapas: documento base, análise ATS, adaptação com IA e exportação acompanhável.
-          </p>
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
             <div className="rounded-2xl border border-border bg-card/75 p-4">
               <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Plano</p>

@@ -9,16 +9,33 @@ import { dashboardCopy } from "@/lib/i18n";
 import { historyListCopy, historyTypeShortLabel, intlLocaleForUi } from "@/lib/i18n-history-ats";
 import { trackEvent } from "@/lib/analytics";
 import { TurnstileWidget } from "@/components/turnstile-widget";
-import { buildResumePdfPrintDocument } from "@/lib/resume-pdf-templates";
+import { buildResumePdfPrintDocument, buildStructuredResumePdfPrintDocument } from "@/lib/resume-pdf-templates";
+import { normalizeResumeData, resumeToPlainText } from "@/lib/resumes/defaults";
+import type { ResumeData } from "@/lib/resumes/types";
 
-type HistoryItem = {
+type GenerationHistoryItem = {
   id: string;
   type: string;
   language: string;
   target_country: string;
   output: string;
   created_at: string;
+  kind?: "generation";
 };
+
+type ResumeHistoryItem = {
+  id: string;
+  kind: "resume";
+  type: "resume";
+  language: string;
+  target_country: string;
+  output: string;
+  created_at: string;
+  title: string;
+  data?: ResumeData;
+};
+
+type HistoryItem = GenerationHistoryItem | ResumeHistoryItem;
 
 export function HistoryList({ items, mode = "history" }: { items: HistoryItem[]; mode?: "history" | "documents" }) {
   const { locale } = useLanguage();
@@ -35,11 +52,15 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
   const [captchaReset, setCaptchaReset] = useState(0);
   const visibleItems = useMemo(() => items.filter((item) => !deletedIds.includes(item.id)), [deletedIds, items]);
   const types = useMemo(() => Array.from(new Set(visibleItems.map((item) => item.type))), [visibleItems]);
+  const resumeLabel = locale === "pt-BR" ? "Currículo" : locale === "es" ? "CV" : locale === "fr" ? "CV" : "Resume";
+  function labelForType(type: string) {
+    return type === "resume" ? resumeLabel : historyTypeShortLabel(locale, type);
+  }
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return visibleItems.filter((item) => {
       const matchesFilter = filter === "all" || item.type === filter;
-      const searchable = `${item.type} ${item.language} ${item.target_country} ${item.output}`.toLowerCase();
+      const searchable = `${item.type} ${item.language} ${item.target_country} ${item.output} ${(item as ResumeHistoryItem).title || ""}`.toLowerCase();
       return matchesFilter && (!normalizedQuery || searchable.includes(normalizedQuery));
     });
   }, [filter, query, visibleItems]);
@@ -78,11 +99,14 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
     setDeleting(id);
     setNotice("");
 
-    const response = await fetch("/api/documents/delete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ generationId: id })
-    });
+    const target = items.find((item) => item.id === id);
+    const response = target?.kind === "resume"
+      ? await fetch(`/api/resumes/${id}`, { method: "DELETE" })
+      : await fetch("/api/documents/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ generationId: id })
+        });
     const data = await response.json().catch(() => ({}));
     setDeleting("");
 
@@ -98,11 +122,22 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
   function exportPdf(item: HistoryItem) {
     const text = (item.output || "").trim();
     if (!text) return;
-    const html = buildResumePdfPrintDocument({
-      template: "executive",
-      title: historyTypeShortLabel(locale, item.type),
-      body: text
-    });
+    const html = item.kind === "resume"
+      ? (() => {
+          const data = normalizeResumeData(item.data || {});
+          const template = data.template === "modern" ? "modern" : data.template === "classic" ? "compact" : "executive";
+          return buildStructuredResumePdfPrintDocument({
+            template,
+            title: item.title || "Currículo",
+            data,
+            watermarkText: undefined
+          });
+        })()
+      : buildResumePdfPrintDocument({
+          template: "executive",
+          title: labelForType(item.type),
+          body: text
+        });
     const iframe = document.createElement("iframe");
     iframe.setAttribute("aria-hidden", "true");
     iframe.style.position = "fixed";
@@ -180,7 +215,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                 onClick={() => setFilter(type)}
                 className={`focus-ring shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold ${filter === type ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
               >
-                {historyTypeShortLabel(locale, type)}
+                {labelForType(type)}
               </button>
             ))}
           </div>
@@ -197,13 +232,15 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
             <div className={mode === "history" ? "grid gap-4 p-4 lg:grid-cols-[1fr_auto] lg:items-start" : "grid gap-4 p-4"}>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="font-semibold text-foreground">{historyTypeShortLabel(locale, item.type)}</h2>
+                  <h2 className="font-semibold text-foreground">
+                    {item.kind === "resume" ? item.title : labelForType(item.type)}
+                  </h2>
                   <span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">{item.language}</span>
                   <span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">{item.target_country}</span>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString(dateLocale)}</p>
                 <p data-clarity-mask="true" className={`${mode === "documents" ? "line-clamp-4" : "line-clamp-2"} mt-3 text-sm leading-6 text-muted-foreground`}>
-                  {item.output}
+                  {item.kind === "resume" ? resumeToPlainText(normalizeResumeData(item.data || {})) : item.output}
                 </p>
               </div>
               <div className={mode === "history" ? "flex flex-wrap gap-1.5 lg:justify-end" : "flex flex-wrap gap-2"}>
@@ -227,7 +264,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                     {copy.historyDownloadText}
                   </button>
                 )}
-                {mode === "documents" ? (
+                {mode === "documents" && item.kind !== "resume" ? (
                   <button type="button" onClick={() => regenerate(item.id)} disabled={regenerating === item.id} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50">
                   <RefreshCw className={regenerating === item.id ? "animate-spin" : ""} size={16} />
                   {regenerating === item.id ? h.regenerating : h.regenerate}

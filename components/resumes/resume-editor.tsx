@@ -15,7 +15,6 @@ type Props = {
   id?: string;
   initialTitle: string;
   initialData: ResumeData;
-  isDraft?: boolean;
 };
 
 type ReviewResult = {
@@ -131,7 +130,7 @@ function reorder<T>(items: T[], from: number, to: number) {
   return copy;
 }
 
-export function ResumeEditor({ id, initialTitle, initialData, isDraft = false }: Props) {
+export function ResumeEditor({ id, initialTitle, initialData }: Props) {
   const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
   const [data, setData] = useState<ResumeData>(initialData);
@@ -299,23 +298,17 @@ export function ResumeEditor({ id, initialTitle, initialData, isDraft = false }:
   return (
     <div className="space-y-5">
       <div className="rounded-3xl border border-border bg-card p-5 shadow-sm">
-        <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">Workspace de currículo</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Construtor de candidatura</h1>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Construtor de currículo</h1>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
-              {isDraft ? "Rascunho local: salve quando quiser; campos incompletos ficam como pendência, não como bloqueio." : "Importe, edite, revise com IA e acompanhe a versão final em tempo real."}
+              Importe, edite, revise com IA e acompanhe a versão final em tempo real.
             </p>
           </div>
-          <div className="min-w-[220px] rounded-2xl border border-primary/25 bg-primary/5 p-3">
+          <div className="min-w-[150px] rounded-2xl border border-primary/25 bg-primary/5 px-4 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">Pontuação ATS</p>
-            <div className="mt-2 flex items-center gap-3">
-              <span className="text-3xl font-bold text-primary">{analysis.score}</span>
-              <span className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                <span className="block h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${analysis.score}%` }} />
-              </span>
-            </div>
-            <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted-foreground">{analysis.recommendations[0]}</p>
+            <p className="mt-1 text-4xl font-bold leading-none text-primary">{analysis.score}</p>
           </div>
         </div>
       </div>
@@ -369,17 +362,13 @@ export function ResumeEditor({ id, initialTitle, initialData, isDraft = false }:
             </section>
           ) : (
             <>
-              <SectionAccordion title="Configuração da candidatura" description="Defina idioma, cargo-alvo e o contexto que orienta ATS/IA." done={Boolean(data.targetRole)}>
+              <SectionAccordion title="Configuração do currículo" description="Defina idioma, cargo-alvo e o contexto que orienta ATS/IA." done={Boolean(data.targetRole)}>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Field label="Título interno"><input className={inputClass} value={title} onChange={(event) => setTitle(event.target.value)} /></Field>
                   <Field label="Idioma final"><input className={inputClass} value={data.language} onChange={(event) => patch({ language: event.target.value })} /></Field>
                   <Field label="Cargo-alvo"><input className={inputClass} value={data.targetRole} onChange={(event) => patch({ targetRole: event.target.value })} /></Field>
                 </div>
                 <Field label="Descrição da vaga para orientar IA e ATS score"><textarea className={cn(textareaClass, "mt-3 min-h-28")} value={data.targetJobDescription} onChange={(event) => patch({ targetJobDescription: event.target.value })} /></Field>
-              </SectionAccordion>
-
-              <SectionAccordion title="Template do documento" description="Escolha visualmente a estrutura antes de exportar." done={Boolean(data.template)}>
-                <TemplatePicker value={data.template} items={resumeTemplates} onChange={(template) => patch({ template: template as ResumeData["template"] })} />
               </SectionAccordion>
 
               <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
@@ -394,6 +383,10 @@ export function ResumeEditor({ id, initialTitle, initialData, isDraft = false }:
                   </label>
                 </div>
               </section>
+
+              <SectionAccordion title="Template do documento" description="Escolha visualmente a estrutura antes de exportar." done={Boolean(data.template)}>
+                <TemplatePicker value={data.template} items={resumeTemplates} onChange={(template) => patch({ template: template as ResumeData["template"] })} />
+              </SectionAccordion>
 
               <SectionAccordion title="Contato" description="Dados básicos usados no cabeçalho do currículo." done={Boolean(data.personal.name && data.personal.email)}>
                 <div className="grid gap-3 sm:grid-cols-2">
