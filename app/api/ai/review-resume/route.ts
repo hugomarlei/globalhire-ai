@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
           })
         }
       ],
+      max_completion_tokens: 6000,
       temperature: 0.2
     });
 

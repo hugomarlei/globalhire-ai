@@ -146,7 +146,7 @@ function extractExperienceAnchors(resume: string) {
     }
   }
 
-  return [...new Set(anchors)].slice(0, 12);
+  return [...new Set(anchors)].slice(0, 20);
 }
 
 function anchorAppearsInDocument(anchor: string, document: string) {
@@ -156,6 +156,54 @@ function anchorAppearsInDocument(anchor: string, document: string) {
   const distinctive = tokens.filter((token) => !["brasil", "franca", "frança", "paris", "curitiba"].includes(token));
   const candidates = distinctive.length ? distinctive : tokens;
   return candidates.some((token) => normalizedDocument.includes(token));
+}
+
+function normalizeCompact(value: string) {
+  return words(value).join(" ");
+}
+
+function hasResumeEvidence(resume: string, patterns: RegExp[]) {
+  return patterns.some((pattern) => pattern.test(resume));
+}
+
+function detectUnsupportedClaims(resume: string, document: string) {
+  const checks: Array<{ claim: string; output: RegExp[]; evidence: RegExp[] }> = [
+    {
+      claim: "gestão/liderança de equipe comercial",
+      output: [
+        /gest[aã]o\s+de\s+equipes?\s+comerciais?/i,
+        /lideran[cç]a\s+de\s+equipes?\s+comerciais?/i,
+        /lider(?:ar|ou|ança)\s+(?:times?|equipes?)\s+(?:de\s+)?vendas/i,
+        /sales\s+team\s+(?:leadership|management)/i
+      ],
+      evidence: [
+        /gest[aã]o\s+de\s+equipes?/i,
+        /lideran[cç]a\s+de\s+equipes?/i,
+        /lider(?:ar|ou|ei)\s+(?:times?|equipes?)/i,
+        /coordena(?:ç[aã]o|r|va)\s+(?:times?|equipes?)/i,
+        /team\s+(?:lead|leadership|management)/i
+      ]
+    },
+    {
+      claim: "expansão de market share",
+      output: [/market\s+share/i, /participa[cç][aã]o\s+de\s+mercado/i],
+      evidence: [/market\s+share/i, /participa[cç][aã]o\s+de\s+mercado/i]
+    },
+    {
+      claim: "gestão de distribuidores/canais indiretos",
+      output: [/distribuidores?/i, /canais?\s+indiretos?/i, /channel\s+partners?/i, /distributors?/i],
+      evidence: [/distribuidores?/i, /canais?\s+indiretos?/i, /channel\s+partners?/i, /distributors?/i]
+    },
+    {
+      claim: "Key Accounts/grandes contas",
+      output: [/key\s+accounts?/i, /grandes?\s+contas?/i],
+      evidence: [/key\s+accounts?/i, /grandes?\s+contas?/i]
+    }
+  ];
+
+  return checks
+    .filter((check) => check.output.some((pattern) => pattern.test(document)) && !hasResumeEvidence(resume, check.evidence))
+    .map((check) => check.claim);
 }
 
 export function evaluateGeneratedAsset(input: QualityInput): AssetQualityEvaluation {
@@ -210,6 +258,9 @@ export function evaluateGeneratedAsset(input: QualityInput): AssetQualityEvaluat
   const experienceRetention = experienceAnchors.length
     ? clamp(((experienceAnchors.length - missingExperienceAnchors.length) / experienceAnchors.length) * 100)
     : 86;
+  const unsupportedClaims = input.type === "ats_resume" || input.type === "translate_resume"
+    ? detectUnsupportedClaims(input.resume, input.document)
+    : [];
 
   const score = clamp(
     transformation * 0.3 +
@@ -230,8 +281,14 @@ export function evaluateGeneratedAsset(input: QualityInput): AssetQualityEvaluat
   if (missingExperienceAnchors.length) {
     issues.push(`A saída removeu experiências/empresas do currículo original: ${missingExperienceAnchors.join(", ")}.`);
   }
+  if (unsupportedClaims.length) {
+    issues.push(`A saída afirma responsabilidades sem evidência no currículo-base: ${unsupportedClaims.join(", ")}.`);
+  }
   if (input.document.length < Math.min(1200, input.resume.length * 0.75) && (input.type === "ats_resume" || input.type === "translate_resume")) {
     issues.push("A saída ficou curta demais para um currículo pronto para candidatura.");
+  }
+  if ((input.type === "ats_resume" || input.type === "translate_resume") && normalizeCompact(input.document).length < normalizeCompact(input.resume).length * 0.72) {
+    issues.push("A saída comprimiu demais o histórico; preserve a cronologia completa com bullets mais densos.");
   }
 
   return {
@@ -263,6 +320,7 @@ Regras obrigatórias:
 - Preserve somente fatos sustentados pelo currículo/base.
 - Não remova empresas, cargos ou experiências do currículo/base. Reordene e compacte o que for menos aderente, mas preserve o histórico real.
 - Se a versão anterior removeu experiências, recoloque-as com bullets mais curtos e orientados à vaga.
+- Não transforme requisito da vaga em competência possuída. Se o currículo não comprova liderança de equipe, distribuidores, market share ou Key Accounts, trate como alvo/transferência, não como fato.
 - Incorpore termos da vaga apenas quando forem coerentes com a trajetória real.
 - Fortaleça estrutura, densidade, bullets e leitura humana.
 - Evite frases genéricas de IA e buzzwords sem prova.

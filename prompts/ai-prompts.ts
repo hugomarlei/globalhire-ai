@@ -113,7 +113,9 @@ TRUTH CONSTRAINTS
 ATS RESUME MODULE
 - Use standard readable sections, clean text and natural keywords. No tables, graphics, icons, keyword stuffing or decorative formatting.
 - Keywords must be supported by resume evidence and integrated where they belong.
-- Preserve all real roles and employers; compact weakly related history instead of deleting it.
+- Preserve the complete career chronology: every real employer, role, date range and location from the source resume must appear in the final resume.
+- Do not cap the resume to only the most relevant experiences. Give target-relevant roles more density and use concise bullets for secondary roles, but do not delete real history.
+- If the job asks for leadership, channels, distributors, market share, Key Accounts or portfolio ownership and the resume does not prove it, frame adjacent evidence as transferable exposure instead of claiming direct ownership.
 `.trim(),
 
   linkedinSearch: `
@@ -171,7 +173,8 @@ const specs: Record<GenerationType, DeliverySpec> = {
       "Core skills must prioritize verified requirements and high-value transferable skills.",
       "Experience bullets must show action, context, tool/process, stakeholder/scope and result when available.",
       "Reorganize density by benchmark relevance: HIGH VALUE evidence gets more space, MEDIUM VALUE stays concise, LOW VALUE is compacted.",
-      "Give more depth to roles closest to the target; compact weaker roles without erasing real history.",
+      "Give more depth to roles closest to the target; compact weaker roles without erasing real history, employers, dates, locations or role titles.",
+      "The final resume must be complete enough for export, not a shortened preview.",
       "Omit empty or negative sections such as no relevant certifications."
     ]
   },
@@ -244,6 +247,7 @@ const specs: Record<GenerationType, DeliverySpec> = {
     rules: [
       "Preserve all experiences, employers, titles, dates, locations, education, certifications, languages, links and contact details.",
       "Do not cut long career histories; translate every role and compact only repeated wording inside a role.",
+      "The final translated resume must be complete enough for export, not a sample or shortened version.",
       "Adapt job titles and section names to target-market conventions without changing seniority or scope.",
       "Keep a clean ATS-readable structure and natural professional language."
     ]

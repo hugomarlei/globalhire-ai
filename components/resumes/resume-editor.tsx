@@ -270,6 +270,20 @@ export function ResumeEditor({ id, initialTitle, initialData, isDraft = false }:
     setNotice("Currículo copiado em texto simples.");
   }
 
+  function acceptReviewSuggestions() {
+    if (!review) return;
+    setData((current) => mergeResumeData(current, review.improvedData));
+    setReview(null);
+    setActiveTab("editor");
+    setNotice("Sugestões aplicadas. Revise os campos, ajuste o que quiser e salve o currículo.");
+  }
+
+  function rejectReviewSuggestions() {
+    setReview(null);
+    setActiveTab("editor");
+    setNotice("Sugestões rejeitadas. O currículo original foi mantido.");
+  }
+
   function downloadTxt() {
     const blob = new Blob([resumeToPlainText(data)], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -341,10 +355,10 @@ export function ResumeEditor({ id, initialTitle, initialData, isDraft = false }:
                     </div>
                   ))}
                   <div className="flex flex-wrap gap-2">
-                    <Button onClick={() => { setData((current) => mergeResumeData(current, review.improvedData)); setNotice("Sugestões aplicadas. Revise e salve o currículo."); }} className="h-10 rounded-md px-3">
+                    <Button onClick={acceptReviewSuggestions} className="h-10 rounded-md px-3">
                       <Check size={16} /> Aceitar sugestões
                     </Button>
-                    <button type="button" onClick={() => setReview(null)} className="focus-ring inline-flex h-10 items-center gap-2 rounded-md border border-border px-3 text-sm hover:bg-muted">
+                    <button type="button" onClick={rejectReviewSuggestions} className="focus-ring inline-flex h-10 items-center gap-2 rounded-md border border-border px-3 text-sm hover:bg-muted">
                       <X size={16} /> Rejeitar
                     </button>
                   </div>

@@ -13,7 +13,7 @@ import { getTargetCountrySelectOptions, targetCountryCanonicalSet } from "@/lib/
 import { dashboardCopy, locales } from "@/lib/i18n";
 import { trackEvent } from "@/lib/analytics";
 import type { GenerationType } from "@/lib/types";
-import { buildResumePdfPrintDocument } from "@/lib/resume-pdf-templates";
+import { buildResumePdfPrintDocument, buildStructuredResumePdfPrintDocument } from "@/lib/resume-pdf-templates";
 import { VOICE_CONTROLLED_GENERATION_TYPES, type OutputLength, type OutputTone } from "@/prompts/ai-prompts";
 import { InterviewGuideOutput } from "@/components/interview-guide-output";
 import { DocumentPreviewShell } from "@/components/application-workspace";
@@ -248,12 +248,20 @@ export function DashboardGenerator({
     if (!output) return;
     trackEvent("export_pdf_clicked", { type, template: pdfTemplate, paid: hasPaidPlan });
     const cleanOutput = normalizeDocumentText(output);
-    const html = buildResumePdfPrintDocument({
-      template: pdfTemplate,
-      title: "GlobalHire AI",
-      body: cleanOutput,
-      watermarkText: hasPaidPlan ? undefined : genUi.pdfFreeWatermark
-    });
+    const watermarkText = hasPaidPlan ? undefined : genUi.pdfFreeWatermark;
+    const html = showDocumentPreview
+      ? buildStructuredResumePdfPrintDocument({
+          template: pdfTemplate,
+          title: "GlobalHire AI",
+          data: previewResumeData,
+          watermarkText
+        })
+      : buildResumePdfPrintDocument({
+          template: pdfTemplate,
+          title: "GlobalHire AI",
+          body: cleanOutput,
+          watermarkText
+        });
 
     const iframe = document.createElement("iframe");
     iframe.setAttribute("aria-hidden", "true");

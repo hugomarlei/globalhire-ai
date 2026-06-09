@@ -33,6 +33,8 @@ function scoreAppliedImprovements(items: string[]) {
   });
 }
 
+const ATS_RESUME_MAX_COMPLETION_TOKENS = 8192;
+
 export async function POST(request: NextRequest) {
   try {
     const originError = rejectInvalidOrigin(request);
@@ -131,8 +133,15 @@ Obrigatório: use estes achados para reescrever o currículo de forma mais forte
         },
         { role: "user", content: prompt }
       ],
+      max_completion_tokens: ATS_RESUME_MAX_COMPLETION_TOKENS,
       temperature: 0.25
     });
+
+    if (completion.choices[0]?.finish_reason === "length") {
+      return NextResponse.json({
+        error: "A IA atingiu o limite de saída antes de finalizar o currículo. Tente novamente; nenhum currículo truncado foi salvo."
+      }, { status: 502 });
+    }
 
     const rawOutput = completion.choices[0]?.message?.content?.trim() || "";
     if (!rawOutput) return NextResponse.json({ error: "A IA não retornou conteúdo." }, { status: 500 });
@@ -169,6 +178,7 @@ Obrigatório: use estes achados para reescrever o currículo de forma mais forte
             })
           }
         ],
+        max_completion_tokens: ATS_RESUME_MAX_COMPLETION_TOKENS,
         temperature: 0.18
       });
       const revised = parseAiOutput(revision.choices[0]?.message?.content?.trim() || "");

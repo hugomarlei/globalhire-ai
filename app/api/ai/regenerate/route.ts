@@ -26,6 +26,12 @@ function scoreAppliedImprovements(items: string[]) {
   });
 }
 
+function maxCompletionTokensFor(type: GenerationType) {
+  if (type === "ats_resume" || type === "translate_resume") return 8192;
+  if (type === "interview_prep") return 5200;
+  return 3000;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const originError = rejectInvalidOrigin(request);
@@ -125,8 +131,15 @@ export async function POST(request: NextRequest) {
         },
         { role: "user", content: prompt }
       ],
+      max_completion_tokens: maxCompletionTokensFor(type),
       temperature: 0.3
     });
+
+    if (completion.choices[0]?.finish_reason === "length") {
+      return NextResponse.json({
+        error: "A IA atingiu o limite de saída antes de finalizar o documento. Tente novamente; nenhum asset truncado foi salvo."
+      }, { status: 502 });
+    }
 
     const rawOutput = completion.choices[0]?.message?.content?.trim() || "";
     let { document, recommendations } = parseAiOutput(rawOutput);
@@ -161,6 +174,7 @@ export async function POST(request: NextRequest) {
             })
           }
         ],
+        max_completion_tokens: maxCompletionTokensFor(type),
         temperature: 0.2
       });
       const revised = parseAiOutput(revision.choices[0]?.message?.content?.trim() || "");
