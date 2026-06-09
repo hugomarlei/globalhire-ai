@@ -5,9 +5,9 @@ export type PlanFeature = GenerationType | "ats_score" | "keywords" | "resume_bu
 
 export const planDisplayPrices = {
   free: "R$0",
-  starter: "R$29/mês",
-  pro: "R$79/mês",
-  elite: "R$149/mês"
+  starter: "R$7/mês",
+  pro: "R$14/mês",
+  elite: "R$18/mês"
 } as const;
 
 export const plans = {
@@ -34,7 +34,7 @@ export const plans = {
     price: planDisplayPrices.starter,
     monthlyLimit: 10,
     stripePriceEnv: "NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID",
-    features: ["10 gerações por mês", "Currículo ATS", "Carta de apresentação", "Resumo LinkedIn"]
+    features: ["10 gerações por mês", "Currículo ATS por vaga", "Carta de apresentação", "Resumo LinkedIn"]
   },
   pro: {
     id: "pro",
@@ -42,7 +42,7 @@ export const plans = {
     price: planDisplayPrices.pro,
     monthlyLimit: 9999,
     stripePriceEnv: "NEXT_PUBLIC_STRIPE_PRO_PRICE_ID",
-    features: ["Gerações ilimitadas", "Tudo do Starter", "Mensagem para recrutador", "Guia para entrevista", "Traduzir currículo", "ATS Score e palavras-chave"]
+    features: ["Gerações ilimitadas", "Tudo do Starter", "Mensagem para recrutador", "Guia para entrevista", "Traduzir currículo", "Score de aderência"]
   },
   elite: {
     id: "elite",

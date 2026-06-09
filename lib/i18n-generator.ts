@@ -47,8 +47,8 @@ export type GeneratorUiStrings = {
 
 const ptByType: Record<GenerationType, GenBlock> = {
   ats_resume: {
-    title: "Gerador de Currículo ATS",
-    subtitle: "Transforme seu currículo em uma versão internacional, clara e alinhada à descrição da vaga.",
+    title: "Central de candidatura",
+    subtitle: "Escolha o material que você quer criar e adapte a entrega ao contexto da vaga.",
     resumeLabel: "Currículo atual",
     resumePlaceholder:
       "Cole aqui seu currículo completo. Inclua experiências, formação, ferramentas, idiomas e certificações.",

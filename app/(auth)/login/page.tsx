@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { Button, Card, Field, inputClass } from "@/components/ui";
+import { PublicCard, PublicKicker } from "@/components/public-page-shell";
 import { SocialAuthButtons } from "@/components/social-auth-buttons";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import { useLanguage } from "@/components/language-provider";
@@ -67,10 +68,27 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="grid flex-1 place-items-center px-4 py-10">
-      <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-semibold text-foreground">{t.title}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{t.lead}</p>
+    <main className="mx-auto grid w-full max-w-7xl flex-1 gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:py-16">
+      <section className="hidden lg:block">
+        <PublicKicker>Acesse sua candidatura</PublicKicker>
+        <h1 className="mt-4 max-w-xl text-4xl font-semibold leading-tight text-foreground">
+          Continue ajustando seu currículo com mais critério antes de enviar.
+        </h1>
+        <p className="mt-5 max-w-xl text-base leading-8 text-muted-foreground">
+          Entre para revisar histórico, gerar novas versões, acompanhar score de aderência e exportar materiais para vagas reais.
+        </p>
+        <div className="mt-8 grid max-w-xl gap-3">
+          {["Currículo, vaga e score no mesmo fluxo.", "IA como apoio de reescrita, não como promessa mágica.", "Documentos prontos para revisar, copiar e exportar."].map((item) => (
+            <PublicCard key={item}>
+              <p className="text-sm text-muted-foreground">{item}</p>
+            </PublicCard>
+          ))}
+        </div>
+      </section>
+
+      <Card className="mx-auto w-full max-w-md rounded-lg p-6">
+        <h2 className="text-2xl font-semibold text-foreground">{t.title}</h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{t.lead}</p>
         {passwordUpdated ? (
           <p className="mt-4 rounded-md bg-brand-500/15 p-3 text-sm text-brand-800 dark:text-brand-50">{t.passwordUpdated}</p>
         ) : null}

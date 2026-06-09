@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { Button, Card, Field, inputClass } from "@/components/ui";
+import { PublicCard, PublicKicker } from "@/components/public-page-shell";
 import { SocialAuthButtons } from "@/components/social-auth-buttons";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import { trackEvent } from "@/lib/analytics";
@@ -92,8 +93,8 @@ export default function SignupPage() {
 
   if (awaitingEmailConfirmation) {
     return (
-      <main className="grid flex-1 place-items-center px-4 py-10">
-        <Card className="w-full max-w-md">
+      <main className="grid flex-1 place-items-center px-4 py-10 sm:px-6">
+        <Card className="w-full max-w-md rounded-lg p-6">
           <div className="flex flex-col items-center text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary">
               <MailCheck size={28} aria-hidden />
@@ -127,10 +128,27 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="grid flex-1 place-items-center px-4 py-10">
-      <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-semibold text-foreground">{t.title}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{t.lead}</p>
+    <main className="mx-auto grid w-full max-w-7xl flex-1 gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:py-16">
+      <section className="hidden lg:block">
+        <PublicKicker>Degustação gratuita</PublicKicker>
+        <h1 className="mt-4 max-w-xl text-4xl font-semibold leading-tight text-foreground">
+          Crie uma candidatura mais forte antes do próximo envio.
+        </h1>
+        <p className="mt-5 max-w-xl text-base leading-8 text-muted-foreground">
+          Comece com as ferramentas principais: currículo, análise de vaga, reescrita, score de aderência e materiais de apoio.
+        </p>
+        <div className="mt-8 grid max-w-xl gap-3 sm:grid-cols-2">
+          {["Analise a vaga", "Reescreva com evidência", "Veja lacunas", "Exporte documentos"].map((item) => (
+            <PublicCard key={item}>
+              <p className="text-sm font-medium text-foreground">{item}</p>
+            </PublicCard>
+          ))}
+        </div>
+      </section>
+
+      <Card className="mx-auto w-full max-w-md rounded-lg p-6">
+        <h2 className="text-2xl font-semibold text-foreground">{t.title}</h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{t.lead}</p>
         <div className="mt-6">
           <SocialAuthButtons mode="signup" />
         </div>

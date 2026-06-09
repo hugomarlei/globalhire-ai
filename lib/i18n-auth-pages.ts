@@ -33,7 +33,7 @@ export type AuthSignupStrings = {
 export const authSignupCopy: Record<Locale, AuthSignupStrings> = {
   "pt-BR": {
     title: "Criar conta grátis",
-    lead: "Comece com uma geração teste.",
+    lead: "Teste as ferramentas principais e veja como seu currículo conversa com uma vaga real.",
     continueEmail: "Continuar com e-mail",
     name: "Nome",
     email: "E-mail",

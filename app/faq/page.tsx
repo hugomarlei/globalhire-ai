@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AutoSiteFooter } from "@/components/site-footer";
 import { PublicNav } from "@/components/nav";
 import { FaqStructuredData } from "@/components/structured-data";
-import { Card } from "@/components/ui";
+import { PublicCard, PublicKicker, PublicPageShell, PublicSection } from "@/components/public-page-shell";
 import { getAppUrl } from "@/lib/app-url";
 import { marketingFaqCopy } from "@/lib/i18n-app-wide";
 import { getServerLocale } from "@/lib/server-locale";
@@ -21,21 +21,22 @@ export default async function FaqPage() {
   const locale = await getServerLocale();
   const faq = marketingFaqCopy[locale];
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <PublicPageShell>
       <FaqStructuredData items={faq.items} />
       <PublicNav />
-      <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-        <h1 className="text-4xl font-semibold text-foreground">{faq.title}</h1>
+      <PublicSection className="max-w-4xl">
+        <PublicKicker>FAQ</PublicKicker>
+        <h1 className="mt-3 text-4xl font-semibold leading-tight text-foreground sm:text-5xl">{faq.title}</h1>
         <div className="mt-8 grid gap-3">
           {faq.items.map(([question, answer]) => (
-            <Card key={question}>
+            <PublicCard key={question}>
               <h2 className="font-semibold text-foreground">{question}</h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">{answer}</p>
-            </Card>
+            </PublicCard>
           ))}
         </div>
-      </section>
+      </PublicSection>
       <AutoSiteFooter />
-    </main>
+    </PublicPageShell>
   );
 }

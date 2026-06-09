@@ -382,7 +382,7 @@ export type AuthLoginStrings = {
 export const authLoginCopy: Record<Locale, AuthLoginStrings> = {
   "pt-BR": {
     title: "Entrar",
-    lead: "Acesse seu painel da GlobalHire AI.",
+    lead: "Volte para seus currículos, análises e documentos de candidatura.",
     passwordUpdated: "Senha atualizada com sucesso. Entre com sua nova senha.",
     socialNotConfigured: "Login social ainda não configurado. Use e-mail e senha por enquanto.",
     continueEmail: "Continuar com e-mail",
@@ -517,9 +517,9 @@ export type MarketingPricingStrings = {
 
 export const marketingPricingCopy: Record<Locale, MarketingPricingStrings> = {
   "pt-BR": {
-    title: "Planos GlobalHire AI",
-    lead: "Escolha entre uma degustação gratuita, uso pontual ou otimização intensiva para candidaturas internacionais.",
-    cta: "Começar",
+    title: "Planos para testar, ajustar e evoluir suas candidaturas",
+    lead: "Preço de lançamento para democratizar acesso a ferramentas de candidatura com IA. Comece grátis e evolua conforme seu volume de vagas.",
+    cta: "Escolher plano",
     stripeNotePrefix: "Planos pagos são processados pelo Stripe. Antes de assinar, leia os",
     terms: "Termos de Uso",
     mid: ", a",
@@ -569,8 +569,8 @@ export const marketingPricingCopy: Record<Locale, MarketingPricingStrings> = {
 export type MarketingFeaturesStrings = { title: string; lead: string; items: string[] };
 export const marketingFeaturesCopy: Record<Locale, MarketingFeaturesStrings> = {
   "pt-BR": {
-    title: "Funcionalidades",
-    lead: "GlobalHire AI combina otimização ATS e copiloto de carreira com IA para candidatos globais.",
+    title: "Ferramentas para candidaturas mais competitivas",
+    lead: "Analise a vaga, ajuste seu currículo e gere materiais de apoio com foco em clareza, aderência e recrutamento real.",
     items: [
       "Otimização de currículo ATS por vaga",
       "Carta de apresentação adaptada",
@@ -630,11 +630,11 @@ export type MarketingResourcesStrings = {
 export const marketingResourcesCopy: Record<Locale, MarketingResourcesStrings> = {
   "pt-BR": {
     title: "Recursos",
-    lead: "Espaço reservado para guias de currículo ATS, candidatura internacional, LinkedIn e entrevistas.",
+    lead: "Guias práticos para entender ATS, melhorar currículo e preparar candidaturas com mais critério.",
     cards: [
-      { title: "Guia de currículo ATS", body: "Conteúdo editorial em preparação." },
-      { title: "Checklist de LinkedIn", body: "Conteúdo editorial em preparação." },
-      { title: "Preparação para entrevista internacional", body: "Conteúdo editorial em preparação." }
+      { title: "Guia de currículo ATS", body: "Como estruturar texto, seções e palavras-chave sem transformar seu currículo em lista artificial." },
+      { title: "Checklist de LinkedIn", body: "Pontos para alinhar resumo, título profissional e experiência ao tipo de vaga que você busca." },
+      { title: "Preparação para entrevista", body: "Como transformar experiências reais em respostas claras, com contexto, ação e resultado." }
     ]
   },
   en: {

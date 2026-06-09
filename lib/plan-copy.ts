@@ -1,7 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 import type { PlanId } from "@/lib/plans";
 import { paidPlans, planDisplayPrices, plans } from "@/lib/plans";
-import { formatStripePaidPlanPrice } from "@/lib/plan-price-display";
 import type { StripePriceCatalogJson } from "@/lib/stripe-price-catalog-types";
 
 export type PlanDisplayRow = {
@@ -38,12 +37,12 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
     },
     starter: {
       name: "Starter",
-      price: "R$29/mo",
+      price: "R$7/mo",
       features: ["10 generations per month", "ATS resume", "Cover letter", "LinkedIn summary"]
     },
     pro: {
       name: "Pro",
-      price: "R$79/mo",
+      price: "R$14/mo",
       features: [
         "Unlimited generations",
         "Everything in Starter",
@@ -55,7 +54,7 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
     },
     elite: {
       name: "Elite",
-      price: "R$149/mo",
+      price: "R$18/mo",
       features: [
         "Everything in Pro",
         "Advanced and consistent optimization",
@@ -84,12 +83,12 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
     },
     starter: {
       name: "Starter",
-      price: "R$29/mes",
+      price: "R$7/mes",
       features: ["10 generaciones al mes", "Currículum ATS", "Carta de presentación", "Resumen LinkedIn"]
     },
     pro: {
       name: "Pro",
-      price: "R$79/mes",
+      price: "R$14/mes",
       features: [
         "Generaciones ilimitadas",
         "Todo lo de Starter",
@@ -101,7 +100,7 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
     },
     elite: {
       name: "Elite",
-      price: "R$149/mes",
+      price: "R$18/mes",
       features: [
         "Todo lo de Pro",
         "Optimización avanzada y consistente",
@@ -130,12 +129,12 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
     },
     starter: {
       name: "Starter",
-      price: "R$29/mois",
+      price: "R$7/mois",
       features: ["10 générations par mois", "CV ATS", "Lettre de motivation", "Résumé LinkedIn"]
     },
     pro: {
       name: "Pro",
-      price: "R$79/mois",
+      price: "R$14/mois",
       features: [
         "Générations illimitées",
         "Tout le pack Starter",
@@ -147,7 +146,7 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
     },
     elite: {
       name: "Elite",
-      price: "R$149/mois",
+      price: "R$18/mois",
       features: [
         "Tout le pack Pro",
         "Optimisation avancée et cohérente",
@@ -162,23 +161,20 @@ const byLocale: Record<Locale, Record<PlanId, PlanCopy>> = {
 
 /**
  * Localized plan rows for UI.
- * When `stripeCatalog` is provided and contains live `unitAmount`, paid-plan `price` strings
- * come from Stripe (see `formatStripePaidPlanPrice`). Otherwise uses **FALLBACK_STATIC_PRICES**
- * from this file / `lib/plans.ts` — same copy as before the dynamic pricing rollout.
+ * Public pricing uses the official launch prices from `lib/plans.ts`.
+ * Stripe still owns checkout; keep Price IDs aligned in Stripe to avoid display/charge mismatch.
  */
 export function getLocalizedPlans(
   locale: Locale,
   stripeCatalog?: StripePriceCatalogJson | null
 ): { free: PlanDisplayRow; paid: PlanDisplayRow[] } {
+  void stripeCatalog;
   const row = byLocale[locale];
   return {
     free: { id: "free", ...row.free },
     paid: paidPlans.map((plan) => {
       const base = row[plan.id];
-      const stripeRow = stripeCatalog?.paid?.[plan.id];
-      const price =
-        stripeRow && stripeRow.unitAmount != null ? formatStripePaidPlanPrice(locale, stripeRow) : base.price;
-      return { id: plan.id, name: base.name, price, features: base.features };
+      return { id: plan.id, name: base.name, price: base.price, features: base.features };
     })
   };
 }

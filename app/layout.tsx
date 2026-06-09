@@ -11,7 +11,6 @@ import { GlobalStructuredData } from "@/components/structured-data";
 import { brandIcon } from "@/lib/brand-assets";
 import { getAppUrl } from "@/lib/app-url";
 import { computeAggregateOfferHighPriceMajorUnits } from "@/lib/plan-price-display";
-import { getCachedStripePriceCatalog } from "@/lib/stripe-price-fetch";
 import "./globals.css";
 
 const inter = Inter({
@@ -38,16 +37,16 @@ const faviconPath = hasFavicon ? "/brand/favicon.ico" : hasSvgFavicon ? "/brand/
 
 export const metadata: Metadata = {
   metadataBase: new URL(getAppUrl()),
-  title: "GlobalHire AI — Currículos ATS e candidaturas internacionais com IA",
+  title: "GlobalHire AI — IA para currículos, ATS e candidaturas mais estratégicas",
   description:
-    "Crie currículos otimizados para ATS, cartas de apresentação e LinkedIn para vagas internacionais com inteligência artificial.",
+    "Use IA para analisar vagas, melhorar currículos, gerar cartas, LinkedIn, mensagens e preparar candidaturas com mais clareza e aderência.",
   alternates: {
     canonical: "/"
   },
   openGraph: {
-    title: "GlobalHire AI — Currículos ATS e candidaturas internacionais com IA",
+    title: "GlobalHire AI — IA para currículos, ATS e candidaturas mais estratégicas",
     description:
-      "Crie currículos otimizados para ATS, cartas de apresentação e LinkedIn para vagas internacionais com inteligência artificial.",
+      "Use IA para analisar vagas, melhorar currículos, gerar cartas, LinkedIn, mensagens e preparar candidaturas com mais clareza e aderência.",
     type: "website",
     url: "/",
     siteName: "GlobalHire AI",
@@ -62,9 +61,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "GlobalHire AI — Currículos ATS e candidaturas internacionais com IA",
+    title: "GlobalHire AI — IA para currículos, ATS e candidaturas mais estratégicas",
     description:
-      "Crie currículos otimizados para ATS, cartas de apresentação e LinkedIn para vagas internacionais com inteligência artificial.",
+      "Use IA para analisar vagas, melhorar currículos, gerar cartas, LinkedIn, mensagens e preparar candidaturas com mais clareza e aderência.",
     images: ogImagePath ? [ogImagePath] : undefined
   },
   icons: faviconDescriptors
@@ -77,9 +76,8 @@ export const metadata: Metadata = {
       : undefined
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const stripeCatalog = await getCachedStripePriceCatalog();
-  const aggregateOfferHighPrice = computeAggregateOfferHighPriceMajorUnits(stripeCatalog);
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const aggregateOfferHighPrice = computeAggregateOfferHighPriceMajorUnits(null);
 
   return (
     <html lang="pt-BR" className={`${inter.variable}`} suppressHydrationWarning>

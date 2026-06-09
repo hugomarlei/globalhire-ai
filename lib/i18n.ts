@@ -334,7 +334,7 @@ export const landingCopy: Record<Locale, {
       ["O limite honesto", "A ferramenta melhora qualidade e aderência, mas a decisão final continua sendo humana."]
     ],
     featuresSectionTitle: "O que muda na prática",
-    featuresSectionLead: "Menos preenchimento genérico. Mais contexto, foco e próxima ação clara.",
+    featuresSectionLead: "A vaga vira critério de revisão: requisitos, palavras-chave e lacunas aparecem antes de você enviar o currículo.",
     whoTitle: "Quem mais ganha com isso",
     whoLines: [
       "Profissionais buscando vagas remotas ou internacionais.",

@@ -1,362 +1,408 @@
 "use client";
 
-import { ArrowRight, CheckCircle2, FileText, Gauge, Globe2, Sparkles, Target, Wand2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { PublicNav } from "@/components/nav";
-import { SiteFooter } from "@/components/site-footer";
-import { useLanguage } from "@/components/language-provider";
-import { Button, Card } from "@/components/ui";
+import { ArrowRight, CheckCircle2, FileText, Gauge, Globe2, Languages, MessageSquareText, ShieldCheck, Sparkles, Target, Wand2, type LucideIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { LogoutShareActions } from "@/components/logout-share-actions";
-import { landingCopy } from "@/lib/i18n";
-import { getLocalizedPlans } from "@/lib/plan-copy";
+import { PublicNav } from "@/components/nav";
+import { PublicBand, PublicCard, PublicKicker, PublicPageShell, PublicSection } from "@/components/public-page-shell";
+import { SiteFooter } from "@/components/site-footer";
+import { Button } from "@/components/ui";
+import { useLanguage } from "@/components/language-provider";
 import type { StripePriceCatalogJson } from "@/lib/stripe-price-catalog-types";
 
-const howIcons = [FileText, Target, Wand2] as const;
+const insightStrip = [
+  "ATS lê estrutura",
+  "Recrutador procura aderência",
+  "IA compara palavras-chave",
+  "Seu currículo precisa conversar com a vaga"
+];
+
+const productSteps = [
+  ["Lê a vaga", "Extrai requisitos, senioridade, responsabilidades e termos recorrentes."],
+  ["Mapeia lacunas", "Mostra o que seu currículo ainda não sinaliza com clareza."],
+  ["Reescreve com evidência", "Melhora a narrativa usando apenas experiência real do candidato."],
+  ["Gera materiais", "Cria currículo, carta, LinkedIn, mensagem, tradução e preparo para entrevista."],
+  ["Mostra alinhamento", "Exibe score simulado para orientar revisão antes do envio."],
+  ["Mantém rastreabilidade", "Salva histórico de candidaturas e documentos gerados."]
+];
+
+const atsSignals = [
+  "Palavras-chave da vaga",
+  "Competências obrigatórias",
+  "Senioridade esperada",
+  "Idioma e mercado",
+  "Clareza de impacto",
+  "Formato legível para ATS"
+];
+
+const tools: Array<[string, string, LucideIcon]> = [
+  ["Currículo ATS por vaga", "Transforma seu currículo em uma versão mais aderente a uma oportunidade específica.", FileText],
+  ["Reescrita de currículo", "Refina resumo e experiências sem inventar cargos, métricas ou resultados.", Wand2],
+  ["Score de aderência", "Mostra um match estimado para orientar ajustes antes da candidatura.", Gauge],
+  ["Carta de apresentação", "Conecta sua experiência ao contexto da empresa e da vaga.", FileText],
+  ["LinkedIn profissional", "Reposiciona seu resumo para recrutadores e oportunidades internacionais.", Globe2],
+  ["Mensagem para recrutador", "Cria uma abordagem curta, educada e relevante para iniciar conversa.", MessageSquareText],
+  ["Tradução de currículo", "Adapta idioma e tom sem perder a estrutura do documento.", Languages],
+  ["Preparação para entrevista", "Organiza perguntas prováveis, respostas e riscos para você treinar melhor.", Target]
+];
+
+const audiences = [
+  "Brasileiros buscando recolocação com mais estratégia.",
+  "Profissionais tentando vagas remotas ou internacionais.",
+  "Candidatos que enviam currículo e quase nunca recebem retorno.",
+  "Pessoas que precisam adaptar documento por país, idioma ou vaga.",
+  "Quem quer entender como ATS, recrutador e IA avaliam uma candidatura."
+];
+
+const faqs = [
+  [
+    "A GlobalHire AI garante entrevista?",
+    "Não. A plataforma melhora clareza, aderência e apresentação dos seus materiais, mas entrevista depende da empresa, da vaga, do mercado e da concorrência."
+  ],
+  [
+    "O score é garantia de aprovação?",
+    "Não. O score é uma pontuação simulada de alinhamento com a vaga. Ele ajuda a revisar melhor, mas não representa aprovação automática em ATS ou recrutamento."
+  ],
+  [
+    "A IA inventa experiências?",
+    "Não deve inventar. A geração foi desenhada para reescrever com base no que você informa. Mesmo assim, você deve revisar tudo antes de enviar."
+  ],
+  [
+    "Posso usar para vagas no Brasil?",
+    "Sim. A GlobalHire AI funciona para vagas no Brasil, vagas remotas e processos internacionais."
+  ],
+  [
+    "Posso usar para vagas internacionais?",
+    "Sim. Você pode ajustar idioma, país-alvo e tom do documento para diferentes mercados."
+  ],
+  [
+    "O plano gratuito inclui quais ferramentas?",
+    "O Free libera acesso de degustação às principais ferramentas para você testar currículo, análise, reescrita e materiais de candidatura."
+  ],
+  [
+    "Meus dados ficam protegidos?",
+    "A plataforma usa autenticação, políticas de privacidade e provedores reconhecidos. Evite enviar dados sensíveis desnecessários e revise as políticas legais antes de usar."
+  ]
+];
+
+function HeroMockup() {
+  return (
+    <div className="rounded-lg border border-border/80 bg-card p-3 shadow-[0_28px_90px_rgba(0,0,0,0.18)]">
+      <div className="rounded-lg border border-border/80 bg-background p-4">
+        <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-start">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Análise de candidatura</p>
+            <p className="mt-1 text-xs text-muted-foreground">Gerente Comercial - Automação Industrial</p>
+          </div>
+          <span className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+            Match estimado 89%
+          </span>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-lg border border-border bg-card p-3">
+            <p className="text-xs font-medium text-muted-foreground">Currículo enviado</p>
+            <div className="mt-3 space-y-2">
+              <span className="block h-2 rounded bg-muted" />
+              <span className="block h-2 w-5/6 rounded bg-muted" />
+              <span className="block h-2 w-2/3 rounded bg-muted" />
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-3">
+            <p className="text-xs font-medium text-muted-foreground">Vaga analisada</p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {["B2B", "CRM", "KPI", "Canais"].map((tag) => (
+                <span key={tag} className="rounded-full bg-muted px-2 py-1 text-[11px] text-muted-foreground">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-lg border border-primary/30 bg-primary/10 p-3">
+            <p className="text-xs font-medium text-primary">Pontos ausentes</p>
+            <ul className="mt-2 space-y-1 text-xs text-foreground">
+              <li>Gestão de canais</li>
+              <li>Carteira e forecast</li>
+              <li>Negociação complexa</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-3 grid gap-3 lg:grid-cols-2">
+          <div className="rounded-lg border border-border bg-card p-3">
+            <p className="text-xs font-semibold text-muted-foreground">Antes</p>
+            <p className="mt-2 text-sm text-foreground">Responsável por relatórios e reuniões.</p>
+          </div>
+          <div className="rounded-lg border border-primary/35 bg-primary/10 p-3">
+            <p className="text-xs font-semibold text-primary">Depois</p>
+            <p className="mt-2 text-sm text-foreground">
+              Produziu análises comerciais semanais para liderança, consolidando indicadores de receita e apoiando decisões estratégicas com base em dados.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function HomePage({ stripeCatalog }: { stripeCatalog: StripePriceCatalogJson | null }) {
   const { locale } = useLanguage();
-  const copy = landingCopy[locale];
-  // stripeCatalog null → getLocalizedPlans falls back to static plan-copy prices; diagnose with Vercel logs (stripe_pricing_diag).
-  const { free, paid } = useMemo(() => getLocalizedPlans(locale, stripeCatalog), [locale, stripeCatalog]);
   const [showLogoutBanner, setShowLogoutBanner] = useState(false);
+  void stripeCatalog;
 
   useEffect(() => {
     setShowLogoutBanner(new URLSearchParams(window.location.search).get("logout") === "success");
   }, []);
 
   return (
-    <main className="brand-shell relative min-h-screen overflow-hidden text-foreground">
-      <div className="brand-grid pointer-events-none absolute inset-0" />
+    <PublicPageShell>
       <PublicNav />
       {showLogoutBanner ? (
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="flex flex-col gap-4 rounded-2xl border border-primary/25 bg-primary/10 p-4 text-sm text-muted-foreground">
-            <span className="text-foreground">{copy.logoutBanner}</span>
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-              <Button href="/cadastro" className="h-9 w-full px-3 sm:w-auto">
-                {copy.primaryCta}
-              </Button>
-              <LogoutShareActions />
+          <div className="rounded-lg border border-primary/25 bg-primary/10 p-4 text-sm text-muted-foreground">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <span className="text-foreground">Você saiu da sua conta. Volte quando quiser para continuar suas candidaturas.</span>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <Button href="/cadastro" className="h-9 px-3">
+                  Criar candidatura grátis
+                </Button>
+                <LogoutShareActions />
+              </div>
             </div>
           </div>
         </div>
       ) : null}
 
-      <section className="relative mx-auto grid max-w-7xl gap-10 px-4 pb-16 pt-14 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:gap-16 lg:pb-20 lg:pt-24">
-        <div className="space-y-8">
-          <p className="inline-flex max-w-prose rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            {copy.heroTagline}
+      <section className="mx-auto grid max-w-7xl gap-10 px-4 pb-14 pt-12 sm:px-6 lg:grid-cols-[0.96fr_1.04fr] lg:items-center lg:pb-20 lg:pt-20">
+        <div className="max-w-3xl">
+          <PublicKicker>Carreira, IA e recrutamento no mesmo campo de jogo</PublicKicker>
+          <h1 className="mt-5 text-4xl font-semibold leading-[1.04] text-foreground sm:text-5xl lg:text-6xl">
+            Use IA para competir com a IA do recrutamento.
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
+            A GlobalHire AI analisa a vaga, entende critérios de triagem e transforma seu currículo, carta, LinkedIn e mensagens em uma candidatura mais clara, estratégica e alinhada.
           </p>
-          <div className="space-y-5">
-            <h1 className="font-display max-w-4xl text-[2.25rem] font-medium leading-[1.06] tracking-tight text-foreground sm:text-5xl lg:text-[3.4rem] lg:leading-[1.04]">
-              {copy.headline}
-            </h1>
-            <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground">{copy.subheadline}</p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Button href="/cadastro" className="h-12 rounded-xl px-6">
-              {copy.primaryCta} <ArrowRight size={18} />
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button href="/cadastro" className="h-12 px-6">
+              Criar candidatura grátis <ArrowRight size={18} />
             </Button>
             <Button
-              href="#precos"
-              className="h-12 rounded-xl border border-border bg-muted/50 text-foreground shadow-none hover:bg-muted"
+              href="#como-funciona"
+              className="h-12 border border-border bg-card px-6 text-foreground shadow-none hover:bg-muted"
             >
-              {copy.secondaryCta}
+              Ver como funciona
             </Button>
           </div>
-          <div className="grid max-w-2xl grid-cols-3 gap-3 sm:gap-4">
-            {copy.stats.map(([value, label]) => (
-              <div key={`${value}-${label}`} className="rounded-2xl border border-border bg-card/70 p-3.5 shadow-sm sm:p-4">
-                <p className="text-xl font-semibold tracking-tight text-primary">{value}</p>
-                <p className="mt-2 text-xs leading-snug text-muted-foreground">{label}</p>
-              </div>
-            ))}
-          </div>
-          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{copy.honestyLine}</p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Sem promessa de emprego. Com mais clareza, aderência e estratégia.
+          </p>
         </div>
-
-        <Card className="overflow-hidden rounded-[28px] border-border/80 bg-card/95 p-0 shadow-[0_24px_100px_rgba(0,0,0,0.24)]">
-          <div className="border-b border-border/70 bg-muted/20 px-5 py-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{copy.previewLabel}</p>
-                <p className="mt-1 max-w-md text-sm leading-relaxed text-muted-foreground">{copy.previewText}</p>
-              </div>
-              <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                {copy.scoreMockLabel}
-              </span>
-            </div>
-          </div>
-          <div className="grid gap-4 p-5">
-            <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-foreground">Fluxo de candidatura</p>
-                <span className="rounded-full border border-border bg-muted/50 px-3 py-1 text-xs text-muted-foreground">
-                  {copy.steps.length} etapas
-                </span>
-              </div>
-              <div className="mt-4 space-y-3">
-                {copy.steps.map((step, index) => {
-                  const Icon = howIcons[index] ?? FileText;
-                  return (
-                    <div key={step.title} className="flex items-start gap-3 rounded-xl border border-border/60 bg-card/70 p-3">
-                      <span className="grid size-9 shrink-0 place-items-center rounded-full border border-primary/20 bg-primary/10 text-primary">
-                        <Icon size={16} />
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-foreground">{step.title}</p>
-                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{step.text}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {copy.previewItems.map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs font-medium text-muted-foreground"
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-border/70 bg-muted/30 p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Score</p>
-                  <Gauge className="text-primary" size={18} aria-hidden />
-                </div>
-                <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">18 → 82</p>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Visão clara do progresso antes da exportação.</p>
-              </div>
-              <div className="rounded-2xl border border-border/70 bg-muted/30 p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Próximo passo</p>
-                  <Target className="text-primary" size={18} aria-hidden />
-                </div>
-                <p className="mt-4 text-lg font-semibold text-foreground">Revisar seção mais fraca</p>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">A IA aponta o que ajustar sem esconder o documento.</p>
-              </div>
-            </div>
-          </div>
-        </Card>
+        <HeroMockup />
       </section>
 
-      <section className="relative border-y border-border/60 bg-muted/20">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{copy.eyebrow}</p>
-              <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
-                {copy.featuresSectionTitle}
-              </h2>
+      <PublicBand className="py-0">
+        <div className="grid gap-3 md:grid-cols-4">
+          {insightStrip.map((item) => (
+            <div key={item} className="rounded-lg border border-border/70 bg-card/80 p-4 text-sm font-medium text-foreground">
+              {item}
             </div>
-            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{copy.featuresSectionLead}</p>
-          </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {copy.featureCards.map((feature, index) => (
-              <Card key={feature.title} className="rounded-3xl border-border/70 bg-card/80 p-5 shadow-sm transition hover:border-primary/25">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="grid size-9 place-items-center rounded-full border border-primary/20 bg-primary/10 text-sm font-semibold text-primary">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <Sparkles className="text-primary/70" size={18} aria-hidden />
-                </div>
-                <h3 className="mt-5 text-xl font-semibold tracking-tight text-card-foreground">{feature.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{feature.text}</p>
-              </Card>
-            ))}
-          </div>
+          ))}
         </div>
-      </section>
+      </PublicBand>
 
-      <section className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
-        <div className="grid gap-8 lg:grid-cols-[0.86fr_1.14fr] lg:items-start lg:gap-10">
-          <div className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{copy.scoreMockLabel}</p>
-            <h2 className="font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">{copy.scoreTitle}</h2>
-            <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">{copy.scoreText}</p>
-            <div className="rounded-2xl border border-border bg-card/75 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{copy.scoreHintTitle}</p>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{copy.scoreHintBody}</p>
-            </div>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Card className="rounded-3xl border-border/70 bg-card/85 p-5 shadow-sm transition hover:border-border">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{copy.scoreBefore}</p>
-                <Target className="text-primary/60" size={18} aria-hidden />
-              </div>
-              <p className="mt-4 text-sm font-medium text-foreground">Currículo genérico</p>
-              <p className="mt-3 text-4xl font-semibold tracking-tight text-foreground">42%</p>
-              <div className="mt-4 h-2 rounded-full bg-muted">
-                <div className="h-2 w-[42%] rounded-full bg-muted-foreground/40" />
-              </div>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Texto legível, mas ainda sem contexto suficiente para destacar a candidatura.
-              </p>
-            </Card>
-            <Card className="rounded-3xl border-primary/40 bg-gradient-to-br from-card via-card to-primary/10 p-5 shadow-[0_20px_60px_rgba(45,212,191,0.10)]">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{copy.scoreAfter}</p>
-                <Wand2 className="text-primary" size={18} aria-hidden />
-              </div>
-              <p className="mt-4 text-sm font-medium text-foreground">Versão alinhada</p>
-              <p className="mt-3 text-4xl font-semibold tracking-tight text-foreground">82%</p>
-              <div className="mt-4 h-2 rounded-full bg-primary/15">
-                <div className="h-2 w-[82%] rounded-full bg-primary" />
-              </div>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Mais contexto, mais foco e uma leitura mais fácil para o recrutador.
-              </p>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative border-y border-border/60 bg-muted/20">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{copy.howItWorks}</p>
-              <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
-                O fluxo certo, em poucos passos
-              </h2>
-            </div>
-            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              O processo fica mais previsível quando a tela mostra a ordem certa: base, vaga, revisão e saída final.
+      <PublicSection>
+        <div className="grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+          <div>
+            <PublicKicker>O problema</PublicKicker>
+            <h2 className="mt-3 text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
+              Seu currículo pode estar bom e ainda assim ser ignorado.
+            </h2>
+            <p className="mt-5 text-base leading-8 text-muted-foreground">
+              Hoje, muitas candidaturas passam por filtros, sistemas ATS e triagens automatizadas antes de chegarem a uma pessoa. O problema não é apenas ter experiência. É apresentar essa experiência na linguagem certa para a vaga certa.
             </p>
           </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {copy.howItWorksCards.map((step, index) => {
-              const Icon = howIcons[index] ?? FileText;
-              return (
-                <Card key={step.title} className="rounded-3xl border-border/70 bg-card/80 p-5 shadow-sm transition hover:border-primary/25">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="grid size-11 place-items-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
-                      <Icon size={18} />
-                    </span>
-                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                  </div>
-                  <h3 className="mt-5 text-lg font-semibold tracking-tight text-card-foreground">{step.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{step.text}</p>
-                </Card>
-              );
-            })}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <PublicCard>
+              <p className="text-sm font-semibold text-muted-foreground">Currículo genérico</p>
+              <p className="mt-3 text-4xl font-semibold text-foreground">42%</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">Baixa aderência porque a experiência não conversa com os requisitos da vaga.</p>
+            </PublicCard>
+            <PublicCard className="border-primary/35 bg-primary/10">
+              <p className="text-sm font-semibold text-primary">Currículo adaptado</p>
+              <p className="mt-3 text-4xl font-semibold text-foreground">89%</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">Mais clareza, palavras-chave reais e impacto profissional melhor sinalizado.</p>
+            </PublicCard>
           </div>
         </div>
-      </section>
+      </PublicSection>
 
-      <section className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
-        <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+      <PublicBand tone="dark" id="como-funciona">
+        <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr]">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{copy.benefitsTitle}</p>
-            <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">Benefícios práticos</h2>
-            <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground">{copy.featuresSectionLead}</p>
+            <PublicKicker dark>Como funciona</PublicKicker>
+            <h2 className="mt-3 text-3xl font-semibold leading-tight text-white sm:text-4xl">
+              Uma camada de inteligência entre você e a vaga.
+            </h2>
+            <p className="mt-5 text-base leading-8 text-zinc-300">
+              A plataforma cruza seu histórico com a descrição da oportunidade para mostrar onde sua candidatura precisa ficar mais forte.
+            </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-            {copy.benefits.map((feature) => (
-              <div
-                key={feature}
-                className="flex items-center gap-3 rounded-2xl border border-border bg-card/75 p-4 shadow-sm transition hover:border-primary/25"
-              >
-                <CheckCircle2 className="shrink-0 text-primary" size={18} />
-                <span className="text-sm text-foreground">{feature}</span>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {productSteps.map(([title, text]) => (
+              <PublicCard key={title} dark>
+                <CheckCircle2 className="text-teal-300" size={18} />
+                <h3 className="mt-3 text-lg font-semibold text-white">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-zinc-300">{text}</p>
+              </PublicCard>
+            ))}
+          </div>
+        </div>
+      </PublicBand>
+
+      <PublicSection>
+        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div>
+            <PublicKicker>Antes e depois</PublicKicker>
+            <h2 className="mt-3 text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
+              Reescrever não é enfeitar. É transformar responsabilidade em evidência.
+            </h2>
+            <p className="mt-5 text-base leading-8 text-muted-foreground">
+              O texto não inventa experiência. Ele tira sua contribuição do modo genérico e mostra valor profissional com mais precisão.
+            </p>
+          </div>
+          <div className="grid gap-3">
+            <PublicCard>
+              <p className="text-sm font-semibold text-muted-foreground">Antes</p>
+              <p className="mt-3 text-xl font-medium text-foreground">Responsável por relatórios e reuniões.</p>
+            </PublicCard>
+            <PublicCard className="border-primary/35 bg-primary/10">
+              <p className="text-sm font-semibold text-primary">Depois</p>
+              <p className="mt-3 text-xl font-medium leading-8 text-foreground">
+                Produziu análises comerciais semanais para liderança, consolidando indicadores de receita e apoiando decisões estratégicas com base em dados.
+              </p>
+            </PublicCard>
+          </div>
+        </div>
+      </PublicSection>
+
+      <PublicBand tone="dark">
+        <div className="grid gap-10 lg:grid-cols-[1fr_0.95fr] lg:items-center">
+          <div>
+            <PublicKicker dark>Inteligência ATS</PublicKicker>
+            <h2 className="mt-3 text-3xl font-semibold leading-tight text-white sm:text-4xl">
+              O que a IA procura, a sua candidatura precisa sinalizar.
+            </h2>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              {atsSignals.map((signal) => (
+                <div key={signal} className="rounded-lg border border-white/10 bg-white/[0.045] p-4 text-sm text-zinc-200">
+                  {signal}
+                </div>
+              ))}
+            </div>
+          </div>
+          <PublicCard dark className="border-teal-300/25 bg-teal-300/[0.06]">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-teal-300">Pontuação de alinhamento</p>
+                <p className="mt-2 text-sm leading-6 text-zinc-300">Exemplo ilustrativo baseado em score simulado de aderência.</p>
+              </div>
+              <ShieldCheck className="text-teal-300" size={24} />
+            </div>
+            <div className="mt-6 grid gap-4">
+              <div>
+                <div className="mb-2 flex justify-between text-sm text-zinc-300">
+                  <span>Antes</span>
+                  <span>42%</span>
+                </div>
+                <div className="h-2 rounded-full bg-white/10">
+                  <div className="h-2 w-[42%] rounded-full bg-zinc-400" />
+                </div>
+              </div>
+              <div>
+                <div className="mb-2 flex justify-between text-sm text-zinc-300">
+                  <span>Depois</span>
+                  <span>89%</span>
+                </div>
+                <div className="h-2 rounded-full bg-white/10">
+                  <div className="h-2 w-[89%] rounded-full bg-teal-300" />
+                </div>
+              </div>
+            </div>
+            <p className="mt-5 text-xs leading-5 text-zinc-400">
+              Não representa garantia de entrevista, aprovação ou passagem automática em ATS.
+            </p>
+          </PublicCard>
+        </div>
+      </PublicBand>
+
+      <PublicSection>
+        <div className="max-w-3xl">
+          <PublicKicker>Ferramentas reais</PublicKicker>
+          <h2 className="mt-3 text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
+            Tudo que você precisa para sair do currículo genérico.
+          </h2>
+        </div>
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {tools.map(([title, text, Icon]) => (
+            <PublicCard key={title}>
+              <Icon className="text-primary" size={20} />
+              <h3 className="mt-3 text-lg font-semibold text-foreground">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{text}</p>
+            </PublicCard>
+          ))}
+        </div>
+      </PublicSection>
+
+      <PublicBand>
+        <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+          <div>
+            <PublicKicker>Para quem</PublicKicker>
+            <h2 className="mt-3 text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
+              Feito para quem precisa competir melhor.
+            </h2>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {audiences.map((item) => (
+              <div key={item} className="flex gap-3 rounded-lg border border-border/80 bg-card/80 p-4 text-sm leading-6 text-muted-foreground">
+                <CheckCircle2 className="mt-0.5 shrink-0 text-primary" size={18} />
+                {item}
               </div>
             ))}
           </div>
         </div>
-      </section>
+      </PublicBand>
 
-      <section className="relative border-y border-border/60 bg-muted/20">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{copy.whoTitle}</p>
-              <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
-                Para quem o fluxo faz mais diferença
-              </h2>
-            </div>
-          </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {copy.whoLines.map((text) => (
-              <Card key={text} className="rounded-3xl border-border/70 bg-card/80 p-5 shadow-sm transition hover:border-primary/25">
-                <Globe2 className="text-primary" size={24} />
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{text}</p>
-              </Card>
+      <PublicSection className="text-center">
+        <div className="mx-auto max-w-3xl">
+          <Sparkles className="mx-auto text-primary" size={28} />
+          <h2 className="mt-5 text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
+            Antes de enviar o próximo currículo, veja como ele conversa com a vaga.
+          </h2>
+          <p className="mt-5 text-base leading-8 text-muted-foreground">
+            Crie uma candidatura grátis, veja seu score de aderência e gere uma versão mais estratégica dos seus documentos.
+          </p>
+          <Button href="/cadastro" className="mt-8 h-12 px-7">
+            Começar grátis <ArrowRight size={18} />
+          </Button>
+        </div>
+      </PublicSection>
+
+      <PublicBand>
+        <div className="mx-auto max-w-4xl">
+          <PublicKicker>FAQ</PublicKicker>
+          <h2 className="mt-3 text-3xl font-semibold text-foreground">Perguntas diretas antes de começar.</h2>
+          <div className="mt-8 grid gap-3">
+            {faqs.map(([question, answer]) => (
+              <PublicCard key={question}>
+                <h3 className="font-semibold text-foreground">{question}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{answer}</p>
+              </PublicCard>
             ))}
           </div>
         </div>
-      </section>
-
-      <section id="precos" className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
-        <div className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{copy.pricingTitle}</p>
-          <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
-            {copy.pricingSectionTitle}
-          </h2>
-          <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{copy.pricingLead}</p>
-        </div>
-        <div className="mt-10 grid gap-5 lg:grid-cols-4">
-          {[free, ...paid].map((plan) => (
-            <Card
-              key={plan.id}
-              className={`flex h-full flex-col rounded-3xl border-border/70 bg-card/80 p-5 shadow-sm ${
-                plan.id === "pro" ? "border-primary/50 ring-1 ring-primary/15" : "transition hover:border-primary/25"
-              }`}
-            >
-              {plan.id === "pro" ? (
-                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-primary">{copy.recommendedBadge}</p>
-              ) : null}
-              <h3 className="text-2xl font-semibold tracking-tight text-card-foreground">{plan.name}</h3>
-              <p className="mt-2 text-3xl font-semibold tracking-tight text-card-foreground">{plan.price}</p>
-              <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
-                {plan.features.slice(0, 6).map((feature) => (
-                  <li key={feature} className="flex gap-2">
-                    <CheckCircle2 className="mt-0.5 shrink-0 text-primary" size={17} />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Button href="/cadastro" className="mt-auto w-full rounded-xl">
-                {copy.planCta}
-              </Button>
-            </Card>
-          ))}
-        </div>
-        <p className="mt-6 text-xs leading-relaxed text-muted-foreground">{copy.pricingDisclaimer}</p>
-      </section>
-
-      <section className="mx-auto max-w-4xl px-4 pb-16 sm:px-6 lg:pb-24">
-        <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{copy.faqTitle}</p>
-          <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
-            Perguntas que valem antes de começar
-          </h2>
-        </div>
-        <div className="mt-8 space-y-4">
-          {copy.marketingFaqs.map(([question, answer]) => (
-            <Card key={question} className="rounded-3xl border-border/70 bg-card/80 p-5 shadow-sm">
-              <h3 className="font-medium text-card-foreground">{question}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{answer}</p>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-4xl px-4 pb-24 text-center sm:px-6 lg:pb-32">
-        <Sparkles className="mx-auto text-primary" size={30} />
-        <h2 className="font-display mt-8 text-3xl font-medium tracking-tight text-foreground sm:text-4xl">{copy.finalCtaTitle}</h2>
-        <Button href="/cadastro" className="mt-10 rounded-xl px-8">
-          {copy.finalCtaButton}
-        </Button>
-      </section>
+      </PublicBand>
 
       <SiteFooter locale={locale} />
-    </main>
+    </PublicPageShell>
   );
 }

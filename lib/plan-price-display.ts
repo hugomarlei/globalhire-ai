@@ -60,12 +60,7 @@ export function formatStripePaidPlanPrice(locale: Locale, row: StripePaidPlanPri
 }
 
 /** AggregateOffer highPrice string (major units, conservative) for JSON-LD when Stripe data exists. */
-export function computeAggregateOfferHighPriceMajorUnits(catalog: StripePriceCatalogJson | null, fallback = "149"): string {
-  if (!catalog?.paid) return fallback;
-  let maxCents = 0;
-  for (const row of Object.values(catalog.paid)) {
-    if (row?.unitAmount != null) maxCents = Math.max(maxCents, row.unitAmount);
-  }
-  if (maxCents <= 0) return fallback;
-  return String(Math.ceil(maxCents / 100));
+export function computeAggregateOfferHighPriceMajorUnits(catalog: StripePriceCatalogJson | null, fallback = "18"): string {
+  void catalog;
+  return fallback;
 }

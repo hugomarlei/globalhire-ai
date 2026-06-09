@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AutoSiteFooter } from "@/components/site-footer";
 import { PublicNav } from "@/components/nav";
-import { Card } from "@/components/ui";
+import { PublicCard, PublicKicker, PublicPageShell, PublicSection } from "@/components/public-page-shell";
 import type { LegalPageChrome } from "@/lib/i18n-legal-chrome";
 
 export type LegalSection = {
@@ -29,28 +29,30 @@ export function LegalPage({
 }) {
   const eb = eyebrow || chrome.eyebrowDefault;
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <PublicPageShell>
       <PublicNav />
-      <article className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
-        <Card className="p-6 sm:p-10">
-          <p className="text-sm font-semibold text-brand-700 dark:text-brand-500">{eb}</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-normal text-foreground sm:text-5xl">{title}</h1>
+      <PublicSection className="max-w-5xl">
+        <article>
+          <PublicKicker>{eb}</PublicKicker>
+          <h1 className="mt-3 text-4xl font-semibold leading-tight text-foreground sm:text-5xl">{title}</h1>
           <p className="mt-4 text-sm font-medium text-muted-foreground">
             {chrome.lastUpdatedPrefix} {updatedAt}
           </p>
           {bindingNotice ? (
-            <div className="mt-4 rounded-lg border border-amber-500/35 bg-amber-500/10 p-4 text-sm leading-relaxed text-foreground dark:border-amber-400/30 dark:bg-amber-400/10">
+            <div className="mt-6 rounded-lg border border-amber-500/35 bg-amber-500/10 p-4 text-sm leading-relaxed text-foreground dark:border-amber-400/30 dark:bg-amber-400/10">
               {bindingNotice}
             </div>
           ) : null}
-          <div className="mt-6 grid gap-4 text-sm leading-7 text-muted-foreground">
-            {intro.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </div>
-          <div className="mt-10 space-y-9">
+          <PublicCard className="mt-8">
+            <div className="grid gap-4 text-sm leading-7 text-muted-foreground">
+              {intro.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
+          </PublicCard>
+          <div className="mt-8 space-y-4">
             {sections.map((section) => (
-              <section key={section.title} className="scroll-mt-24">
+              <section key={section.title} className="scroll-mt-24 rounded-lg border border-border/80 bg-card/80 p-5">
                 <h2 className="text-xl font-semibold text-foreground">{section.title}</h2>
                 <div className="mt-3 grid gap-3 text-sm leading-7 text-muted-foreground">
                   {section.paragraphs.map((paragraph) => (
@@ -70,7 +72,7 @@ export function LegalPage({
             ))}
           </div>
           <nav
-            className="mt-10 flex flex-wrap gap-4 border-t border-border pt-6 text-sm text-muted-foreground"
+            className="mt-8 flex flex-wrap gap-4 border-t border-border pt-6 text-sm text-muted-foreground"
             aria-label={chrome.legalNavAria}
           >
             <Link href="/privacidade" className="font-medium text-brand-700 hover:underline dark:text-brand-200 dark:hover:text-white">
@@ -92,9 +94,9 @@ export function LegalPage({
               {chrome.linkSupport}
             </Link>
           </nav>
-        </Card>
-      </article>
+        </article>
+      </PublicSection>
       <AutoSiteFooter />
-    </main>
+    </PublicPageShell>
   );
 }
