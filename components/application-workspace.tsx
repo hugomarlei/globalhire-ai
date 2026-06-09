@@ -22,20 +22,20 @@ export function ProgressHeader({
 }) {
   return (
     <section className={cn("overflow-hidden rounded-2xl border border-primary/15 bg-card/95 shadow-[0_18px_70px_rgba(0,0,0,0.10)] backdrop-blur-xl transition dark:border-primary/20 dark:bg-card/90 dark:shadow-[0_24px_90px_rgba(0,0,0,0.38)]", sticky && "sticky top-[72px] z-30")}>
-      <div className="grid gap-4 p-4 md:grid-cols-[auto_minmax(0,1fr)] xl:grid-cols-[auto_minmax(0,1fr)_auto] xl:items-center">
-        <div className="flex items-center gap-3">
-          <div className="relative grid size-16 place-items-center rounded-full bg-primary/10 text-primary ring-8 ring-primary/10">
+      <div className="grid min-w-0 gap-4 p-4 lg:grid-cols-[auto_minmax(0,1fr)] 2xl:grid-cols-[auto_minmax(0,1fr)_auto] 2xl:items-center">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="relative grid size-14 shrink-0 place-items-center rounded-full bg-primary/10 text-primary ring-4 ring-primary/10 sm:size-16 sm:ring-8">
             <span className="text-xl font-semibold tabular-nums">{score}</span>
           </div>
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">{status}</p>
-            <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">Próximo passo: {nextStep}</h2>
-            <div className="mt-2 h-1.5 w-48 overflow-hidden rounded-full bg-muted">
+            <h2 className="mt-1 text-base font-semibold tracking-tight text-foreground sm:text-lg">Próximo passo: {nextStep}</h2>
+            <div className="mt-2 h-1.5 w-full max-w-48 overflow-hidden rounded-full bg-muted">
               <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: `${Math.max(0, Math.min(100, completeness))}%` }} />
             </div>
           </div>
         </div>
-        <div className="flex min-w-0 flex-wrap gap-2">
+        <div className="flex min-w-0 flex-wrap gap-2 lg:justify-start">
           {items.map((item) => (
             <span key={item.label} className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition", item.done ? "border-primary/25 bg-primary/10 text-primary" : "border-border bg-muted/60 text-muted-foreground")}>
               {item.done ? <Check size={13} /> : <span className="size-1.5 rounded-full bg-current opacity-50" />}
@@ -43,7 +43,7 @@ export function ProgressHeader({
             </span>
           ))}
         </div>
-        {action ? <div className="flex shrink-0 justify-start xl:justify-end">{action}</div> : null}
+        {action ? <div className="flex min-w-0 justify-start 2xl:justify-end [&>button]:w-full sm:[&>button]:w-auto">{action}</div> : null}
       </div>
     </section>
   );
