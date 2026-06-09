@@ -16,236 +16,325 @@ type PromptArgs = {
   outputTone?: OutputTone;
 };
 
+type DeliverySpec = {
+  label: string;
+  objective: string;
+  modules: string[];
+  rules: string[];
+  structure?: string[];
+};
+
 const VOICE_TYPES: GenerationType[] = ["recruiter_message", "cover_letter", "linkedin_summary"];
 
 /** Types that honor output length & tone controls (client + API). */
 export const VOICE_CONTROLLED_GENERATION_TYPES = VOICE_TYPES;
 
-function buildVoiceBlock(type: GenerationType, length: OutputLength, tone: OutputTone) {
-  if (!VOICE_TYPES.includes(type)) return "";
+const modules = {
+  factExtraction: `
+FACT EXTRACTION LAYER
+- Extract a private fact base from the resume: roles, employers, dates, seniority, sectors, tools, certifications, languages, outcomes, scope, stakeholders and constraints.
+- Tag each useful fact as evidence, differentiator, keyword, market signal or risk.
+- No final claim may exist without support in this fact base.
+`.trim(),
 
-  const lengthLines: Record<OutputLength, string> = {
-    short:
-      "Extensao desejada: CURTA. Seja economico: va direto ao ponto, sem preambulos longos ou repeticao de buzzwords.",
-    medium:
-      "Extensao desejada: MEDIA. Equilibre contexto util com objetividade; nao encaixe paragrafos de preenchimento.",
-    detailed:
-      "Extensao desejada: DETALHADA. Mais contexto e nuances, mas ainda sem enrolacao; cada frase deve acrescentar algo."
-  };
+  jobIntelligence: `
+JOB INTELLIGENCE LAYER
+- If a job description exists, extract target role, seniority, business context, ATS keywords, tools, responsibilities, technical skills and behavioral skills.
+- Infer company type and market pressure from the description when possible.
+- Build a private match map: strong evidence, partial evidence, transferable evidence and unsupported gaps.
+`.trim(),
 
-  const toneLines: Record<OutputTone, string> = {
-    natural:
-      "Tom NATURAL: soe como uma pessoa escrevendo com clareza; contracoes sao permitidas quando naturais no idioma final.",
-    professional:
-      "Tom PROFISSIONAL: cordial e credivel, sem jargao vazio nem tom de manual corporativo.",
-    confident:
-      "Tom CONFIANTE: afirmativo e competente, sem arrogancia; mostre adequacao sem pedir desculpas pela candidatura.",
-    direct:
-      "Tom DIRETO: frases curtas, verbo ativo, zero rodeios e zero clichês de abertura."
-  };
+  benchmarkMarket: `
+BENCHMARK & MARKET INTELLIGENCE ENGINE
+- Run this before drafting any asset.
+- Employer analysis: identify employer, sector, segment, size and market when present in the job description, company description, vacancy URL or role context. If absent, infer only from available wording and mark uncertainty privately.
+- Classify market context using grounded signals: Siemens/Emerson = Industrial Automation, ABB = Industrial Technology, Schneider Electric = Energy Management, Google = Big Tech, Tesla = Automotive Technology, Mercado Livre = Marketplace & Logistics, Amazon = E-commerce/Cloud.
+- Role positioning: identify function, seniority and nature of the role, such as Sales Engineer, Account Manager, Solutions Architect, Software Engineer, Plant Manager, Technical Support Engineer or Operations Manager.
+- Market expectation model: determine what the market values for that role. Examples: Sales Engineer = technical knowledge, consultative relationship, specification, commercial support and complex sales; Software Engineer = architecture, scalability, code quality and distributed systems; Operations Manager = processes, efficiency, leadership and KPIs.
+- Competitive differentiation: compare the resume against market expectations and classify differentiators privately as HIGH VALUE, MEDIUM VALUE or LOW VALUE. Also identify gaps and rare experiences.
+- Strategic positioning: answer privately why this candidate should be chosen instead of similar candidates in the same market.
+- Never invent employer facts. If employer context is weak, write market-aware but avoid pretending to know the company.
+`.trim(),
 
-  return `
-=== Controle de tamanho e tom (obrigatorio para esta entrega) ===
-${lengthLines[length]}
-${toneLines[tone]}
-Evite sinais de texto generico de modelo de IA:
-- Nao abra com formulas como "Nos dias de hoje", "E importante notar", "No atual cenario", "Como profissional altamente motivado".
-- Nao use lista de adjetivos vazios (proativo, dinamico, apaixonado por desafios) sem exemplo concreto.
-- Nao repita a mesma estrutura de frase em paragrafos seguidos.
-- Prefira especificidade baseada no curriculo e na vaga em vez de generalidades.
-`.trim();
+  evidence: `
+EVIDENCE ENGINE
+- Replace generic claims with proof: action + context + tool/process + stakeholder/scope + result when available.
+- If no metric exists, use scope, environment, responsibility or complexity. Never invent numbers.
+- Ban unsupported filler such as "strong experience", "extensive background", "proven track record", "highly motivated" and equivalents.
+`.trim(),
+
+  differentiation: `
+DIFFERENTIATION ENGINE
+- Identify what makes the candidate less interchangeable: rare combinations, international exposure, technical complexity, regulated environments, customer exposure, leadership, scope changes, languages and relevant projects.
+- Prioritize real differentiators over broad skill lists.
+- The output must not read as if another candidate could use it unchanged.
+`.trim(),
+
+  positioning: `
+POSITIONING ENGINE
+- Privately answer: "Why would this candidate be remembered among 100 candidates?"
+- Use that answer to shape headline, opening, sequence, emphasis and closing argument.
+- Lead with hiring value, not with a generic title or chronological dump.
+`.trim(),
+
+  marketAdaptation: `
+MARKET ADAPTATION ENGINE
+- Adapt vocabulary, density, proof style and seniority framing to the target country, market, sector, company type and role level.
+- If the job context implies a specific employer or sector, tailor the angle to it. Siemens, ABB, Tesla, Google and Mercado Livre should not receive the same narrative.
+- Use benchmark findings to decide which facts deserve more density and which facts should be compacted.
+- Keep factual truth higher priority than persuasion.
+`.trim(),
+
+  humanWriting: `
+HUMAN WRITING ENGINE
+- Write like an elite human resume writer: natural rhythm, varied sentence length, concrete nouns and active verbs.
+- Avoid repeated bullet stems, template openings, mechanical transitions and AI-scented phrasing.
+- Prefer precise language over inflated corporate tone.
+`.trim(),
+
+  qualityAudit: `
+QUALITY AUDIT ENGINE
+- Before final output, privately score ATS/searchability, job fit, evidence density, differentiation, clarity, naturalness and factual safety.
+- Verify specificity: does the asset feel specific to the employer, market, role, seniority and target country?
+- Ask privately: could this asset be reused for another vacancy without meaningful changes? If yes, rewrite it.
+- If evidence, differentiation, job fit or naturalness is weak, rewrite before responding.
+- Do not expose the audit; only the improved final asset and applied improvements are allowed.
+`.trim(),
+
+  truth: `
+TRUTH CONSTRAINTS
+- Do not invent companies, titles, degrees, certifications, tools, languages, metrics, awards, employers, seniority, locations or experiences.
+- Do not upgrade responsibility beyond resume evidence.
+- Preserve contact details and locations that exist in the source unless anonymization is requested.
+- Use the final language requested by the user. Keep proper nouns, technologies, certifications and tools in their market-standard form.
+`.trim(),
+
+  atsResume: `
+ATS RESUME MODULE
+- Use standard readable sections, clean text and natural keywords. No tables, graphics, icons, keyword stuffing or decorative formatting.
+- Keywords must be supported by resume evidence and integrated where they belong.
+- Preserve all real roles and employers; compact weakly related history instead of deleting it.
+`.trim(),
+
+  linkedinSearch: `
+LINKEDIN SEARCH MODULE
+- Balance search keywords with a human narrative.
+- Include sectors, tools, problems solved and market positioning only when supported.
+- Avoid keyword walls and generic personal branding language.
+`.trim(),
+
+  interview: `
+INTERVIEW MODULE
+- Prepare the candidate to speak with evidence, not memorize generic answers.
+- Convert resume facts into likely questions, STAR stories, differentiators, risks and thoughtful questions for the interviewer.
+`.trim(),
+
+  translation: `
+TRANSLATION MODULE
+- This delivery is translation and market wording adaptation, not job optimization.
+- Ignore job description even if provided.
+- Preserve every real role, employer, date, location, education item, certification, language, link and contact detail.
+`.trim()
+} satisfies Record<string, string>;
+
+const sharedPipeline = [
+  modules.factExtraction,
+  modules.jobIntelligence,
+  modules.benchmarkMarket,
+  modules.evidence,
+  modules.differentiation,
+  modules.positioning,
+  modules.marketAdaptation,
+  modules.humanWriting,
+  modules.qualityAudit,
+  modules.truth
+];
+
+const specs: Record<GenerationType, DeliverySpec> = {
+  ats_resume: {
+    label: "Premium ATS resume rewrite",
+    objective: "Create a differentiated, evidence-rich resume aligned to the role, market and target country.",
+    modules: [modules.atsResume],
+    structure: [
+      "Name",
+      "Headline or Target Role",
+      "Contact",
+      "Professional Summary",
+      "Core Skills",
+      "Professional Experience",
+      "Education",
+      "Certifications",
+      "Languages"
+    ],
+    rules: [
+      "Summary must state lane, proof and market fit in 3 to 5 dense lines.",
+      "Core skills must prioritize verified requirements and high-value transferable skills.",
+      "Experience bullets must show action, context, tool/process, stakeholder/scope and result when available.",
+      "Reorganize density by benchmark relevance: HIGH VALUE evidence gets more space, MEDIUM VALUE stays concise, LOW VALUE is compacted.",
+      "Give more depth to roles closest to the target; compact weaker roles without erasing real history.",
+      "Omit empty or negative sections such as no relevant certifications."
+    ]
+  },
+
+  cover_letter: {
+    label: "Premium cover letter",
+    objective: "Turn resume evidence into a hiring argument, not a prose copy of the resume.",
+    modules: [],
+    rules: [
+      "Open with a concrete fit argument grounded in candidate evidence.",
+      "Build 2 to 4 proof points tied to the employer's business need.",
+      "Connect the candidate's strongest benchmark differentiator directly to the company/market context.",
+      "Show market and company-context awareness without sounding templated.",
+      "Close with a calm next step, not pressure or generic enthusiasm.",
+      "Never use ceremonial openings such as I hope this message finds you well."
+    ]
+  },
+
+  linkedin_summary: {
+    label: "Premium LinkedIn summary",
+    objective: "Make the profile memorable, searchable and human.",
+    modules: [modules.linkedinSearch],
+    rules: [
+      "Use first person unless the target language strongly favors another convention.",
+      "The first paragraph must define professional lane and differentiator.",
+      "Include evidence, sectors, tools, problems solved and international angle when supported.",
+      "Emphasize competitive differentiators that would matter in the benchmark market.",
+      "Do not over-polish into a brochure voice.",
+      "Do not include contact details unless they naturally belong in the summary."
+    ]
+  },
+
+  recruiter_message: {
+    label: "Premium recruiter outreach message",
+    objective: "Produce a concise message a real candidate would send to a recruiter.",
+    modules: [],
+    rules: [
+      "Use one context line, one evidence/value line and one clear ask.",
+      "Mention role/company context when available.",
+      "Highlight one specific value point tied to the benchmark scenario, not a generic career pitch.",
+      "No flattery, filler, pressure or generic excitement.",
+      "Short = 60-90 words; medium = 90-130 words; detailed = 130-180 words."
+    ]
+  },
+
+  interview_prep: {
+    label: "Premium interview preparation guide",
+    objective: "Help the candidate answer with evidence and strategic positioning.",
+    modules: [modules.interview],
+    structure: [
+      "=== PERGUNTAS PROVAVEIS ===",
+      "=== RESPOSTAS EM STAR ===",
+      "=== DIFERENCIAIS A ENFATIZAR ===",
+      "=== RISCOS OU LACUNAS ===",
+      "=== PERGUNTAS AO ENTREVISTADOR ==="
+    ],
+    rules: [
+      "Questions must reflect job context and resume evidence.",
+      "STAR answers must use real facts; do not invent projects or metrics.",
+      "Prepare answers around employer, sector and role expectations identified by the benchmark engine.",
+      "Risks must be honest and paired with a positioning strategy.",
+      "Keep sections practical, concise and scannable."
+    ]
+  },
+
+  translate_resume: {
+    label: "Complete resume translation",
+    objective: "Translate the full resume and adapt professional wording to the target country without job-specific rewriting.",
+    modules: [modules.translation, modules.atsResume],
+    rules: [
+      "Preserve all experiences, employers, titles, dates, locations, education, certifications, languages, links and contact details.",
+      "Do not cut long career histories; translate every role and compact only repeated wording inside a role.",
+      "Adapt job titles and section names to target-market conventions without changing seniority or scope.",
+      "Keep a clean ATS-readable structure and natural professional language."
+    ]
+  }
+};
+
+const lengthRules: Record<OutputLength, string> = {
+  short: "short: concise and high-signal; no filler",
+  medium: "medium: balanced proof and readability",
+  detailed: "detailed: richer proof and context, still disciplined"
+};
+
+const toneRules: Record<OutputTone, string> = {
+  natural: "natural: human, clear and conversational-professional",
+  professional: "professional: polished, credible and controlled",
+  confident: "confident: assertive, commercially aware and never arrogant",
+  direct: "direct: active verbs, short sentences and no ceremonial openings"
+};
+
+function compactList(title: string, items: string[]) {
+  if (!items.length) return "";
+  return `${title}\n${items.map((item) => `- ${item}`).join("\n")}`;
 }
 
-const labels: Record<GenerationType, string> = {
-  ats_resume: "otimização de currículo ATS internacional",
-  cover_letter: "carta de apresentação persuasiva",
-  linkedin_summary: "resumo de LinkedIn forte e global",
-  recruiter_message: "mensagem curta para recrutador",
-  interview_prep: "guia estruturado para entrevista (cards e secoes escaneaveis)",
-  translate_resume: "tradução e adaptação internacional do currículo"
-};
+function contextBlock(args: PromptArgs) {
+  const base = [
+    `Final language: ${args.language}`,
+    `Target country/market: ${args.targetCountry}`
+  ];
 
-const transformationQualityGate = `
-=== Porta de qualidade antes de responder ===
-Antes de entregar, avalie internamente o documento final contra estes criterios. Nao mostre esta auditoria ao usuario; use-a para revisar e melhorar a propria saida antes de responder.
+  if (args.type === "translate_resume") {
+    return compactList("TARGET CONTEXT", [...base, "Job description: intentionally ignored for this delivery"]);
+  }
 
-Meta minima: o documento final deve atingir pelo menos 90% de aderencia a estes criterios:
-1. Melhoria real: o material precisa ficar mais claro, competitivo e orientado ao cargo do que o curriculo/base. Se for apenas sinonimo, reorganizacao pequena ou maquiagem textual, reescreva novamente.
-2. Alinhamento com a vaga: extraia responsabilidades, senioridade, competencias, ferramentas, palavras-chave ATS e contexto da descricao da vaga. Use somente os termos que forem sustentados pelo historico real do candidato.
-3. Escrita ATS e humana: use secoes padrao, cargos claros, palavras-chave naturais e bullets escaneaveis. Evite texto com cheiro de IA: frases genericas, promessas vazias, adjetivos sem prova, repeticao mecanica e buzzwords sem evidencias.
-4. Valor para recrutador: cada bloco importante deve responder "por que esta pessoa faz sentido para esta vaga?" com evidencia, escopo, impacto, ferramentas, stakeholders, processos ou contexto.
-5. Transformacao do curriculo: reposicione resumo, competencias e experiencias para destacar o que mais combina com a vaga; reduza informacao pouco relevante sem apagar fatos importantes.
-6. Golden rule de curriculo forte: bullets devem preferir acao + contexto + impacto/escopo + ferramenta/metodo quando houver base. Quando numero nao existir, nao invente; use impacto qualitativo concreto ou placeholder seguro.
-7. Veracidade: nao crie empresas, cargos, certificacoes, diplomas, senioridade, tecnologias, idiomas, resultados, premios ou metricas. Se uma lacuna impedir otimizacao, use formulacao honesta ou placeholder explicito.
-8. Aceitacao por ATS e empresa: mantenha formato limpo, sem tabelas, sem arte, sem excesso de simbolos, sem keyword stuffing e sem afirmacoes que parecam fraudulentas.
-9. Prova de especificidade: substitua responsabilidades vagas por bullets com verbos fortes e contexto real. Inclua termos e experiencias condizentes com perfil, trajetoria e curriculo do candidato.
-10. Revisao final: compare mentalmente o resultado com curriculos fortes e atuais usados em candidaturas internacionais: densidade suficiente, leitura rapida, ordem estrategica, linguagem natural e evidencia verificavel.
+  return [
+    compactList("TARGET CONTEXT", [
+      ...base,
+      `Plan/intensity: ${args.planLabel || "Standard"} (${args.intensityPercent || "default"})`,
+      `Optimization instruction: ${args.optimizationInstruction || "Improve materially while staying faithful to the resume."}`
+    ]),
+    `JOB DESCRIPTION / CONTEXT\n${args.jobDescription?.trim() || "Not provided. Build positioning from resume evidence, target market and likely role context only."}`
+  ].join("\n\n");
+}
 
-Se qualquer criterio critico falhar, corrija o documento final antes de responder. Nunca diga que algo foi melhorado se a melhoria nao aparece no documento final.
-`.trim();
+function voiceBlock(args: PromptArgs) {
+  if (!VOICE_TYPES.includes(args.type)) return "";
+  const length = args.outputLength || "medium";
+  const tone = args.outputTone || "professional";
+  return compactList("VOICE CONTROL", [
+    `Length: ${lengthRules[length]}`,
+    `Tone: ${toneRules[tone]}`,
+    "Apply these controls to the final asset, not to the private analysis"
+  ]);
+}
 
-const deliveryGuidance: Record<GenerationType, string> = {
-  ats_resume: `
-Entrega: currículo ATS internacional.
-Objetivo: produzir um currículo substancial, competitivo e claramente adaptado à vaga.
-Estrutura recomendada quando houver dados suficientes:
-NOME DO PROFISSIONAL
-Target Role: cargo-alvo alinhado à vaga
-Contacto / cabeçalho: telefone, e-mail, cidade/localização e links profissionais exatamente como constarem no currículo de origem (ajuste só formatação ATS, não apague dados reais).
-Resumo profissional / Professional Summary
-Competências principais / Core Skills
-Experiência profissional / Professional Experience
-Formação / Education
-Certificações / Certifications
-Idiomas / Languages
+function deliveryBlock(type: GenerationType) {
+  const spec = specs[type];
+  return [
+    `DELIVERY\n${spec.label}\nObjective: ${spec.objective}`,
+    spec.structure?.length ? `Required / recommended structure\n${spec.structure.join("\n")}` : "",
+    ...spec.modules,
+    compactList("DELIVERY RULES", spec.rules)
+  ].filter(Boolean).join("\n\n");
+}
 
-Use os títulos no idioma final solicitado. Os rótulos em inglês acima são apenas referência quando o idioma final for inglês.
-
-Regras especificas:
-- Cabeçalho: preserve telefone, e-mail, cidade ou região e links que o candidato já forneceu. Não omita por conveniência. Não invente dados que não existam na fonte.
-- O resumo profissional deve ter 4 a 6 linhas densas, conectando experiencia real ao cargo-alvo.
-- Core Skills deve refletir palavras-chave importantes da vaga, mas somente quando compatíveis com a experiência do candidato.
-- Reescreva bullets com linguagem forte, orientada a impacto, escopo, ferramentas, stakeholders, resultados e senioridade.
-- Cada experiência relevante deve ter bullets suficientes para vender o candidato, normalmente 3 a 6 por cargo relevante quando houver base factual. Não resuma demais.
-- Não apague experiências profissionais do currículo original para encurtar a resposta. Preserve todas as empresas/cargos reais; compacte cargos menos aderentes com 2 a 3 bullets, mas não remova histórico técnico/comercial relevante.
-- Para vagas técnicas B2B/industriais, preserve e reposicione experiências com automação, vendas técnicas, aplicação, manutenção, confiabilidade, treinamento técnico, válvulas, motores, CLP, inversores, bombas, sistemas pneumáticos, IIoT ou relacionamento com clientes industriais.
-- Inclua uma hierarquia clara: cargos mais aderentes a vaga devem receber mais densidade; cargos menos aderentes devem ser preservados de forma mais compacta.
-- O resultado deve parecer um curriculo escrito por um bom resume writer humano: direto, verificavel, denso e sem promessas exageradas.
-- Se houver descrição da vaga, priorize experiências e habilidades mais alinhadas a ela.
-- Se o currículo tiver muitas informações irrelevantes para a vaga, reduza o peso delas sem apagar fatos importantes.
-- Nunca escreva seções depreciativas como "Nenhum certificado relevante", "sem certificações relevantes" ou equivalentes. Se não houver certificações, omita a seção.
-- Localização: não invente cidade ou país. Se o candidato indicou cidade no material de origem, mantenha-a (pode normalizar capitalização). Se não houver cidade, use país/região ou "disponível para remoto" apenas quando isso já estiver implícito ou for o país-alvo informado.
-`,
-  cover_letter: `
-Entrega: carta de apresentação.
-Objetivo: soar convincente e humano — não como modelo genérico de IA.
-Regras especificas:
-- Abra com uma frase concreta ligando perfil da vaga a uma evidencia real do curriculo (sem aberturas de formula).
-- Evite cartas que "cheiram" a ChatGPT: sem listas de buzzwords, sem paragrafos so de adjetivos.
-- Respeite a extensao pedida no bloco "Controle de tamanho e tom"; ajuste o numero de paragrafos (ex.: curta = 2-3 paragrafos curtos; detalhada = 4-6 com mais contexto).
-- Cite evidencias reais do curriculo em linguagem simples.
-- Demonstre adequacao ao pais-alvo sem juridiquês nem ironia.
-- Nao repita o curriculo linha a linha; transforme experiencia em argumento de contratacao.
-`,
-  linkedin_summary: `
-Entrega: resumo de LinkedIn.
-Objetivo: primeiro paragrafo ja mostrar personalidade e clareza — como quem fala com um recrutador, nao com um template.
-Regras especificas:
-- Primeira pessoa, ritmo variado, frases de tamanhos diferentes.
-- Inclua especialidade, impacto, problemas que resolve, ferramentas/setores e objetivo internacional quando fizer sentido.
-- Nada de blocos inteiro em tom de "brochura"; troque por detalhes especificos.
-- Preserve contacto e localizacao presentes no material de origem; nao remova cidade, telefone ou e-mail reais.
-- Respeite a extensao pedida no bloco "Controle de tamanho e tom" (ex.: curta = ~900-1200 caracteres; detalhada = mais espaco para prova social e foco).
-`,
-  recruiter_message: `
-Entrega: mensagem para recrutador.
-Objetivo: mensagem que parece escrita por um humano ocupado — direta, cordial, util.
-Regras especificas:
-- Limite-orientacao por extensao: CURTA ~60-90 palavras; MEDIA ~90-120; DETALHADA ~120-170 (nao ultrapasse 190).
-- Nao use "Espero que essa mensagem te encontre bem" nem floreio semelhante.
-- Uma frase de contexto, uma de valor/prova, um pedido claro de proximo passo (sem pressao agressiva).
-- Mencione a vaga ou cargo quando souber; evite vaguidade total.
-`,
-  interview_prep: `
-Entrega: guia de preparacao para entrevista.
-Objetivo: organizar o conteudo para estudo rapido antes da conversa.
-Regras especificas:
-- OBRIGATORIO: estruture por secoes usando linhas exatamente neste formato (tres sinais de igual, titulo, tres sinais de igual):
-=== PERGUNTAS PROVAVEIS ===
-(conteudo)
-
-Cada secao deve ter titulo em MAIUSCULAS curtas (sem emoji). Sugestao de secoes (use as que fizerem sentido, pode omitir secao vazia):
-=== PERGUNTAS PROVAVEIS ===
-=== RESPOSTAS EM STAR ===
-=== PONTOS FORTES PARA ENFATIZAR ===
-=== RISCOS OU LACUNAS ===
-=== PERGUNTAS PARA FAZER AO ENTREVISTADOR ===
-- Dentro de cada secao use listas com trave (-) quando ajudar a escaneabilidade.
-- Sugira respostas STAR quando fizer sentido, de forma compacta.
-`,
-  translate_resume: `
-Entrega: tradução e adaptação internacional do currículo.
-Objetivo: traduzir integralmente o currículo e adaptar convenções, tom e termos do país-alvo sem cortar histórico.
-Regras especificas:
-- Esta entrega NÃO usa descrição da vaga. Não solicite vaga, não invente cargo-alvo e não otimize para uma vaga específica.
-- Preserve TODAS as experiências, empresas, cargos, datas, localidades, formação, certificações, idiomas, links e dados de contacto do currículo original.
-- Não resuma o currículo para caber em uma resposta curta. Se houver muitas experiências, traduza todas e mantenha a estrutura completa.
-- Pode compactar apenas frases redundantes dentro da mesma experiência, mas nunca remover uma experiência/cargo/empresa real.
-- Preserve os dados de contacto e localização do original, salvo pedido explícito de anonimização; não apague cidade ou telefone reais.
-- Adapte nomes de cargos sem distorcer senioridade.
-- Mantenha o documento denso e pronto para candidatura.
-`
-};
-
-export function buildPrompt(args: PromptArgs) {
-  const task = labels[args.type];
-  const guidance = deliveryGuidance[args.type];
-  const length: OutputLength = args.outputLength || "medium";
-  const tone: OutputTone = args.outputTone || "professional";
-  const voice = buildVoiceBlock(args.type, length, tone);
-
-  return `
-Voce e um especialista senior em carreira internacional, ATS, recrutamento global e escrita profissional.
-Sua tarefa: ${task}.
-
-Público: profissionais multilíngues de qualquer país buscando vagas remotas, internacionais ou fora do próprio mercado local.
-Idioma final obrigatorio: ${args.language}.
-Pais-alvo: ${args.targetCountry}.
-
-Contexto estrategico:
-O usuario espera uma transformacao real do material, nao uma reescrita superficial. Seu trabalho e agir como um career strategist, resume writer executivo e recrutador internacional ao mesmo tempo.
-
-Regras de qualidade:
-- Plano aplicado: ${args.planLabel || "Starter/Free"}. Intensidade de otimização esperada: ${args.intensityPercent || "50%"}.
-- Instrução de intensidade: ${args.optimizationInstruction || "Aplique melhoria moderada, fiel ao currículo original e alinhada à vaga quando houver descrição."}
-- Seja especifico, profissional e orientado a resultado.
-${args.type === "translate_resume" ? "- Antes de escrever, identifique estrutura, idioma original, cargos, empresas, datas, formação, certificações, idiomas e dados de contato para preservar tudo na tradução." : "- Antes de escrever, analise mentalmente a descrição da vaga e identifique cargo-alvo, responsabilidades, senioridade, competências técnicas, competências comportamentais, palavras-chave ATS e contexto do país."}
-${args.type === "translate_resume" ? "- Traduza e adapte convenções linguísticas do país-alvo sem transformar o currículo em outro perfil e sem cortar experiências." : "- Adapte o documento ao texto da vaga. Não apenas reescreva o currículo com sinônimos."}
-${args.type === "translate_resume" ? "- Preserve a ordem e o conteúdo essencial do histórico original; ajuste termos profissionais para soarem naturais no idioma final." : "- Reordene informacoes, destaque experiencias mais relevantes e incorpore palavras-chave reais da vaga quando forem verdadeiras para o candidato."}
-${args.type === "translate_resume" ? "- Mantenha formato ATS limpo, mas priorize fidelidade e completude da tradução." : "- Otimize para ATS quando fizer sentido, usando palavras-chave da vaga sem exagero e sem keyword stuffing."}
-- Nunca invente empresas, cargos, diplomas, certificações ou métricas que não estejam no currículo.
-- Quando faltarem metricas, sugira marcadores com espacos seguros como "[insira metrica]".
-- Adapte tom, vocabulário e convenções para o país-alvo.
-- Use exclusivamente o idioma final solicitado (${args.language}) em todo o documento final, incluindo títulos de secção, bullets, resumo, etiquetas e CTAs. Não misture outro idioma.
-- Não misture idiomas. Exceção: mantenha termos técnicos, nomes de ferramentas, certificações, empresas e tecnologias exatamente como aparecem ou como são usados no mercado (ex.: AWS, Kubernetes).
-- Mapeamento de idioma: "Português do Brasil" ou "pt-BR" → português do Brasil em todo o texto. "English" ou "en" → inglês (preferencialmente inglês norte-americano profissional). "Français" ou "fr" → francês integral. "Español" ou "es" → espanhol integral.
-- Entregue um documento final pronto para copiar.
-- Não use markdown no documento final.
-- Não use caracteres de diff como "+" no início das linhas.
-- Não coloque explicações, sugestões ou melhorias aplicadas dentro do documento final.
-- Se a entrega for currículo ATS, priorize esta estrutura quando houver informação suficiente: Professional Summary, Core Skills, Professional Experience, Education, Certifications, Languages.
-- Cada bullet de experiencia deve tentar conectar acao, contexto e impacto. Quando nao houver numero, mantenha a frase forte e honesta.
-- As melhorias aplicadas devem explicar quais transformações você já fez no documento final.
-- Cada melhoria aplicada deve começar com um impacto estimado entre colchetes, no formato "[12%]". Esse percentual representa a melhora estimada daquela alteração para a vaga-alvo, nao uma garantia de entrevista ou contratacao.
-- Cada melhoria aplicada deve citar uma mudanca verificavel do documento final: exemplo, "reposicionei X", "incorporei Y", "densifiquei Z". Nao liste boas praticas genericas.
-- O documento final deve ser completo o bastante para candidatura. Evite respostas curtas demais.
-- Insira uma linha em branco entre a linha de localizacao/availability e a secao de resumo profissional, quando ambas existirem.
-
-${transformationQualityGate}
-
-${guidance}
-
-${voice ? `${voice}\n` : ""}
-
-Formato obrigatorio da resposta:
-Responda exclusivamente usando os marcadores abaixo.
-Não escreva nada antes de <DOCUMENT_FINAL> e nada depois de </APPLIED_IMPROVEMENTS>.
+const outputContract = `
+OUTPUT CONTRACT
+Respond only with these tags. Nothing before <DOCUMENT_FINAL> and nothing after </APPLIED_IMPROVEMENTS>.
 
 <DOCUMENT_FINAL>
-documento final completo, limpo, adaptado a vaga e pronto para uso
+final asset only
 </DOCUMENT_FINAL>
 
 <APPLIED_IMPROVEMENTS>
-- [12%] melhoria aplicada 1
-- [10%] melhoria aplicada 2
-- [8%] melhoria aplicada 3
-- [7%] melhoria aplicada 4
-- [6%] melhoria aplicada 5
+- [12%] specific visible improvement in the final asset
+- [10%] specific visible improvement in the final asset
+- [8%] specific visible improvement in the final asset
+- [7%] specific visible improvement in the final asset
+- [6%] specific visible improvement in the final asset
 </APPLIED_IMPROVEMENTS>
-
-Curriculo/base do usuario:
-${args.resume}
-
-${args.type === "translate_resume" ? "Contexto de tradução: não há descrição de vaga nesta entrega. Traduza e adapte o currículo completo ao idioma e país-alvo." : `Descricao da vaga ou contexto:\n${args.jobDescription || "Não informado. Trabalhe com base no currículo e no objetivo internacional."}`}
 `.trim();
+
+export function buildPrompt(args: PromptArgs) {
+  return [
+    `ROLE\nYou are GlobalHire's principal content-generation architect: an elite international resume writer, career strategist and recruiter-caliber editor.\nTask: ${specs[args.type].label}.`,
+    contextBlock(args),
+    "PRIVATE ARCHITECTURE\nRun these layers silently before writing. Do not expose maps, scores, notes or reasoning.",
+    ...sharedPipeline,
+    deliveryBlock(args.type),
+    voiceBlock(args),
+    outputContract,
+    `SOURCE RESUME\n${args.resume}`
+  ].filter(Boolean).join("\n\n").trim();
 }
