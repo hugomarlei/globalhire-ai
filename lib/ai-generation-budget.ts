@@ -120,6 +120,103 @@ function structuredResumeText(data: ResumeData, type: GenerationType) {
   ].filter(Boolean).join("\n\n").trim();
 }
 
+function bulletize(value: string) {
+  return normalizeText(value)
+    .split("\n")
+    .map((line) => line.replace(/^[•\-–]\s*/, "").trim())
+    .filter(Boolean)
+    .map((line) => `• ${line}`)
+    .join("\n");
+}
+
+export function buildCompleteResumeFallback(resume: string, language: string, type: GenerationType) {
+  const data = normalizeResumeData(importResumeText(resume));
+  const personal = data.personal;
+  const contact = [personal.email, personal.phone, personal.location, personal.links].filter(Boolean).join(" | ");
+  const experience = data.experience
+    .filter((item) => item.company || item.role || item.description)
+    .map((item) => {
+      const dates = [item.start, item.current ? "Atual" : item.end].filter(Boolean).join(" - ");
+      return [
+        [item.role, item.company].filter(Boolean).join(" - ") || "Experiência",
+        [item.location, dates].filter(Boolean).join(" | "),
+        bulletize(item.description)
+      ].filter(Boolean).join("\n");
+    })
+    .join("\n\n");
+  const education = data.education
+    .filter((item) => item.degree || item.school || item.description)
+    .map((item) => [
+      [item.degree, item.school].filter(Boolean).join(" - ") || "Formação",
+      [item.location, item.start, item.end].filter(Boolean).join(" | "),
+      item.description
+    ].filter(Boolean).join("\n"))
+    .join("\n\n");
+  const certifications = data.certifications
+    .filter((item) => item.name || item.issuer || item.description)
+    .map((item) => [[item.name, item.issuer].filter(Boolean).join(" - "), item.date, item.description].filter(Boolean).join("\n"))
+    .join("\n\n");
+  const isEnglish = /english|ingl[eê]s/i.test(language);
+  const labels = isEnglish
+    ? {
+        summary: "Professional Summary",
+        skills: "Core Skills",
+        experience: "Professional Experience",
+        education: "Education",
+        certifications: "Certifications",
+        languages: "Languages"
+      }
+    : {
+        summary: type === "translate_resume" ? "Resumo profissional" : "Resumo Profissional",
+        skills: "Habilidades",
+        experience: "Experiência Profissional",
+        education: "Formação",
+        certifications: "Certificações",
+        languages: "Idiomas"
+      };
+
+  return [
+    personal.name,
+    personal.headline,
+    contact,
+    section(labels.summary, data.summary),
+    section(labels.skills, data.skills.join(", ")),
+    section(labels.experience, experience),
+    section(labels.education, education),
+    section(labels.certifications, certifications),
+    section(labels.languages, data.languages.join(", "))
+  ].filter(Boolean).join("\n\n").trim();
+}
+
+function normalizeForContainment(value: string) {
+  return normalizeText(value)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+export function longDocumentLooksIncomplete(type: GenerationType, sourceResume: string, document: string) {
+  if (!LONG_DOCUMENT_TYPES.includes(type)) return false;
+  const cleanDocument = normalizeText(document);
+  if (cleanDocument.length < 600) return true;
+  if (cleanDocument.length < normalizeText(sourceResume).length * 0.42) return true;
+
+  const data = normalizeResumeData(importResumeText(sourceResume));
+  const normalizedOutput = normalizeForContainment(cleanDocument);
+  const anchors = data.experience
+    .filter((item) => item.company || item.role)
+    .flatMap((item) => [item.company, item.role])
+    .filter((item): item is string => Boolean(item && item.length >= 3))
+    .slice(0, 30);
+
+  if (!anchors.length) return false;
+  const missing = anchors.filter((anchor) => {
+    const key = normalizeForContainment(anchor).split(/\s+/).filter((part) => part.length > 2);
+    return key.length > 0 && !key.some((part) => normalizedOutput.includes(part));
+  });
+  return missing.length > Math.max(2, Math.floor(anchors.length * 0.35));
+}
+
 function compactResume(resume: string, type: GenerationType) {
   const clean = normalizeText(resume);
   const hardCap = LONG_DOCUMENT_TYPES.includes(type) ? 12_000 : 8_500;

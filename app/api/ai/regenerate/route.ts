@@ -13,9 +13,11 @@ import { getLatestActiveSubscription } from "@/lib/subscription-state";
 import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
 import {
   budgetedMaxCompletionTokens,
+  buildCompleteResumeFallback,
   desiredCompletionTokens,
   groqRateLimitResponse,
   isGroqRateLimitError,
+  longDocumentLooksIncomplete,
   prepareBudgetedGenerationInput,
   shouldAutoReviseWithAi
 } from "@/lib/ai-generation-budget";
@@ -151,7 +153,15 @@ export async function POST(request: NextRequest) {
 
     const rawOutput = completion.choices[0]?.message?.content?.trim() || "";
     let { document, recommendations } = parseAiOutput(rawOutput);
+    if (!document && (type === "ats_resume" || type === "translate_resume")) {
+      document = buildCompleteResumeFallback(original.input_resume, original.language, type);
+      recommendations = ["Versão completa reconstruída localmente para evitar documento vazio."];
+    }
     if (!document) return NextResponse.json({ error: "A IA não retornou um documento válido." }, { status: 500 });
+    if (longDocumentLooksIncomplete(type, original.input_resume, document)) {
+      document = buildCompleteResumeFallback(original.input_resume, original.language, type);
+      recommendations = ["Versão completa reconstruída localmente porque a IA retornou um documento incompleto."];
+    }
     let quality = evaluateGeneratedAsset({
       type,
       resume: original.input_resume,

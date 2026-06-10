@@ -12,9 +12,11 @@ import { getLatestActiveSubscription } from "@/lib/subscription-state";
 import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
 import {
   budgetedMaxCompletionTokens,
+  buildCompleteResumeFallback,
   desiredCompletionTokens,
   groqRateLimitResponse,
   isGroqRateLimitError,
+  longDocumentLooksIncomplete,
   prepareBudgetedGenerationInput,
   shouldAutoReviseWithAi
 } from "@/lib/ai-generation-budget";
@@ -147,7 +149,15 @@ export async function POST(request: NextRequest) {
     if (!rawOutput) return NextResponse.json({ error: "A IA nao retornou conteudo." }, { status: 500 });
 
     let { document, recommendations } = parseAiOutput(rawOutput);
+    if (!document && (parsed.data.type === "ats_resume" || parsed.data.type === "translate_resume")) {
+      document = buildCompleteResumeFallback(parsed.data.resume, parsed.data.language, parsed.data.type);
+      recommendations = ["Versão completa reconstruída localmente para evitar documento vazio."];
+    }
     if (!document) return NextResponse.json({ error: "A IA nao retornou um documento valido." }, { status: 500 });
+    if (longDocumentLooksIncomplete(parsed.data.type, parsed.data.resume, document)) {
+      document = buildCompleteResumeFallback(parsed.data.resume, parsed.data.language, parsed.data.type);
+      recommendations = ["Versão completa reconstruída localmente porque a IA retornou um currículo incompleto."];
+    }
     let quality = evaluateGeneratedAsset({
       type: parsed.data.type,
       resume: parsed.data.resume,
