@@ -151,16 +151,12 @@ Obrigatório: use estes achados para reescrever o currículo de forma mais forte
       temperature: 0.25
     });
 
-    if (completion.choices[0]?.finish_reason === "length") {
-      return NextResponse.json({
-        error: "A IA atingiu o limite de saída antes de finalizar o currículo. Tente novamente; nenhum currículo truncado foi salvo."
-      }, { status: 502 });
-    }
-
     const rawOutput = completion.choices[0]?.message?.content?.trim() || "";
-    if (!rawOutput) return NextResponse.json({ error: "A IA não retornou conteúdo." }, { status: 500 });
-
     let { document, recommendations } = parseAiOutput(rawOutput);
+    if (completion.choices[0]?.finish_reason === "length") {
+      document = buildCompleteResumeFallback(parsed.data.resume, parsed.data.language, "ats_resume");
+      recommendations = ["Versão completa reconstruída localmente porque a IA atingiu o limite de saída."];
+    }
     if (!document) {
       document = buildCompleteResumeFallback(parsed.data.resume, parsed.data.language, "ats_resume");
       recommendations = ["Versão completa reconstruída localmente para evitar currículo vazio."];

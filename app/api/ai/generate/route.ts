@@ -139,19 +139,18 @@ export async function POST(request: NextRequest) {
       temperature: 0.25
     });
 
-    if (completion.choices[0]?.finish_reason === "length") {
-      return NextResponse.json({
-        error: "A IA atingiu o limite de saída antes de finalizar o documento. Tente novamente; nenhum asset truncado foi salvo."
-      }, { status: 502 });
-    }
-
     const rawOutput = completion.choices[0]?.message?.content?.trim() || "";
-    if (!rawOutput) return NextResponse.json({ error: "A IA nao retornou conteudo." }, { status: 500 });
-
     let { document, recommendations } = parseAiOutput(rawOutput);
+    if (completion.choices[0]?.finish_reason === "length" && (parsed.data.type === "ats_resume" || parsed.data.type === "translate_resume")) {
+      document = buildCompleteResumeFallback(parsed.data.resume, parsed.data.language, parsed.data.type);
+      recommendations = ["Versão completa reconstruída localmente porque a IA atingiu o limite de saída."];
+    }
     if (!document && (parsed.data.type === "ats_resume" || parsed.data.type === "translate_resume")) {
       document = buildCompleteResumeFallback(parsed.data.resume, parsed.data.language, parsed.data.type);
       recommendations = ["Versão completa reconstruída localmente para evitar documento vazio."];
+    }
+    if (!rawOutput && !(parsed.data.type === "ats_resume" || parsed.data.type === "translate_resume")) {
+      return NextResponse.json({ error: "A IA nao retornou conteudo." }, { status: 500 });
     }
     if (!document) return NextResponse.json({ error: "A IA nao retornou um documento valido." }, { status: 500 });
     if (longDocumentLooksIncomplete(parsed.data.type, parsed.data.resume, document)) {

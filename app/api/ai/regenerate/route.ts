@@ -145,14 +145,12 @@ export async function POST(request: NextRequest) {
       temperature: 0.3
     });
 
-    if (completion.choices[0]?.finish_reason === "length") {
-      return NextResponse.json({
-        error: "A IA atingiu o limite de saída antes de finalizar o documento. Tente novamente; nenhum asset truncado foi salvo."
-      }, { status: 502 });
-    }
-
     const rawOutput = completion.choices[0]?.message?.content?.trim() || "";
     let { document, recommendations } = parseAiOutput(rawOutput);
+    if (completion.choices[0]?.finish_reason === "length" && (type === "ats_resume" || type === "translate_resume")) {
+      document = buildCompleteResumeFallback(original.input_resume, original.language, type);
+      recommendations = ["Versão completa reconstruída localmente porque a IA atingiu o limite de saída."];
+    }
     if (!document && (type === "ats_resume" || type === "translate_resume")) {
       document = buildCompleteResumeFallback(original.input_resume, original.language, type);
       recommendations = ["Versão completa reconstruída localmente para evitar documento vazio."];
