@@ -6,6 +6,7 @@ import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
 import { normalizeResumeData, resumeToPlainText } from "@/lib/resumes/defaults";
 import { resumeChatSchema } from "@/lib/resumes/validation";
 import { assertResumeAiAccess } from "@/lib/resumes/ai-access";
+import { groqRateLimitResponse, isGroqRateLimitError } from "@/lib/ai-generation-budget";
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,6 +31,7 @@ export async function POST(request: NextRequest) {
     if (!process.env.GROQ_API_KEY) return NextResponse.json({ error: "GROQ_API_KEY nao configurada no servidor." }, { status: 500 });
 
     const data = normalizeResumeData(parsed.data.data);
+    const resumeContext = resumeToPlainText(data).slice(0, 7000);
     const completion = await groq.chat.completions.create({
       model: GROQ_MODEL,
       messages: [
@@ -42,12 +44,13 @@ export async function POST(request: NextRequest) {
           role: "user",
           content: JSON.stringify({
             language: parsed.data.language,
-            resumeContext: resumeToPlainText(data).slice(0, 12000),
+            resumeContext,
             recentConversation: parsed.data.history,
             question: parsed.data.question
           })
         }
       ],
+      max_completion_tokens: 1200,
       temperature: 0.25
     });
 
@@ -56,6 +59,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ answer });
   } catch (error) {
+    if (isGroqRateLimitError(error)) return groqRateLimitResponse();
     console.error("resume_chat_error", error);
     return NextResponse.json({ error: "Erro interno no chat de IA." }, { status: 500 });
   }

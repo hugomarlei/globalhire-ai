@@ -11,6 +11,14 @@ import type { GenerationType } from "@/lib/types";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { getLatestActiveSubscription } from "@/lib/subscription-state";
 import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
+import {
+  budgetedMaxCompletionTokens,
+  desiredCompletionTokens,
+  groqRateLimitResponse,
+  isGroqRateLimitError,
+  prepareBudgetedGenerationInput,
+  shouldAutoReviseWithAi
+} from "@/lib/ai-generation-budget";
 
 const regenerateSchema = z.object({
   generationId: z.string().uuid(),
@@ -24,12 +32,6 @@ function scoreAppliedImprovements(items: string[]) {
     const text = item.replace(/\[?\s*\d{1,2}\s*%\s*\]?\s*[-–—:]?\s*/, "").trim();
     return { text, score: Math.min(Math.max(score, 1), 35) };
   });
-}
-
-function maxCompletionTokensFor(type: GenerationType) {
-  if (type === "ats_resume" || type === "translate_resume") return 8192;
-  if (type === "interview_prep") return 5200;
-  return 3000;
 }
 
 export async function POST(request: NextRequest) {
@@ -111,16 +113,22 @@ export async function POST(request: NextRequest) {
     }
 
     const intensity = optimizationIntensity(planId);
+    const prepared = prepareBudgetedGenerationInput({
+      type,
+      resume: original.input_resume,
+      jobDescription: original.job_description || ""
+    });
     const prompt = buildPrompt({
       type: original.type,
-      resume: original.input_resume,
-      jobDescription: original.job_description || "",
+      resume: prepared.resume,
+      jobDescription: prepared.jobDescription,
       language: original.language,
       targetCountry: original.target_country,
       optimizationInstruction: `${intensity.instruction} Gere uma nova versão, diferente da anterior, mantendo o mesmo contexto salvo.`,
       planLabel: intensity.label,
       intensityPercent: intensity.percent
     });
+    const maxCompletionTokens = budgetedMaxCompletionTokens(prompt, desiredCompletionTokens(type));
 
     const completion = await groq.chat.completions.create({
       model: GROQ_MODEL,
@@ -131,7 +139,7 @@ export async function POST(request: NextRequest) {
         },
         { role: "user", content: prompt }
       ],
-      max_completion_tokens: maxCompletionTokensFor(type),
+      max_completion_tokens: maxCompletionTokens,
       temperature: 0.3
     });
 
@@ -152,45 +160,51 @@ export async function POST(request: NextRequest) {
       recommendations
     });
 
-    if (quality.shouldRevise) {
-      const revision = await groq.chat.completions.create({
-        model: GROQ_MODEL,
-        messages: [
-          {
-            role: "system",
-            content:
-              "Você é um auditor e rewriter sênior de assets de candidatura. Gere uma versão materialmente melhor, sem inventar fatos e sem repetir a versão anterior."
-          },
-          {
-            role: "user",
-            content: buildQualityRevisionPrompt({
-              type,
-              resume: original.input_resume,
-              jobDescription: original.job_description || "",
-              document,
-              recommendations,
-              quality,
-              language: original.language
-            })
-          }
-        ],
-        max_completion_tokens: maxCompletionTokensFor(type),
-        temperature: 0.2
-      });
-      const revised = parseAiOutput(revision.choices[0]?.message?.content?.trim() || "");
-      if (revised.document) {
-        const revisedQuality = evaluateGeneratedAsset({
+    if (quality.shouldRevise && shouldAutoReviseWithAi(type, prepared)) {
+      try {
+        const revisionPrompt = buildQualityRevisionPrompt({
           type,
-          resume: original.input_resume,
-          jobDescription: original.job_description || "",
-          document: revised.document,
-          recommendations: revised.recommendations
+          resume: prepared.resume,
+          jobDescription: prepared.jobDescription,
+          document,
+          recommendations,
+          quality,
+          language: original.language
         });
-        if (revisedQuality.score >= quality.score) {
-          document = revised.document;
-          recommendations = revised.recommendations;
-          quality = revisedQuality;
+        const revision = await groq.chat.completions.create({
+          model: GROQ_MODEL,
+          messages: [
+            {
+              role: "system",
+              content:
+                "Você é um auditor e rewriter sênior de assets de candidatura. Gere uma versão materialmente melhor, sem inventar fatos e sem repetir a versão anterior."
+            },
+            {
+              role: "user",
+              content: revisionPrompt
+            }
+          ],
+          max_completion_tokens: budgetedMaxCompletionTokens(revisionPrompt, maxCompletionTokens),
+          temperature: 0.2
+        });
+        const revised = parseAiOutput(revision.choices[0]?.message?.content?.trim() || "");
+        if (revised.document) {
+          const revisedQuality = evaluateGeneratedAsset({
+            type,
+            resume: original.input_resume,
+            jobDescription: original.job_description || "",
+            document: revised.document,
+            recommendations: revised.recommendations
+          });
+          if (revisedQuality.score >= quality.score) {
+            document = revised.document;
+            recommendations = revised.recommendations;
+            quality = revisedQuality;
+          }
         }
+      } catch (error) {
+        if (!isGroqRateLimitError(error)) throw error;
+        console.warn("regenerate_revision_rate_limited", { type });
       }
     }
 
@@ -215,6 +229,7 @@ export async function POST(request: NextRequest) {
       quality
     });
   } catch (error) {
+    if (isGroqRateLimitError(error)) return groqRateLimitResponse();
     console.error("regenerate_error", error);
     return NextResponse.json({ error: "Erro interno ao regenerar documento." }, { status: 500 });
   }

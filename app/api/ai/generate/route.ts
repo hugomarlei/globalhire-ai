@@ -10,6 +10,14 @@ import { buildQualityRevisionPrompt, evaluateGeneratedAsset } from "@/lib/ai-out
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { getLatestActiveSubscription } from "@/lib/subscription-state";
 import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
+import {
+  budgetedMaxCompletionTokens,
+  desiredCompletionTokens,
+  groqRateLimitResponse,
+  isGroqRateLimitError,
+  prepareBudgetedGenerationInput,
+  shouldAutoReviseWithAi
+} from "@/lib/ai-generation-budget";
 
 function scoreAppliedImprovements(items: string[]) {
   return items.map((item, index) => {
@@ -24,14 +32,6 @@ function scoreAppliedImprovements(items: string[]) {
       score: Math.min(Math.max(score, 1), 35)
     };
   });
-}
-
-function maxCompletionTokensFor(type: string, outputLength?: string) {
-  if (type === "ats_resume" || type === "translate_resume") return 8192;
-  if (type === "interview_prep") return 5200;
-  if (outputLength === "detailed") return 4200;
-  if (outputLength === "short") return 1800;
-  return 3000;
 }
 
 export async function POST(request: NextRequest) {
@@ -101,10 +101,15 @@ export async function POST(request: NextRequest) {
     }
     
     const intensity = optimizationIntensity(planId);
-    const prompt = buildPrompt({
+    const prepared = prepareBudgetedGenerationInput({
       type: parsed.data.type,
       resume: parsed.data.resume,
-      jobDescription: parsed.data.jobDescription,
+      jobDescription: parsed.data.jobDescription
+    });
+    const prompt = buildPrompt({
+      type: parsed.data.type,
+      resume: prepared.resume,
+      jobDescription: prepared.jobDescription,
       language: parsed.data.language,
       targetCountry: parsed.data.targetCountry,
       optimizationInstruction: intensity.instruction,
@@ -113,6 +118,10 @@ export async function POST(request: NextRequest) {
       outputLength: parsed.data.outputLength,
       outputTone: parsed.data.outputTone
     });
+    const maxCompletionTokens = budgetedMaxCompletionTokens(
+      prompt,
+      desiredCompletionTokens(parsed.data.type, parsed.data.outputLength)
+    );
 
     const completion = await groq.chat.completions.create({
       model: GROQ_MODEL,
@@ -124,7 +133,7 @@ export async function POST(request: NextRequest) {
         },
         { role: "user", content: prompt }
       ],
-      max_completion_tokens: maxCompletionTokensFor(parsed.data.type, parsed.data.outputLength),
+      max_completion_tokens: maxCompletionTokens,
       temperature: 0.25
     });
 
@@ -147,45 +156,51 @@ export async function POST(request: NextRequest) {
       recommendations
     });
 
-    if (quality.shouldRevise) {
-      const revision = await groq.chat.completions.create({
-        model: GROQ_MODEL,
-        messages: [
-          {
-            role: "system",
-            content:
-              "Voce e um auditor e rewriter senior de curriculos, ATS e assets de candidatura. Corrija apenas com fatos sustentados. Entregue uma versao mais forte, especifica, humana e alinhada a vaga."
-          },
-          {
-            role: "user",
-            content: buildQualityRevisionPrompt({
-              type: parsed.data.type,
-              resume: parsed.data.resume,
-              jobDescription: parsed.data.jobDescription,
-              document,
-              recommendations,
-              quality,
-              language: parsed.data.language
-            })
-          }
-        ],
-        max_completion_tokens: maxCompletionTokensFor(parsed.data.type, parsed.data.outputLength),
-        temperature: 0.18
-      });
-      const revised = parseAiOutput(revision.choices[0]?.message?.content?.trim() || "");
-      if (revised.document) {
-        const revisedQuality = evaluateGeneratedAsset({
+    if (quality.shouldRevise && shouldAutoReviseWithAi(parsed.data.type, prepared)) {
+      try {
+        const revisionPrompt = buildQualityRevisionPrompt({
           type: parsed.data.type,
-          resume: parsed.data.resume,
-          jobDescription: parsed.data.jobDescription,
-          document: revised.document,
-          recommendations: revised.recommendations
+          resume: prepared.resume,
+          jobDescription: prepared.jobDescription,
+          document,
+          recommendations,
+          quality,
+          language: parsed.data.language
         });
-        if (revisedQuality.score >= quality.score) {
-          document = revised.document;
-          recommendations = revised.recommendations;
-          quality = revisedQuality;
+        const revision = await groq.chat.completions.create({
+          model: GROQ_MODEL,
+          messages: [
+            {
+              role: "system",
+              content:
+                "Voce e um auditor e rewriter senior de curriculos, ATS e assets de candidatura. Corrija apenas com fatos sustentados. Entregue uma versao mais forte, especifica, humana e alinhada a vaga."
+            },
+            {
+              role: "user",
+              content: revisionPrompt
+            }
+          ],
+          max_completion_tokens: budgetedMaxCompletionTokens(revisionPrompt, maxCompletionTokens),
+          temperature: 0.18
+        });
+        const revised = parseAiOutput(revision.choices[0]?.message?.content?.trim() || "");
+        if (revised.document) {
+          const revisedQuality = evaluateGeneratedAsset({
+            type: parsed.data.type,
+            resume: parsed.data.resume,
+            jobDescription: parsed.data.jobDescription,
+            document: revised.document,
+            recommendations: revised.recommendations
+          });
+          if (revisedQuality.score >= quality.score) {
+            document = revised.document;
+            recommendations = revised.recommendations;
+            quality = revisedQuality;
+          }
         }
+      } catch (error) {
+        if (!isGroqRateLimitError(error)) throw error;
+        console.warn("quality_revision_rate_limited", { type: parsed.data.type });
       }
     }
 
@@ -209,6 +224,7 @@ export async function POST(request: NextRequest) {
       quality
     });
   } catch (error) {
+    if (isGroqRateLimitError(error)) return groqRateLimitResponse();
     console.error("ai_generate_error", error);
     return NextResponse.json({ error: "Erro interno ao gerar documento." }, { status: 500 });
   }

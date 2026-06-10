@@ -7,6 +7,7 @@ import { mergeResumeData, normalizeResumeData, resumeToPlainText } from "@/lib/r
 import { calculateResumeScore } from "@/lib/resumes/score";
 import { reviewResumeSchema } from "@/lib/resumes/validation";
 import { assertResumeAiAccess } from "@/lib/resumes/ai-access";
+import { budgetedMaxCompletionTokens } from "@/lib/ai-generation-budget";
 
 function parseJson(value: string) {
   try {
@@ -76,8 +77,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Adicione dados reais do curriculo antes de revisar com IA." }, { status: 400 });
     }
     const localScore = calculateResumeScore(data);
+    const plainTextForAi = plainText.slice(0, 8000);
     let raw = "";
     try {
+      const reviewPayload = JSON.stringify({
+        language: parsed.data.language,
+        resume: data,
+        plainText: plainTextForAi,
+        qualityGate: [
+          "Avalie internamente se a versao melhorada seria aceita por ATS e recrutador humano.",
+          "Compare mentalmente com curriculos fortes: secoes limpas, resumo especifico, skills aderentes e experiencia com acao + contexto + impacto.",
+          "Se improvedData ficar quase igual ao original, revise novamente antes de responder.",
+          "Use palavras-chave da vaga apenas se data.targetJobDescription existir e forem condizentes com o historico do candidato.",
+          "Nao apresente melhoria que nao apareca em improvedData."
+        ],
+        expectedJson: {
+          categories: [
+            { key: "structure", title: "Estrutura e organização", score: 0, suggestions: ["..."] },
+            { key: "clarity", title: "Conteúdo e clareza", score: 0, suggestions: ["..."] },
+            { key: "positioning", title: "Posicionamento de cargo", score: 0, suggestions: ["..."] },
+            { key: "atsHumanFit", title: "ATS e leitura humana", score: 0, suggestions: ["..."] }
+          ],
+          improvedData: "ResumeData JSON com melhorias verificaveis e substanciais, mantendo todos os fatos verdadeiros"
+        }
+      });
       const completion = await groq.chat.completions.create({
         model: GROQ_MODEL,
         messages: [
@@ -88,30 +111,10 @@ export async function POST(request: NextRequest) {
           },
           {
             role: "user",
-            content: JSON.stringify({
-              language: parsed.data.language,
-              resume: data,
-              plainText,
-              qualityGate: [
-                "Avalie internamente se a versao melhorada seria aceita por ATS e recrutador humano.",
-                "Compare mentalmente com curriculos fortes: secoes limpas, resumo especifico, skills aderentes e experiencia com acao + contexto + impacto.",
-                "Se improvedData ficar quase igual ao original, revise novamente antes de responder.",
-                "Use palavras-chave da vaga apenas se data.targetJobDescription existir e forem condizentes com o historico do candidato.",
-                "Nao apresente melhoria que nao apareca em improvedData."
-              ],
-              expectedJson: {
-                categories: [
-                  { key: "structure", title: "Estrutura e organização", score: 0, suggestions: ["..."] },
-                  { key: "clarity", title: "Conteúdo e clareza", score: 0, suggestions: ["..."] },
-                  { key: "positioning", title: "Posicionamento de cargo", score: 0, suggestions: ["..."] },
-                  { key: "atsHumanFit", title: "ATS e leitura humana", score: 0, suggestions: ["..."] }
-                ],
-                improvedData: "ResumeData JSON com melhorias verificaveis e substanciais, mantendo todos os fatos verdadeiros"
-              }
-            })
+            content: reviewPayload
           }
         ],
-        max_completion_tokens: 6000,
+        max_completion_tokens: budgetedMaxCompletionTokens(reviewPayload, 3600),
         temperature: 0.2
       });
       raw = completion.choices[0]?.message?.content?.trim() || "";

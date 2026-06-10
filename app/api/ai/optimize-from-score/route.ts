@@ -10,6 +10,14 @@ import { buildQualityRevisionPrompt, evaluateGeneratedAsset } from "@/lib/ai-out
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { getLatestActiveSubscription } from "@/lib/subscription-state";
 import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
+import {
+  budgetedMaxCompletionTokens,
+  desiredCompletionTokens,
+  groqRateLimitResponse,
+  isGroqRateLimitError,
+  prepareBudgetedGenerationInput,
+  shouldAutoReviseWithAi
+} from "@/lib/ai-generation-budget";
 
 const optimizeFromScoreSchema = z.object({
   resume: z.string().min(100, "Cole pelo menos 100 caracteres do currículo.").max(20000),
@@ -32,8 +40,6 @@ function scoreAppliedImprovements(items: string[]) {
     return { text, score: Math.min(Math.max(score, 1), 35) };
   });
 }
-
-const ATS_RESUME_MAX_COMPLETION_TOKENS = 8192;
 
 export async function POST(request: NextRequest) {
   try {
@@ -112,16 +118,22 @@ Contexto da análise ATS já realizada:
 Obrigatório: use estes achados para reescrever o currículo de forma mais forte e alinhada à vaga. Incorpore palavras-chave ausentes somente quando forem compatíveis com a experiência real do candidato.`;
 
     const intensity = optimizationIntensity(planId);
-    const prompt = buildPrompt({
+    const prepared = prepareBudgetedGenerationInput({
       type: "ats_resume",
       resume: parsed.data.resume,
-      jobDescription: `${parsed.data.jobDescription}\n\n${scoreContext}`,
+      jobDescription: `${parsed.data.jobDescription}\n\n${scoreContext}`
+    });
+    const prompt = buildPrompt({
+      type: "ats_resume",
+      resume: prepared.resume,
+      jobDescription: prepared.jobDescription,
       language: parsed.data.language,
       targetCountry: parsed.data.targetCountry,
       optimizationInstruction: intensity.instruction,
       planLabel: intensity.label,
       intensityPercent: intensity.percent
     });
+    const maxCompletionTokens = budgetedMaxCompletionTokens(prompt, desiredCompletionTokens("ats_resume"));
 
     const completion = await groq.chat.completions.create({
       model: GROQ_MODEL,
@@ -133,7 +145,7 @@ Obrigatório: use estes achados para reescrever o currículo de forma mais forte
         },
         { role: "user", content: prompt }
       ],
-      max_completion_tokens: ATS_RESUME_MAX_COMPLETION_TOKENS,
+      max_completion_tokens: maxCompletionTokens,
       temperature: 0.25
     });
 
@@ -156,45 +168,51 @@ Obrigatório: use estes achados para reescrever o currículo de forma mais forte
       recommendations
     });
 
-    if (quality.shouldRevise) {
-      const revision = await groq.chat.completions.create({
-        model: GROQ_MODEL,
-        messages: [
-          {
-            role: "system",
-            content:
-              "Você é um auditor e rewriter sênior de currículos ATS. Corrija a versão reprovada com melhoria real, alinhamento à vaga e preservação estrita de fatos."
-          },
-          {
-            role: "user",
-            content: buildQualityRevisionPrompt({
-              type: "ats_resume",
-              resume: parsed.data.resume,
-              jobDescription: parsed.data.jobDescription,
-              document,
-              recommendations,
-              quality,
-              language: parsed.data.language
-            })
-          }
-        ],
-        max_completion_tokens: ATS_RESUME_MAX_COMPLETION_TOKENS,
-        temperature: 0.18
-      });
-      const revised = parseAiOutput(revision.choices[0]?.message?.content?.trim() || "");
-      if (revised.document) {
-        const revisedQuality = evaluateGeneratedAsset({
+    if (quality.shouldRevise && shouldAutoReviseWithAi("ats_resume", prepared)) {
+      try {
+        const revisionPrompt = buildQualityRevisionPrompt({
           type: "ats_resume",
-          resume: parsed.data.resume,
-          jobDescription: parsed.data.jobDescription,
-          document: revised.document,
-          recommendations: revised.recommendations
+          resume: prepared.resume,
+          jobDescription: prepared.jobDescription,
+          document,
+          recommendations,
+          quality,
+          language: parsed.data.language
         });
-        if (revisedQuality.score >= quality.score) {
-          document = revised.document;
-          recommendations = revised.recommendations;
-          quality = revisedQuality;
+        const revision = await groq.chat.completions.create({
+          model: GROQ_MODEL,
+          messages: [
+            {
+              role: "system",
+              content:
+                "Você é um auditor e rewriter sênior de currículos ATS. Corrija a versão reprovada com melhoria real, alinhamento à vaga e preservação estrita de fatos."
+            },
+            {
+              role: "user",
+              content: revisionPrompt
+            }
+          ],
+          max_completion_tokens: budgetedMaxCompletionTokens(revisionPrompt, maxCompletionTokens),
+          temperature: 0.18
+        });
+        const revised = parseAiOutput(revision.choices[0]?.message?.content?.trim() || "");
+        if (revised.document) {
+          const revisedQuality = evaluateGeneratedAsset({
+            type: "ats_resume",
+            resume: parsed.data.resume,
+            jobDescription: parsed.data.jobDescription,
+            document: revised.document,
+            recommendations: revised.recommendations
+          });
+          if (revisedQuality.score >= quality.score) {
+            document = revised.document;
+            recommendations = revised.recommendations;
+            quality = revisedQuality;
+          }
         }
+      } catch (error) {
+        if (!isGroqRateLimitError(error)) throw error;
+        console.warn("score_optimize_revision_rate_limited");
       }
     }
     const appliedImprovements = scoreAppliedImprovements(recommendations);
@@ -211,6 +229,7 @@ Obrigatório: use estes achados para reescrever o currículo de forma mais forte
 
     return NextResponse.json({ output: document, appliedImprovements, saved: true, quality });
   } catch (error) {
+    if (isGroqRateLimitError(error)) return groqRateLimitResponse();
     console.error("score_optimize_error", error);
     return NextResponse.json({ error: "Erro interno ao otimizar o currículo." }, { status: 500 });
   }

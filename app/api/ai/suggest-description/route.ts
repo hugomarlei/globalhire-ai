@@ -5,6 +5,7 @@ import { buildRateLimitKey, cooldownLimit } from "@/lib/rate-limit";
 import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
 import { suggestDescriptionSchema } from "@/lib/resumes/validation";
 import { assertResumeAiAccess } from "@/lib/resumes/ai-access";
+import { groqRateLimitResponse, isGroqRateLimitError } from "@/lib/ai-generation-budget";
 
 function parseJsonArray(value: string) {
   try {
@@ -72,6 +73,7 @@ export async function POST(request: NextRequest) {
           })
         }
       ],
+      max_completion_tokens: 900,
       temperature: 0.2
     });
 
@@ -81,6 +83,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ bullets });
   } catch (error) {
+    if (isGroqRateLimitError(error)) return groqRateLimitResponse();
     console.error("resume_suggest_error", error);
     return NextResponse.json({ error: "Erro interno ao gerar sugestoes." }, { status: 500 });
   }
