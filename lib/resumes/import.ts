@@ -44,6 +44,12 @@ function cleanText(text: string) {
     .replace(/\r/g, "\n")
     .replace(/([A-Za-zÀ-ú])-\n([A-Za-zÀ-ú])/g, "$1-$2")
     .replace(/\u00a0/g, " ")
+    .replace(
+      /\s+(?=(?:LINKS?|PERFIL|RESUMO(?:\s+PROFISSIONAL)?|EXPERI[EÊ]NCIA(?:\s+PROFISSIONAL)?|FORMA[CÇ][AÃ]O|EDUCA[CÇ][AÃ]O|CERTIFICA[CÇ][OÕ]ES|HABILIDADES|COMPET[EÊ]NCIAS|IDIOMAS|LANGUAGES|SKILLS|PROFESSIONAL EXPERIENCE|WORK EXPERIENCE|EDUCATION|CERTIFICATIONS)\b)/gi,
+      "\n"
+    )
+    .replace(/\s+(?=•\s*)/g, "\n")
+    .replace(new RegExp(`\\s+(?=${dateTokenSource}\\s+(?:[—–-]|[A-ZÀ-Ú]))`, "gi"), "\n")
     .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();

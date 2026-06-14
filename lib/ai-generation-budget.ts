@@ -30,6 +30,11 @@ function normalizeText(value: string) {
   return value
     .replace(/\r/g, "\n")
     .replace(/\u00a0/g, " ")
+    .replace(
+      /\s+(?=(?:LINKS?|PERFIL|RESUMO(?:\s+PROFISSIONAL)?|EXPERI[EÊ]NCIA(?:\s+PROFISSIONAL)?|FORMA[CÇ][AÃ]O|EDUCA[CÇ][AÃ]O|CERTIFICA[CÇ][OÕ]ES|HABILIDADES|COMPET[EÊ]NCIAS|IDIOMAS|LANGUAGES|SKILLS|PROFESSIONAL EXPERIENCE|WORK EXPERIENCE|EDUCATION|CERTIFICATIONS)\b)/gi,
+      "\n"
+    )
+    .replace(/\s+(?=•\s*)/g, "\n")
     .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
@@ -130,6 +135,7 @@ function bulletize(value: string) {
 }
 
 export function buildCompleteResumeFallback(resume: string, language: string, type: GenerationType) {
+  const rawFallback = normalizeText(resume);
   const data = normalizeResumeData(importResumeText(resume));
   const personal = data.personal;
   const contact = [personal.email, personal.phone, personal.location, personal.links].filter(Boolean).join(" | ");
@@ -175,7 +181,7 @@ export function buildCompleteResumeFallback(resume: string, language: string, ty
         languages: "Idiomas"
       };
 
-  return [
+  const structuredFallback = [
     personal.name,
     personal.headline,
     contact,
@@ -186,6 +192,15 @@ export function buildCompleteResumeFallback(resume: string, language: string, ty
     section(labels.certifications, certifications),
     section(labels.languages, data.languages.join(", "))
   ].filter(Boolean).join("\n\n").trim();
+
+  if (
+    rawFallback.length >= 600 &&
+    (structuredFallback.length < 600 || structuredFallback.length < rawFallback.length * 0.35)
+  ) {
+    return rawFallback;
+  }
+
+  return structuredFallback || rawFallback;
 }
 
 function normalizeForContainment(value: string) {
