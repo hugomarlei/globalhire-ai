@@ -190,12 +190,12 @@ export default async function DashboardPage({
           ))}
         </div>
 
-        <Card className="rounded-xl p-4 shadow-sm">
+        <Card className="rounded-2xl p-4 shadow-sm">
           <h2 className="text-xl font-semibold text-foreground">{d.careerTitle}</h2>
           <p className="mt-2 text-sm text-muted-foreground">{d.careerLead}</p>
           <div className="mt-4 grid gap-2">
             {careerLinks.map(({ label, href, Icon }) => (
-              <a key={label} href={href} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
+              <a key={label} href={href} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-xl border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
                 <span className="inline-flex items-center gap-2"><Icon className="text-brand-500" size={17} /> {label}</span>
                 <ExternalLink size={15} />
               </a>

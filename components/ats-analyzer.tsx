@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { AlertTriangle, CheckCircle2, Copy, FileClock, FileUp, Loader2, SearchCheck, Sparkles } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Download, FileUp, Loader2, Save, SearchCheck, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Field, cn, textareaClass } from "@/components/ui";
 import { DocumentPreviewShell } from "@/components/application-workspace";
@@ -15,6 +14,7 @@ import { targetCountryCanonicalSet } from "@/lib/target-countries";
 import { defaultResumeData, normalizeResumeData, resumeColors, resumeTemplates } from "@/lib/resumes/defaults";
 import { importResumeText } from "@/lib/resumes/import";
 import type { ResumeData } from "@/lib/resumes/types";
+import { buildStructuredResumePdfPrintDocument } from "@/lib/resume-pdf-templates";
 
 const stopWords = new Set([
   "and",
@@ -74,7 +74,9 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
   const [optimizedOutput, setOptimizedOutput] = useState("");
   const [optimizedResumeData, setOptimizedResumeData] = useState<ResumeData | null>(null);
   const [optimizationError, setOptimizationError] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [savingHistory, setSavingHistory] = useState(false);
+  const [savedHistory, setSavedHistory] = useState(false);
+  const [historyError, setHistoryError] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
   const [captchaReset, setCaptchaReset] = useState(0);
   const [apiLanguage, setApiLanguage] = useState(() => outputLanguageLabelForApi("pt-BR"));
@@ -149,6 +151,8 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
     setUploadMessage("");
     setOptimizedOutput("");
     setOptimizedResumeData(null);
+    setSavedHistory(false);
+    setHistoryError("");
 
     try {
       const formData = new FormData();
@@ -185,6 +189,8 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
     setOptimizationError("");
     setOptimizedOutput("");
     setOptimizedResumeData(null);
+    setSavedHistory(false);
+    setHistoryError("");
     trackEvent("ats_analysis_started", { score: analysis.score, match: analysis.match, mode });
 
     const response = await fetch("/api/ai/optimize-from-score", {
@@ -221,11 +227,72 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
     trackEvent("ats_score_generated", { score: analysis.score, match: analysis.match, mode });
   }
 
-  async function copyOutput() {
+  function exportOptimizedPdf() {
     if (!optimizedOutput) return;
-    await navigator.clipboard.writeText(optimizedOutput);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
+    const pdfTemplate = previewData.template === "modern" ? "modern" : previewData.template === "classic" ? "compact" : "executive";
+    const html = buildStructuredResumePdfPrintDocument({
+      template: pdfTemplate,
+      title: "Currículo otimizado",
+      data: previewData
+    });
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("aria-hidden", "true");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    iframe.style.opacity = "0";
+    iframe.style.pointerEvents = "none";
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentDocument;
+    const win = iframe.contentWindow;
+    if (!doc || !win) {
+      iframe.remove();
+      return;
+    }
+
+    doc.open();
+    doc.write(html);
+    doc.close();
+    const cleanup = () => iframe.remove();
+    win.addEventListener("afterprint", cleanup, { once: true });
+    window.setTimeout(cleanup, 120_000);
+    requestAnimationFrame(() => {
+      win.focus();
+      win.print();
+    });
+  }
+
+  async function saveOptimizedToHistory() {
+    if (!optimizedOutput) return;
+    setSavingHistory(true);
+    setHistoryError("");
+    const response = await fetch("/api/history/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "ats_resume",
+        language: apiLanguage,
+        targetCountry: apiTargetCountry,
+        inputResume: resume,
+        jobDescription,
+        output: optimizedOutput,
+        resumeData: previewData
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    setSavingHistory(false);
+
+    if (!response.ok) {
+      setHistoryError(data.error || "Não foi possível salvar no histórico.");
+      return;
+    }
+
+    setSavedHistory(true);
+    trackEvent("ats_score_saved_to_history", { score: analysis.score, match: analysis.match, mode });
   }
 
   const showUpgradeOnError = optimizationError.toLowerCase().includes(a.limitKeyword);
@@ -274,6 +341,8 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
                   setResume(event.target.value);
                   setOptimizedOutput("");
                   setOptimizedResumeData(null);
+                  setSavedHistory(false);
+                  setHistoryError("");
                 }}
                 placeholder={a.pasteResumePlaceholder}
               />
@@ -287,6 +356,8 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
                   setJobDescription(event.target.value);
                   setOptimizedOutput("");
                   setOptimizedResumeData(null);
+                  setSavedHistory(false);
+                  setHistoryError("");
                 }}
                 placeholder={a.jobPlaceholder}
               />
@@ -378,17 +449,19 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
 
             {optimizedOutput ? (
               <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
-                <p className="text-xs font-semibold uppercase text-primary">Salvo no histórico</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <button onClick={copyOutput} className="focus-ring inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 text-xs font-semibold text-foreground hover:bg-muted">
-                    <Copy size={14} />
-                    {copied ? a.copied : a.copy}
+                <p className="text-xs font-semibold uppercase text-primary">Currículo otimizado pronto</p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">Baixe o PDF ou salve esta versão no histórico quando estiver satisfeito com o preview.</p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <button onClick={exportOptimizedPdf} className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground hover:bg-muted">
+                    <Download size={16} />
+                    Baixar PDF
                   </button>
-                  <Link href="/historico" className="focus-ring inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 text-xs font-semibold text-foreground hover:bg-muted">
-                    <FileClock size={14} />
-                    {a.savedHistory}
-                  </Link>
+                  <button onClick={saveOptimizedToHistory} disabled={savingHistory || savedHistory} className="focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-3 text-sm font-semibold text-primary-foreground hover:brightness-105 disabled:opacity-60">
+                    {savingHistory ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                    {savedHistory ? "Salvo no histórico" : "Salvar no histórico"}
+                  </button>
                 </div>
+                {historyError ? <p className="mt-2 text-xs text-coral">{historyError}</p> : null}
               </div>
             ) : null}
           </div>
@@ -405,7 +478,11 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
                 <button
                   key={item.key}
                   type="button"
-                  onClick={() => setTemplate(item.key)}
+                  onClick={() => {
+                    setTemplate(item.key);
+                    setSavedHistory(false);
+                    setHistoryError("");
+                  }}
                   className={cn(
                     "focus-ring h-8 rounded-lg px-2.5 text-xs font-semibold transition",
                     template === item.key ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-card hover:text-foreground"
@@ -422,7 +499,11 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
                 key={color}
                 type="button"
                 aria-label={`Cor ${color}`}
-                onClick={() => setPrimaryColor(color)}
+                onClick={() => {
+                  setPrimaryColor(color);
+                  setSavedHistory(false);
+                  setHistoryError("");
+                }}
                 className={`focus-ring size-9 rounded-full border-2 ${primaryColor === color ? "border-foreground" : "border-border"}`}
                 style={{ backgroundColor: color }}
               />

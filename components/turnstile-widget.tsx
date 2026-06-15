@@ -208,7 +208,7 @@ export function TurnstileWidget({
 
   if (!siteKey) {
     return (
-      <p className="rounded-md border border-border bg-card p-3 text-xs leading-5 text-muted-foreground">{tc.disabled}</p>
+      <p className="rounded-2xl border border-border bg-card p-3 text-xs leading-5 text-muted-foreground">{tc.disabled}</p>
     );
   }
 
@@ -219,9 +219,9 @@ export function TurnstileWidget({
         <p className="text-xs text-muted-foreground">{tc.loading}</p>
       ) : null}
       {status === "error" ? (
-        <div className="rounded-md border border-coral/25 bg-coral/10 p-3 text-xs leading-5 text-coral">
+        <div className="rounded-2xl border border-coral/25 bg-coral/10 p-3 text-xs leading-5 text-coral">
           <p>{tc.errorBody}</p>
-          <button type="button" onClick={retryWidget} className="focus-ring mt-2 rounded-md border border-border bg-card px-3 py-2 font-semibold text-foreground hover:bg-muted">
+          <button type="button" onClick={retryWidget} className="focus-ring mt-2 rounded-xl border border-border bg-card px-3 py-2 font-semibold text-foreground hover:bg-muted">
             {tc.retry}
           </button>
         </div>

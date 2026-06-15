@@ -188,7 +188,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
 
   return (
     <div className="grid gap-5">
-      <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-3xl border border-border bg-card/90 p-5 shadow-sm backdrop-blur-xl lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-3xl font-semibold text-foreground">{mode === "history" ? h.titleHistory : h.titleDocuments}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{mode === "history" ? h.leadHistory : h.leadDocuments}</p>
@@ -196,7 +196,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
         <div className="flex flex-wrap gap-2">
           <Link
             href="/historico"
-            className={`focus-ring inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${mode === "history" ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+            className={`focus-ring inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold ${mode === "history" ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
           >
             <Clock size={16} />
             {h.tabHistory}
@@ -210,7 +210,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
         </div>
       </div>
 
-      <Card className="rounded-xl p-3 shadow-sm">
+      <Card className="rounded-2xl p-4 shadow-sm">
         <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
           <label className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={17} />
@@ -220,7 +220,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
             <button
               type="button"
               onClick={() => setFilter("all")}
-              className={`focus-ring shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold ${filter === "all" ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+              className={`focus-ring shrink-0 rounded-xl px-3 py-2 text-xs font-semibold ${filter === "all" ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
             >
               {h.filterAll}
             </button>
@@ -229,7 +229,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                 key={type}
                 type="button"
                 onClick={() => setFilter(type)}
-                className={`focus-ring shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold ${filter === type ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                className={`focus-ring shrink-0 rounded-xl px-3 py-2 text-xs font-semibold ${filter === type ? "bg-primary text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
               >
                 {labelForType(type)}
               </button>
@@ -240,19 +240,19 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
           <TurnstileWidget action="regenerate" onVerify={setTurnstileToken} resetSignal={captchaReset} />
         </div> : null}
       </Card>
-      {notice ? <p className="rounded-md border border-border bg-card p-3 text-sm text-card-foreground">{notice}</p> : null}
+      {notice ? <p className="rounded-2xl border border-border bg-card p-3 text-sm text-card-foreground shadow-sm">{notice}</p> : null}
 
       <div className={mode === "documents" ? "grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3" : "relative grid gap-0 border-l border-border pl-4"}>
         {filtered.map((item) => (
-          <Card key={item.id} className={mode === "history" ? "relative mb-3 h-fit min-h-0 w-full min-w-0 self-start rounded-xl p-0 shadow-sm before:absolute before:-left-[23px] before:top-5 before:size-3 before:rounded-full before:border-2 before:border-background before:bg-primary" : "h-fit min-h-0 w-full min-w-0 self-start p-0"}>
+          <Card key={item.id} className={mode === "history" ? "relative mb-3 h-fit min-h-0 w-full min-w-0 self-start rounded-2xl p-0 shadow-sm before:absolute before:-left-[23px] before:top-5 before:size-3 before:rounded-full before:border-2 before:border-background before:bg-primary" : "h-fit min-h-0 w-full min-w-0 self-start rounded-2xl p-0"}>
             <div className={mode === "history" ? "grid gap-4 p-4 lg:grid-cols-[1fr_auto] lg:items-start" : "grid gap-4 p-4"}>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-semibold text-foreground">
                     {item.kind === "resume" ? item.title : labelForType(item.type)}
                   </h2>
-                  <span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">{item.language}</span>
-                  <span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">{item.target_country}</span>
+                  <span className="rounded-full border border-border bg-muted/60 px-2.5 py-1 text-xs text-muted-foreground">{item.language}</span>
+                  <span className="rounded-full border border-border bg-muted/60 px-2.5 py-1 text-xs text-muted-foreground">{item.target_country}</span>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString(dateLocale)}</p>
                 <p data-clarity-mask="true" className={`${mode === "documents" ? "line-clamp-4" : "line-clamp-2"} mt-3 text-sm leading-6 text-muted-foreground`}>
@@ -260,7 +260,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                 </p>
               </div>
               <div className={mode === "history" ? "flex flex-wrap gap-1.5 lg:justify-end" : "flex flex-wrap gap-2"}>
-                <button type="button" onClick={() => copyText(item.id, displayText(item))} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
+                <button type="button" onClick={() => copyText(item.id, displayText(item))} className="focus-ring inline-flex h-10 items-center gap-2 rounded-xl border border-border px-3 text-sm text-foreground hover:bg-muted">
                   <Copy size={16} />
                   {copied === item.id ? h.copied : h.copy}
                 </button>
@@ -269,24 +269,24 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                     type="button"
                     disabled
                     title={copy.historyExportUnavailable}
-                    className="focus-ring inline-flex cursor-not-allowed items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-muted-foreground opacity-50"
+                    className="focus-ring inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-xl border border-border px-3 text-sm text-muted-foreground opacity-50"
                   >
                     <Download size={16} />
                     {copy.historyDownloadText}
                   </button>
                 ) : (
-                  <button type="button" onClick={() => exportPdf(item)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
+                  <button type="button" onClick={() => exportPdf(item)} className="focus-ring inline-flex h-10 items-center gap-2 rounded-xl border border-border px-3 text-sm text-foreground hover:bg-muted">
                     <Download size={16} />
                     {copy.historyDownloadText}
                   </button>
                 )}
                 {mode === "documents" && item.kind !== "resume" ? (
-                  <button type="button" onClick={() => regenerate(item.id)} disabled={regenerating === item.id} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50">
+                  <button type="button" onClick={() => regenerate(item.id)} disabled={regenerating === item.id} className="focus-ring inline-flex h-10 items-center gap-2 rounded-xl border border-border px-3 text-sm text-foreground hover:bg-muted disabled:opacity-50">
                   <RefreshCw className={regenerating === item.id ? "animate-spin" : ""} size={16} />
                   {regenerating === item.id ? h.regenerating : h.regenerate}
                   </button>
                 ) : null}
-                <button type="button" onClick={() => deleteItem(item.id)} disabled={deleting === item.id} className="focus-ring inline-flex items-center gap-2 rounded-md border border-red-400/30 px-3 py-2 text-sm text-red-700 hover:bg-red-500/10 disabled:opacity-50 dark:border-red-400/20 dark:text-red-100 dark:hover:bg-red-500/10">
+                <button type="button" onClick={() => deleteItem(item.id)} disabled={deleting === item.id} className="focus-ring inline-flex h-10 items-center gap-2 rounded-xl border border-red-400/30 px-3 text-sm text-red-700 hover:bg-red-500/10 disabled:opacity-50 dark:border-red-400/20 dark:text-red-100 dark:hover:bg-red-500/10">
                   <Trash2 size={16} />
                   {deleting === item.id ? h.deleting : h.delete}
                 </button>

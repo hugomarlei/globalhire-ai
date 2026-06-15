@@ -7,7 +7,6 @@ import { verifyTurnstileToken } from "@/lib/turnstile";
 import { getLatestActiveSubscription } from "@/lib/subscription-state";
 import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
 import { buildAtsScoreOptimizedResume } from "@/lib/ats-score-optimizer";
-import { encodeStructuredResumeGeneration } from "@/lib/generation-output";
 
 const optimizeFromScoreSchema = z.object({
   resume: z.string().min(100, "Cole pelo menos 100 caracteres do currículo.").max(20000),
@@ -107,26 +106,11 @@ export async function POST(request: NextRequest) {
     });
     const appliedImprovements = scoreAppliedImprovements(recommendations);
 
-    const { data: inserted } = await supabase
-      .from("generations")
-      .insert({
-        user_id: user.id,
-        type: "ats_resume",
-        language: parsed.data.language,
-        target_country: parsed.data.targetCountry,
-        input_resume: parsed.data.resume,
-        job_description: parsed.data.jobDescription,
-        output: encodeStructuredResumeGeneration(resumeData, document)
-      })
-      .select("id,created_at")
-      .single();
-
     return NextResponse.json({
       output: document,
       resumeData,
-      generation: inserted,
       appliedImprovements,
-      saved: true,
+      saved: false,
       quality: {
         score: Math.max(parsed.data.score, parsed.data.match),
         issues: [],

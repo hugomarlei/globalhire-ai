@@ -86,7 +86,7 @@ export function SocialAuthButtons({ mode }: { mode: "login" | "signup" }) {
             type="button"
             onClick={() => signIn(provider.id)}
             disabled={Boolean(loadingProvider)}
-            className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-semibold text-card-foreground shadow-sm transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-none"
+            className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-card-foreground shadow-sm transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-none"
           >
             {loadingProvider === provider.id ? (
               <Loader2 className="animate-spin text-foreground" size={18} aria-hidden />
@@ -97,7 +97,7 @@ export function SocialAuthButtons({ mode }: { mode: "login" | "signup" }) {
           </button>
         ))}
       </div>
-      {error ? <p className="rounded-md bg-coral/15 p-3 text-sm text-coral">{error}</p> : null}
+      {error ? <p className="rounded-2xl bg-coral/15 p-3 text-sm text-coral">{error}</p> : null}
       <p className="text-xs leading-5 text-muted-foreground">{s.providerSetupHint}</p>
     </div>
   );

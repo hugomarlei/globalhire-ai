@@ -165,7 +165,7 @@ export function SettingsPanel() {
               <Bell className="text-brand-500" size={22} />
               <h2 className="text-xl font-semibold text-foreground">{ui.communicationsTitle}</h2>
             </div>
-            <p className="mt-3 rounded-md border border-border bg-muted p-3 text-sm leading-6 text-muted-foreground">{ui.communicationsBody}</p>
+            <p className="mt-3 rounded-2xl border border-border bg-muted/60 p-3 text-sm leading-6 text-muted-foreground">{ui.communicationsBody}</p>
           </Card>
           <Card>
             <div className="flex items-center gap-2">
