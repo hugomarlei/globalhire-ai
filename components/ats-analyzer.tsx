@@ -248,7 +248,7 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
           </div>
         </div>
       </section>
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,430px)_minmax(0,1fr)]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,480px)_minmax(0,1fr)]">
         <div className="grid content-start gap-4">
         <Card className="rounded-2xl p-4 shadow-sm">
           <div className="flex items-center gap-2">
@@ -296,95 +296,101 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
 
         <Card className="rounded-2xl p-4 shadow-sm">
           <div className="grid gap-4">
-            <div className="grid grid-cols-[112px_minmax(0,1fr)] gap-4">
-            <div className="grid place-items-center rounded-lg border border-border bg-muted/25 p-3">
-              <div className="grid size-24 place-items-center rounded-full border-[7px] border-primary/25 bg-muted">
-                <div className="text-center">
-                  <p className="text-3xl font-semibold text-primary">{analysis.score}</p>
-                  <p className="text-xs text-muted-foreground">{a.scoreGaugeLabel}</p>
-                </div>
-              </div>
-            </div>
-            <div className="grid gap-4">
-              <div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{a.matchLabel}</span>
-                  <span className="font-semibold text-primary">{analysis.match}%</span>
-                </div>
-                <div className="mt-2 h-2 rounded-full bg-muted">
-                  <div className="h-2 rounded-full bg-primary" style={{ width: `${analysis.match}%` }} />
-                </div>
-              </div>
-            </div>
-              <div id="keywords" className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-md border border-border bg-muted/20 p-3">
-                  <h2 className="text-sm font-semibold text-foreground">{a.foundTitle}</h2>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {analysis.found.slice(0, 12).map((keyword) => (
-                      <span key={keyword} className="rounded-md bg-primary/15 px-2 py-1 text-xs text-foreground">
-                        {keyword}
-                      </span>
-                    ))}
-                    {!analysis.found.length ? <p className="text-sm text-muted-foreground">{a.pasteJobHint}</p> : null}
-                  </div>
-                </div>
-                <div className="rounded-md border border-border bg-muted/20 p-3">
-                  <h2 className="text-sm font-semibold text-foreground">{a.missingTitle}</h2>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {analysis.missing.slice(0, 12).map((keyword) => (
-                      <span key={keyword} className="rounded-md bg-coral/15 px-2 py-1 text-xs text-coral">
-                        {keyword}
-                      </span>
-                    ))}
-                    {!analysis.missing.length ? <p className="text-sm text-muted-foreground">{a.noGap}</p> : null}
+            <div className="grid gap-3 sm:grid-cols-[104px_minmax(0,1fr)] sm:items-center">
+              <div className="grid place-items-center rounded-xl border border-border bg-muted/25 p-3">
+                <div className="grid size-20 place-items-center rounded-full border-[7px] border-primary/25 bg-muted">
+                  <div className="text-center">
+                    <p className="text-3xl font-semibold text-primary">{analysis.score}</p>
+                    <p className="text-[11px] text-muted-foreground">{a.scoreGaugeLabel}</p>
                   </div>
                 </div>
               </div>
-              <div className="rounded-md border border-border bg-muted/20 p-3">
-                <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                  <Sparkles className="text-primary" size={18} /> {a.recommendationsTitle}
-                </h2>
-                <ul className="mt-3 grid gap-2 text-sm leading-6 text-muted-foreground">
-                  {analysis.recommendations.map((item) => (
-                    <li key={item} className="flex gap-2">
-                      <CheckCircle2 className="mt-1 shrink-0 text-primary" size={15} /> {item}
-                    </li>
+              <div className="min-w-0 rounded-xl border border-border bg-muted/20 p-3">
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="truncate text-muted-foreground">{a.matchLabel}</span>
+                  <span className="shrink-0 font-semibold text-primary">{analysis.match}%</span>
+                </div>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+                  <div className="h-2 rounded-full bg-primary transition-all duration-500" style={{ width: `${analysis.match}%` }} />
+                </div>
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">Use a prévia ao lado para conferir a versão que será salva no histórico.</p>
+              </div>
+            </div>
+
+            <div id="keywords" className="grid gap-3">
+              <div className="rounded-xl border border-border bg-muted/20 p-3">
+                <h2 className="text-sm font-semibold text-foreground">{a.foundTitle}</h2>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {analysis.found.slice(0, 12).map((keyword) => (
+                    <span key={keyword} className="rounded-md bg-primary/15 px-2 py-1 text-xs text-foreground">
+                      {keyword}
+                    </span>
                   ))}
-                </ul>
-              </div>
-              {optimizationError ? (
-                <div className="rounded-md bg-coral/15 p-3 text-sm text-coral">
-                  <p className="flex items-center gap-2">
-                    <AlertTriangle size={16} /> {optimizationError}
-                  </p>
-                  {showUpgradeOnError ? (
-                    <Button href="/assinatura#planos" className="mt-3 bg-primary text-primary-foreground hover:brightness-105">
-                      {a.viewPlans}
-                    </Button>
-                  ) : null}
+                  {!analysis.found.length ? <p className="text-sm leading-6 text-muted-foreground">{a.pasteJobHint}</p> : null}
                 </div>
-              ) : null}
+              </div>
+              <div className="rounded-xl border border-border bg-muted/20 p-3">
+                <h2 className="text-sm font-semibold text-foreground">{a.missingTitle}</h2>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {analysis.missing.slice(0, 12).map((keyword) => (
+                    <span key={keyword} className="rounded-md bg-coral/15 px-2 py-1 text-xs text-coral">
+                      {keyword}
+                    </span>
+                  ))}
+                  {!analysis.missing.length ? <p className="text-sm leading-6 text-muted-foreground">{a.noGap}</p> : null}
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-muted/20 p-3">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Sparkles className="text-primary" size={18} /> {a.recommendationsTitle}
+              </h2>
+              <ul className="mt-3 grid gap-2 text-sm leading-6 text-muted-foreground">
+                {analysis.recommendations.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <CheckCircle2 className="mt-1 shrink-0 text-primary" size={15} /> <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {optimizationError ? (
+              <div className="rounded-xl bg-coral/15 p-3 text-sm text-coral">
+                <p className="flex items-center gap-2">
+                  <AlertTriangle size={16} /> {optimizationError}
+                </p>
+                {showUpgradeOnError ? (
+                  <Button href="/assinatura#planos" className="mt-3 bg-primary text-primary-foreground hover:brightness-105">
+                    {a.viewPlans}
+                  </Button>
+                ) : null}
+              </div>
+            ) : null}
+
+            <div className="grid gap-3 rounded-xl border border-border bg-muted/20 p-3 pb-5">
               <TurnstileWidget action="ats_score" onVerify={setTurnstileToken} resetSignal={captchaReset} />
-              <Button onClick={optimizeFromScore} disabled={optimizing || resume.length < 100 || jobDescription.length < 40} className="bg-primary text-primary-foreground hover:brightness-105">
+              <Button onClick={optimizeFromScore} disabled={optimizing || resume.length < 100 || jobDescription.length < 40} className="w-full bg-primary text-primary-foreground hover:brightness-105">
                 {optimizing ? <Loader2 className="animate-spin" size={17} /> : <Sparkles size={17} />}
                 {optimizing ? a.optimizing : a.optimizeCta}
               </Button>
-              {optimizedOutput ? (
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
-                  <p className="text-xs font-semibold uppercase text-primary">Salvo no histórico</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <button onClick={copyOutput} className="focus-ring inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 text-xs font-semibold text-foreground hover:bg-muted">
-                      <Copy size={14} />
-                      {copied ? a.copied : a.copy}
-                    </button>
-                    <Link href="/historico" className="focus-ring inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 text-xs font-semibold text-foreground hover:bg-muted">
-                      <FileClock size={14} />
-                      {a.savedHistory}
-                    </Link>
-                  </div>
-                </div>
-              ) : null}
             </div>
+
+            {optimizedOutput ? (
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
+                <p className="text-xs font-semibold uppercase text-primary">Salvo no histórico</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button onClick={copyOutput} className="focus-ring inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 text-xs font-semibold text-foreground hover:bg-muted">
+                    <Copy size={14} />
+                    {copied ? a.copied : a.copy}
+                  </button>
+                  <Link href="/historico" className="focus-ring inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 text-xs font-semibold text-foreground hover:bg-muted">
+                    <FileClock size={14} />
+                    {a.savedHistory}
+                  </Link>
+                </div>
+              </div>
+            ) : null}
           </div>
         </Card>
 

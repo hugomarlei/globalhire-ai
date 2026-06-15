@@ -15,8 +15,7 @@ import { trackEvent } from "@/lib/analytics";
 import type { GenerationType } from "@/lib/types";
 import { buildResumePdfPrintDocument, buildStructuredResumePdfPrintDocument } from "@/lib/resume-pdf-templates";
 import { VOICE_CONTROLLED_GENERATION_TYPES, type OutputLength, type OutputTone } from "@/prompts/ai-prompts";
-import { InterviewGuideOutput } from "@/components/interview-guide-output";
-import { DocumentPreviewShell } from "@/components/application-workspace";
+import { DocumentPreviewShell, SectionAccordion, TemplatePicker } from "@/components/application-workspace";
 import { ResumePreview } from "@/components/resumes/resume-preview";
 import { defaultResumeData } from "@/lib/resumes/defaults";
 import { importResumeText } from "@/lib/resumes/import";
@@ -50,6 +49,32 @@ function generatorTemplateToResumeTemplate(template: PdfTemplateKey): ResumeData
   if (template === "modern") return "modern";
   if (template === "compact") return "classic";
   return "professional";
+}
+
+function AssetPaperPreview({
+  title,
+  text,
+  emptyLabel,
+  loading,
+  loadingLabel
+}: {
+  title: string;
+  text: string;
+  emptyLabel: string;
+  loading: boolean;
+  loadingLabel: string;
+}) {
+  const content = loading ? loadingLabel : normalizeDocumentText(text || emptyLabel);
+
+  return (
+    <article data-clarity-mask="true" className="min-h-[920px] bg-white px-8 py-9 text-slate-950 shadow-sm sm:px-12 sm:py-12">
+      <div className="border-b border-slate-200 pb-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-teal-700">GlobalHire AI</p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{title}</h1>
+      </div>
+      <div className={cn("mt-6 whitespace-pre-wrap text-[15px] leading-7", !text && !loading ? "text-slate-500" : "text-slate-800")}>{content}</div>
+    </article>
+  );
 }
 
 export function DashboardGenerator({
@@ -309,38 +334,36 @@ export function DashboardGenerator({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
-      <section className="lg:col-span-12">
-        <div className="rounded-3xl border border-border bg-card p-5 text-card-foreground shadow-sm dark:border-white/10 dark:bg-card/85">
-          <div className="grid gap-5 lg:grid-cols-[0.76fr_1.24fr] lg:items-center">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-primary">Workspace de entregas</p>
-              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Ferramentas</h1>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {visibleTypes.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setType(item)}
-                  className={cn(
-                    "focus-ring rounded-xl border px-3 py-2.5 text-left transition hover:-translate-y-0.5",
-                    type === item
-                      ? "border-primary bg-primary text-primary-foreground shadow-glow dark:shadow-glow-dark"
-                      : "border-border bg-background text-foreground hover:bg-muted dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]"
-                  )}
-                >
-                  <span className="block text-sm font-semibold">{copy.deliveryTypes[item]}</span>
-                </button>
-              ))}
-            </div>
+    <div className="grid gap-5 xl:grid-cols-[minmax(0,500px)_minmax(0,1fr)] xl:items-start">
+      <div className="grid content-start gap-4">
+        <section className="rounded-3xl border border-border bg-card p-5 text-card-foreground shadow-sm dark:border-white/10 dark:bg-card/85">
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary">Workspace de entregas</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Ferramentas</h1>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            {visibleTypes.map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => {
+                  setType(item);
+                  setOutput("");
+                  setAppliedImprovements([]);
+                }}
+                className={cn(
+                  "focus-ring min-h-14 rounded-xl border px-3 py-2.5 text-left transition hover:-translate-y-0.5",
+                  type === item
+                    ? "border-primary bg-primary text-primary-foreground shadow-glow dark:shadow-glow-dark"
+                    : "border-border bg-background text-foreground hover:bg-muted dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]"
+                )}
+              >
+                <span className="block text-sm font-semibold leading-snug">{copy.deliveryTypes[item]}</span>
+              </button>
+            ))}
           </div>
-        </div>
-      </section>
-      <div className="space-y-5 lg:col-span-5">
-        <Card className="border-border/90 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{genUi.formColumnTitle}</p>
-          <div className="mt-4 grid gap-5">
+        </section>
+
+        <SectionAccordion title="Entrada do candidato" description="Importe o currículo e adicione contexto quando a entrega exigir vaga-alvo." done={resume.trim().length > 0}>
+          <div className="grid gap-5">
             <div className="rounded-xl border border-border/70 bg-muted/25 p-4">
               <Field label={genUi.uploadPdfDocx}>
                 <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-primary/35 bg-card/80 p-4 text-sm text-foreground transition hover:bg-muted/40">
@@ -374,13 +397,18 @@ export function DashboardGenerator({
                 Use como referência complementar. Para importar o perfil completo com fidelidade, exporte o PDF do LinkedIn e envie no campo acima.
               </p>
             </Field>
+
             {usesJobDescription ? (
               <Field label={copy.jobDescription}>
                 <textarea data-clarity-mask="true" className={textareaClass} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder={context.jobPlaceholder} />
               </Field>
             ) : null}
+          </div>
+        </SectionAccordion>
 
-            <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+        <SectionAccordion title="Configuração da entrega" description="Idioma, país, tom e modelo do arquivo final." done={Boolean(language && targetCountry)}>
+          <div className="grid gap-5">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <Field label={copy.outputLanguage}>
                 <select
                   className={inputClass}
@@ -448,10 +476,29 @@ export function DashboardGenerator({
                     <option value="direct">{genUi.toneDirect}</option>
                   </select>
                 </Field>
-                <p className="sm:col-span-2 text-xs leading-relaxed text-muted-foreground">{genUi.voiceControlsHint}</p>
+                <p className="text-xs leading-relaxed text-muted-foreground sm:col-span-2">{genUi.voiceControlsHint}</p>
               </div>
             ) : null}
 
+            <Field label={copy.pdfTemplate}>
+              <TemplatePicker
+                value={pdfTemplate}
+                items={(Object.keys(genUi.pdfTemplates) as PdfTemplateKey[]).map((template) => ({
+                  key: template,
+                  label: genUi.pdfTemplates[template]
+                }))}
+                onChange={(value) => {
+                  const v = value as PdfTemplateKey;
+                  setPdfTemplate(v);
+                  persistPreferencePatch({ template: v });
+                }}
+              />
+            </Field>
+          </div>
+        </SectionAccordion>
+
+        <Card className="rounded-2xl border-border/90 p-4 shadow-sm">
+          <div className="grid gap-4">
             {error ? (
               <div className="rounded-xl bg-coral/15 p-4 text-sm text-coral">
                 <p className="flex items-center gap-2 font-semibold">
@@ -468,12 +515,13 @@ export function DashboardGenerator({
               </div>
             ) : null}
 
-            <TurnstileWidget action="generation" onVerify={setTurnstileToken} resetSignal={captchaReset} />
-
-            <Button type="button" className="bg-primary text-primary-foreground hover:brightness-105 disabled:opacity-50" onClick={generate} disabled={loading || !resume.trim()}>
-              {loading ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
-              {loading ? copy.generating : context.cta}
-            </Button>
+            <div className="grid gap-3 rounded-xl border border-border bg-muted/20 p-3 pb-5">
+              <TurnstileWidget action="generation" onVerify={setTurnstileToken} resetSignal={captchaReset} />
+              <Button type="button" className="w-full bg-primary text-primary-foreground hover:brightness-105 disabled:opacity-50" onClick={generate} disabled={loading || !resume.trim()}>
+                {loading ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
+                {loading ? copy.generating : context.cta}
+              </Button>
+            </div>
 
             {loading ? (
               <div className="rounded-xl border border-brand-500/25 bg-brand-500/10 p-4">
@@ -486,18 +534,8 @@ export function DashboardGenerator({
                 </div>
               </div>
             ) : null}
-          </div>
-        </Card>
-      </div>
 
-      <div className="space-y-5 lg:col-span-7 lg:sticky lg:top-24">
-        <Card className="min-h-[480px] border-border/90 shadow-md">
-          <div className="flex flex-col gap-4 border-b border-border/70 pb-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{genUi.previewColumnTitle}</p>
-              <h2 className="mt-1 text-xl font-semibold text-foreground">{copy.finalDocument}</h2>
-            </div>
-            <div className="flex min-w-0 flex-wrap items-end gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={copyOutput}
@@ -516,23 +554,6 @@ export function DashboardGenerator({
                 <RefreshCw size={17} />
                 {genUi.regenerate}
               </button>
-              <Field label={copy.pdfTemplate}>
-                <select
-                  className={`${inputClass} h-10 min-h-10 min-w-[10rem]`}
-                  value={pdfTemplate}
-                  onChange={(event) => {
-                    const v = event.target.value as PdfTemplateKey;
-                    setPdfTemplate(v);
-                    persistPreferencePatch({ template: v });
-                  }}
-                >
-                  {(Object.keys(genUi.pdfTemplates) as PdfTemplateKey[]).map((template) => (
-                    <option key={template} value={template}>
-                      {genUi.pdfTemplates[template]}
-                    </option>
-                  ))}
-                </select>
-              </Field>
               <button
                 type="button"
                 onClick={exportPdf}
@@ -543,68 +564,52 @@ export function DashboardGenerator({
                 {copy.pdf}
               </button>
             </div>
+            {!hasPaidPlan ? <p className="text-xs text-muted-foreground">{copy.watermarkNotice}</p> : null}
           </div>
-
-          <div
-            className={cn(
-              "mt-5 min-h-[420px] rounded-2xl border border-border/80 bg-gradient-to-b from-card via-card to-muted/15 p-4 shadow-inner sm:p-5",
-              type === "ats_resume" && "ring-1 ring-primary/10"
-            )}
-          >
-            {type === "interview_prep" ? (
-              <InterviewGuideOutput text={output} loading={loading} skeletonLabel={genUi.preparingOutput} emptyLabel={context.empty} />
-            ) : showDocumentPreview ? (
-              <div data-clarity-mask="true" className="relative">
-                {loading ? (
-                  <div className="absolute inset-x-4 top-4 z-10 rounded-xl border border-border bg-card/95 p-3 text-sm font-medium text-muted-foreground shadow-sm backdrop-blur">
-                    {genUi.preparingOutput}
-                  </div>
-                ) : null}
-                <DocumentPreviewShell>
-                  <ResumePreview data={previewResumeData} />
-                </DocumentPreviewShell>
-                {!output && !resume && !loading ? <p className="mt-3 text-sm text-muted-foreground">{context.empty}</p> : null}
-              </div>
-            ) : (
-              <pre
-                data-clarity-mask="true"
-                className={cn(
-                  "whitespace-pre-wrap font-sans text-sm leading-relaxed tracking-tight text-foreground antialiased",
-                  !output && !loading && "text-muted-foreground"
-                )}
-              >
-                {loading ? genUi.preparingOutput : output || context.empty}
-              </pre>
-            )}
-          </div>
-
-          <div className="mt-5 rounded-xl border border-border/80 bg-card/90 p-4 shadow-sm">
-            <div className="flex items-center gap-2">
-              <FileText className="text-mint" size={18} />
-              <h3 className="font-semibold text-foreground">{copy.appliedImprovements}</h3>
-            </div>
-            {appliedImprovements.length ? (
-              <ul data-clarity-mask="true" className="mt-3 grid gap-2 text-sm leading-relaxed text-muted-foreground">
-                {appliedImprovements.map((improvement) => (
-                  <li key={`${improvement.score}-${improvement.text}`} className="flex gap-3 rounded-xl border border-border/60 bg-muted/30 p-3">
-                    <span className="grid h-8 min-w-14 place-items-center rounded-lg bg-brand-500/15 text-sm font-semibold text-brand-500">
-                      +{improvement.score}%
-                    </span>
-                    <span>{improvement.text}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : loading ? (
-              <div className="mt-3 space-y-2">
-                <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
-                <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
-              </div>
-            ) : (
-              <p className="mt-3 text-sm text-muted-foreground">{copy.emptyImprovements}</p>
-            )}
-          </div>
-          {!hasPaidPlan ? <p className="mt-3 text-xs text-muted-foreground">{copy.watermarkNotice}</p> : null}
         </Card>
+
+        <Card className="rounded-2xl border-border/90 p-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <FileText className="text-mint" size={18} />
+            <h3 className="font-semibold text-foreground">{copy.appliedImprovements}</h3>
+          </div>
+          {appliedImprovements.length ? (
+            <ul data-clarity-mask="true" className="mt-3 grid gap-2 text-sm leading-relaxed text-muted-foreground">
+              {appliedImprovements.map((improvement) => (
+                <li key={`${improvement.score}-${improvement.text}`} className="flex gap-3 rounded-xl border border-border/60 bg-muted/30 p-3">
+                  <span className="grid h-8 min-w-14 place-items-center rounded-lg bg-brand-500/15 text-sm font-semibold text-brand-500">
+                    +{improvement.score}%
+                  </span>
+                  <span>{improvement.text}</span>
+                </li>
+              ))}
+            </ul>
+          ) : loading ? (
+            <div className="mt-3 space-y-2">
+              <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-muted-foreground">{copy.emptyImprovements}</p>
+          )}
+        </Card>
+      </div>
+
+      <div className="min-w-0 xl:sticky xl:top-24">
+        <DocumentPreviewShell title={copy.finalDocument}>
+          {showDocumentPreview ? (
+            <div data-clarity-mask="true" className="relative">
+              {loading ? (
+                <div className="absolute inset-x-4 top-4 z-10 rounded-xl border border-border bg-card/95 p-3 text-sm font-medium text-muted-foreground shadow-sm backdrop-blur">
+                  {genUi.preparingOutput}
+                </div>
+              ) : null}
+              <ResumePreview data={previewResumeData} />
+            </div>
+          ) : (
+            <AssetPaperPreview title={copy.deliveryTypes[type]} text={output} emptyLabel={context.empty} loading={loading} loadingLabel={genUi.preparingOutput} />
+          )}
+        </DocumentPreviewShell>
       </div>
     </div>
   );
