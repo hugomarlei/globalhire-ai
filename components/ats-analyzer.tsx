@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, CheckCircle2, Copy, FileClock, FileUp, Loader2, RefreshCw, SearchCheck, Sparkles } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Copy, FileClock, FileUp, Loader2, SearchCheck, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, Field, textareaClass } from "@/components/ui";
-import { DocumentPreviewShell, TemplatePicker } from "@/components/application-workspace";
+import { Button, Card, Field, cn, textareaClass } from "@/components/ui";
+import { DocumentPreviewShell } from "@/components/application-workspace";
 import { ResumePreview } from "@/components/resumes/resume-preview";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import { trackEvent } from "@/lib/analytics";
@@ -248,17 +248,17 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
           </div>
         </div>
       </section>
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,0.86fr)_minmax(620px,1.14fr)]">
-        <div className="grid gap-5">
-        <Card>
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,430px)_minmax(0,1fr)]">
+        <div className="grid content-start gap-4">
+        <Card className="rounded-2xl p-4 shadow-sm">
           <div className="flex items-center gap-2">
             <SearchCheck className="text-brand-500" size={22} />
-            <h2 className="text-2xl font-semibold text-foreground">{isKeywordMode ? a.analyzerTitleKeywords : a.analyzerTitleScore}</h2>
+            <h2 className="text-xl font-semibold text-foreground">{isKeywordMode ? a.analyzerTitleKeywords : a.analyzerTitleScore}</h2>
           </div>
-          <p className="mt-3 rounded-md border border-border bg-card p-3 text-xs leading-5 text-muted-foreground">{a.disclaimer}</p>
-          <div className="mt-6 grid gap-4">
+          <p className="mt-3 rounded-md border border-border bg-muted/30 p-3 text-xs leading-5 text-muted-foreground">{a.disclaimer}</p>
+          <div className="mt-4 grid gap-3">
             <Field label={a.uploadLabel}>
-              <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border bg-muted/40 p-4 text-sm text-foreground hover:bg-muted/70 dark:border-border">
+              <label className="focus-ring flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border bg-muted/40 p-3 text-sm text-foreground hover:bg-muted/70 dark:border-border">
                 {loadingUpload ? <Loader2 className="animate-spin" size={18} /> : <FileUp size={18} />}
                 {loadingUpload ? a.uploadLoading : a.uploadIdle}
                 <input data-clarity-mask="true" className="hidden" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => upload(event.target.files?.[0] || null)} />
@@ -268,7 +268,7 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
             <Field label={a.pasteResumeLabel}>
               <textarea
                 data-clarity-mask="true"
-                className={textareaClass}
+                className={cn(textareaClass, "min-h-32")}
                 value={resume}
                 onChange={(event) => {
                   setResume(event.target.value);
@@ -281,7 +281,7 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
             <Field label={a.jobLabel}>
               <textarea
                 data-clarity-mask="true"
-                className={textareaClass}
+                className={cn(textareaClass, "min-h-32")}
                 value={jobDescription}
                 onChange={(event) => {
                   setJobDescription(event.target.value);
@@ -294,13 +294,14 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
           </div>
         </Card>
 
-        <Card>
-          <div className="grid gap-5 md:grid-cols-[220px_1fr]">
-            <div className="grid place-items-center rounded-lg border border-border bg-card p-6">
-              <div className="grid size-40 place-items-center rounded-full border-[10px] border-primary/25 bg-muted">
+        <Card className="rounded-2xl p-4 shadow-sm">
+          <div className="grid gap-4">
+            <div className="grid grid-cols-[112px_minmax(0,1fr)] gap-4">
+            <div className="grid place-items-center rounded-lg border border-border bg-muted/25 p-3">
+              <div className="grid size-24 place-items-center rounded-full border-[7px] border-primary/25 bg-muted">
                 <div className="text-center">
-                  <p className="text-5xl font-semibold text-primary">{analysis.score}</p>
-                  <p className="text-sm text-muted-foreground">{a.scoreGaugeLabel}</p>
+                  <p className="text-3xl font-semibold text-primary">{analysis.score}</p>
+                  <p className="text-xs text-muted-foreground">{a.scoreGaugeLabel}</p>
                 </div>
               </div>
             </div>
@@ -314,9 +315,10 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
                   <div className="h-2 rounded-full bg-primary" style={{ width: `${analysis.match}%` }} />
                 </div>
               </div>
+            </div>
               <div id="keywords" className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-md border border-border bg-card p-4">
-                  <h2 className="font-semibold text-foreground">{a.foundTitle}</h2>
+                <div className="rounded-md border border-border bg-muted/20 p-3">
+                  <h2 className="text-sm font-semibold text-foreground">{a.foundTitle}</h2>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {analysis.found.slice(0, 12).map((keyword) => (
                       <span key={keyword} className="rounded-md bg-primary/15 px-2 py-1 text-xs text-foreground">
@@ -326,8 +328,8 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
                     {!analysis.found.length ? <p className="text-sm text-muted-foreground">{a.pasteJobHint}</p> : null}
                   </div>
                 </div>
-                <div className="rounded-md border border-border bg-card p-4">
-                  <h2 className="font-semibold text-foreground">{a.missingTitle}</h2>
+                <div className="rounded-md border border-border bg-muted/20 p-3">
+                  <h2 className="text-sm font-semibold text-foreground">{a.missingTitle}</h2>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {analysis.missing.slice(0, 12).map((keyword) => (
                       <span key={keyword} className="rounded-md bg-coral/15 px-2 py-1 text-xs text-coral">
@@ -338,8 +340,8 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
                   </div>
                 </div>
               </div>
-              <div className="rounded-md border border-border bg-card p-4">
-                <h2 className="flex items-center gap-2 font-semibold text-foreground">
+              <div className="rounded-md border border-border bg-muted/20 p-3">
+                <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                   <Sparkles className="text-primary" size={18} /> {a.recommendationsTitle}
                 </h2>
                 <ul className="mt-3 grid gap-2 text-sm leading-6 text-muted-foreground">
@@ -367,17 +369,48 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
                 {optimizing ? <Loader2 className="animate-spin" size={17} /> : <Sparkles size={17} />}
                 {optimizing ? a.optimizing : a.optimizeCta}
               </Button>
+              {optimizedOutput ? (
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
+                  <p className="text-xs font-semibold uppercase text-primary">Salvo no histórico</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <button onClick={copyOutput} className="focus-ring inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 text-xs font-semibold text-foreground hover:bg-muted">
+                      <Copy size={14} />
+                      {copied ? a.copied : a.copy}
+                    </button>
+                    <Link href="/historico" className="focus-ring inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 text-xs font-semibold text-foreground hover:bg-muted">
+                      <FileClock size={14} />
+                      {a.savedHistory}
+                    </Link>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         </Card>
 
-        <Card>
-          <h2 className="text-base font-semibold text-foreground">Template da versão otimizada</h2>
-          <p className="mt-1 text-sm text-muted-foreground">A versão salva no histórico usará o template e a cor selecionados antes da otimização.</p>
-          <div className="mt-4">
-            <TemplatePicker value={template} items={resumeTemplates} onChange={(value) => setTemplate(value as ResumeData["template"])} />
+        <Card className="rounded-2xl p-4 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Template</h2>
+              <p className="mt-1 text-xs text-muted-foreground">Prévia e histórico usam esta seleção.</p>
+            </div>
+            <div className="inline-flex rounded-xl border border-border bg-muted/30 p-1">
+              {resumeTemplates.map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setTemplate(item.key)}
+                  className={cn(
+                    "focus-ring h-8 rounded-lg px-2.5 text-xs font-semibold transition",
+                    template === item.key ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-card hover:text-foreground"
+                  )}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-2">
             {resumeColors.map((color) => (
               <button
                 key={color}
@@ -396,32 +429,6 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
           <ResumePreview data={previewData} />
         </DocumentPreviewShell>
       </div>
-
-      <Card>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-foreground">{a.outputCardTitle}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{a.outputCardLead}</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button onClick={copyOutput} disabled={!optimizedOutput} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-40">
-              <Copy size={16} />
-              {copied ? a.copied : a.copy}
-            </button>
-            <button onClick={optimizeFromScore} disabled={optimizing || resume.length < 100 || jobDescription.length < 40} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-40">
-              <RefreshCw size={16} />
-              {a.generateAgain}
-            </button>
-            <Link href="/historico" className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
-              <FileClock size={16} />
-              {a.savedHistory}
-            </Link>
-          </div>
-        </div>
-        <pre data-clarity-mask="true" className="mt-5 min-h-72 whitespace-pre-wrap rounded-md border border-border bg-muted p-4 text-sm leading-6 text-foreground">
-          {optimizing ? a.preOutput : optimizedOutput || a.emptyPreOutput}
-        </pre>
-      </Card>
     </div>
   );
 }
