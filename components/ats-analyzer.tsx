@@ -4,12 +4,17 @@ import Link from "next/link";
 import { AlertTriangle, CheckCircle2, Copy, FileClock, FileUp, Loader2, RefreshCw, SearchCheck, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Field, textareaClass } from "@/components/ui";
+import { DocumentPreviewShell, TemplatePicker } from "@/components/application-workspace";
+import { ResumePreview } from "@/components/resumes/resume-preview";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import { trackEvent } from "@/lib/analytics";
 import { useLanguage } from "@/components/language-provider";
 import { locales } from "@/lib/i18n";
 import { atsAnalyzerCopy, buildAtsRecommendations, outputLanguageLabelForApi } from "@/lib/i18n-history-ats";
 import { targetCountryCanonicalSet } from "@/lib/target-countries";
+import { defaultResumeData, normalizeResumeData, resumeColors, resumeTemplates } from "@/lib/resumes/defaults";
+import { importResumeText } from "@/lib/resumes/import";
+import type { ResumeData } from "@/lib/resumes/types";
 
 const stopWords = new Set([
   "and",
@@ -67,12 +72,15 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
   const [uploadMessage, setUploadMessage] = useState("");
   const [optimizing, setOptimizing] = useState(false);
   const [optimizedOutput, setOptimizedOutput] = useState("");
+  const [optimizedResumeData, setOptimizedResumeData] = useState<ResumeData | null>(null);
   const [optimizationError, setOptimizationError] = useState("");
   const [copied, setCopied] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
   const [captchaReset, setCaptchaReset] = useState(0);
   const [apiLanguage, setApiLanguage] = useState(() => outputLanguageLabelForApi("pt-BR"));
   const [apiTargetCountry, setApiTargetCountry] = useState("Estados Unidos");
+  const [template, setTemplate] = useState<ResumeData["template"]>("professional");
+  const [primaryColor, setPrimaryColor] = useState(resumeColors[0]);
 
   useEffect(() => {
     try {
@@ -97,6 +105,23 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
   }, [locale]);
 
   const isKeywordMode = mode === "keywords";
+  const previewData = useMemo(() => {
+    const base = {
+      ...defaultResumeData(),
+      language: apiLanguage,
+      targetJobDescription: jobDescription,
+      template,
+      primaryColor
+    };
+    const data = optimizedResumeData || importResumeText(optimizedOutput || resume, base);
+    return normalizeResumeData({
+      ...data,
+      language: apiLanguage,
+      targetJobDescription: jobDescription,
+      template,
+      primaryColor
+    });
+  }, [apiLanguage, jobDescription, optimizedOutput, optimizedResumeData, primaryColor, resume, template]);
 
   const analysis = useMemo(() => {
     const keywords = extractKeywords(jobDescription);
@@ -122,6 +147,8 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
     if (!file) return;
     setLoadingUpload(true);
     setUploadMessage("");
+    setOptimizedOutput("");
+    setOptimizedResumeData(null);
 
     try {
       const formData = new FormData();
@@ -149,6 +176,7 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
       setUploadMessage(a.uploadErrorNetwork);
     } finally {
       setLoadingUpload(false);
+      setOptimizedResumeData(null);
     }
   }
 
@@ -156,6 +184,7 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
     setOptimizing(true);
     setOptimizationError("");
     setOptimizedOutput("");
+    setOptimizedResumeData(null);
     trackEvent("ats_analysis_started", { score: analysis.score, match: analysis.match, mode });
 
     const response = await fetch("/api/ai/optimize-from-score", {
@@ -171,6 +200,8 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
         recommendations: analysis.recommendations,
         language: apiLanguage,
         targetCountry: apiTargetCountry,
+        template,
+        primaryColor,
         turnstileToken
       })
     });
@@ -186,6 +217,7 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
     }
 
     setOptimizedOutput(data.output);
+    setOptimizedResumeData(data.resumeData ? normalizeResumeData(data.resumeData) : importResumeText(data.output || resume, previewData));
     trackEvent("ats_score_generated", { score: analysis.score, match: analysis.match, mode });
   }
 
@@ -216,7 +248,8 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
           </div>
         </div>
       </section>
-      <div className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,0.86fr)_minmax(620px,1.14fr)]">
+        <div className="grid gap-5">
         <Card>
           <div className="flex items-center gap-2">
             <SearchCheck className="text-brand-500" size={22} />
@@ -233,10 +266,30 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
             </Field>
             {uploadMessage ? <p className="text-sm text-muted-foreground">{uploadMessage}</p> : null}
             <Field label={a.pasteResumeLabel}>
-              <textarea data-clarity-mask="true" className={textareaClass} value={resume} onChange={(event) => setResume(event.target.value)} placeholder={a.pasteResumePlaceholder} />
+              <textarea
+                data-clarity-mask="true"
+                className={textareaClass}
+                value={resume}
+                onChange={(event) => {
+                  setResume(event.target.value);
+                  setOptimizedOutput("");
+                  setOptimizedResumeData(null);
+                }}
+                placeholder={a.pasteResumePlaceholder}
+              />
             </Field>
             <Field label={a.jobLabel}>
-              <textarea data-clarity-mask="true" className={textareaClass} value={jobDescription} onChange={(event) => setJobDescription(event.target.value)} placeholder={a.jobPlaceholder} />
+              <textarea
+                data-clarity-mask="true"
+                className={textareaClass}
+                value={jobDescription}
+                onChange={(event) => {
+                  setJobDescription(event.target.value);
+                  setOptimizedOutput("");
+                  setOptimizedResumeData(null);
+                }}
+                placeholder={a.jobPlaceholder}
+              />
             </Field>
           </div>
         </Card>
@@ -317,6 +370,31 @@ export function AtsAnalyzer({ mode = "score" }: { mode?: "score" | "keywords" })
             </div>
           </div>
         </Card>
+
+        <Card>
+          <h2 className="text-base font-semibold text-foreground">Template da versão otimizada</h2>
+          <p className="mt-1 text-sm text-muted-foreground">A versão salva no histórico usará o template e a cor selecionados antes da otimização.</p>
+          <div className="mt-4">
+            <TemplatePicker value={template} items={resumeTemplates} onChange={(value) => setTemplate(value as ResumeData["template"])} />
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {resumeColors.map((color) => (
+              <button
+                key={color}
+                type="button"
+                aria-label={`Cor ${color}`}
+                onClick={() => setPrimaryColor(color)}
+                className={`focus-ring size-9 rounded-full border-2 ${primaryColor === color ? "border-foreground" : "border-border"}`}
+                style={{ backgroundColor: color }}
+              />
+            ))}
+          </div>
+        </Card>
+        </div>
+
+        <DocumentPreviewShell title={optimizedOutput ? "Currículo otimizado" : "Preview do currículo"}>
+          <ResumePreview data={previewData} />
+        </DocumentPreviewShell>
       </div>
 
       <Card>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { rejectInvalidOrigin } from "@/lib/security";
 import { normalizeResumeData, resumeToPlainText } from "@/lib/resumes/defaults";
+import { parseGenerationOutput } from "@/lib/generation-output";
 
 function sanitizeFilenamePart(value: string) {
   return value.replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48) || "document";
@@ -28,7 +29,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     .eq("user_id", user.id)
     .maybeSingle();
 
-  let text = (data?.output || "").trim();
+  let text = parseGenerationOutput(data?.output || "").text.trim();
   let type = data?.type || "export";
 
   if (error || !data) {

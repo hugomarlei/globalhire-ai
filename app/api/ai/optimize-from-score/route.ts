@@ -7,6 +7,7 @@ import { verifyTurnstileToken } from "@/lib/turnstile";
 import { getLatestActiveSubscription } from "@/lib/subscription-state";
 import { getClientIp, rejectInvalidOrigin } from "@/lib/security";
 import { buildAtsScoreOptimizedResume } from "@/lib/ats-score-optimizer";
+import { encodeStructuredResumeGeneration } from "@/lib/generation-output";
 
 const optimizeFromScoreSchema = z.object({
   resume: z.string().min(100, "Cole pelo menos 100 caracteres do currículo.").max(20000),
@@ -18,6 +19,8 @@ const optimizeFromScoreSchema = z.object({
   recommendations: z.array(z.string()).max(10).default([]),
   language: z.string().min(2).max(40).default("Português do Brasil"),
   targetCountry: z.string().min(2).max(60).default("Estados Unidos"),
+  template: z.enum(["classic", "professional", "modern"]).default("professional"),
+  primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).default("#0f766e"),
   turnstileToken: z.string().optional()
 });
 
@@ -92,28 +95,36 @@ export async function POST(request: NextRequest) {
       }, { status: 402 });
     }
 
-    const { document, recommendations } = buildAtsScoreOptimizedResume({
+    const { document, recommendations, resumeData } = buildAtsScoreOptimizedResume({
       resume: parsed.data.resume,
       jobDescription: parsed.data.jobDescription,
       language: parsed.data.language,
       found: parsed.data.found,
       missing: parsed.data.missing,
-      recommendations: parsed.data.recommendations
+      recommendations: parsed.data.recommendations,
+      template: parsed.data.template,
+      primaryColor: parsed.data.primaryColor
     });
     const appliedImprovements = scoreAppliedImprovements(recommendations);
 
-    await supabase.from("generations").insert({
-      user_id: user.id,
-      type: "ats_resume",
-      language: parsed.data.language,
-      target_country: parsed.data.targetCountry,
-      input_resume: parsed.data.resume,
-      job_description: parsed.data.jobDescription,
-      output: document
-    });
+    const { data: inserted } = await supabase
+      .from("generations")
+      .insert({
+        user_id: user.id,
+        type: "ats_resume",
+        language: parsed.data.language,
+        target_country: parsed.data.targetCountry,
+        input_resume: parsed.data.resume,
+        job_description: parsed.data.jobDescription,
+        output: encodeStructuredResumeGeneration(resumeData, document)
+      })
+      .select("id,created_at")
+      .single();
 
     return NextResponse.json({
       output: document,
+      resumeData,
+      generation: inserted,
       appliedImprovements,
       saved: true,
       quality: {

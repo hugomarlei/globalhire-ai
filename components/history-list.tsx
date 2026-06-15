@@ -12,6 +12,7 @@ import { TurnstileWidget } from "@/components/turnstile-widget";
 import { buildResumePdfPrintDocument, buildStructuredResumePdfPrintDocument } from "@/lib/resume-pdf-templates";
 import { normalizeResumeData, resumeToPlainText } from "@/lib/resumes/defaults";
 import type { ResumeData } from "@/lib/resumes/types";
+import { parseGenerationOutput } from "@/lib/generation-output";
 
 type GenerationHistoryItem = {
   id: string;
@@ -56,11 +57,14 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
   function labelForType(type: string) {
     return type === "resume" ? resumeLabel : historyTypeShortLabel(locale, type);
   }
+  function displayText(item: HistoryItem) {
+    return item.kind === "resume" ? resumeToPlainText(normalizeResumeData(item.data || {})) : parseGenerationOutput(item.output).text;
+  }
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return visibleItems.filter((item) => {
       const matchesFilter = filter === "all" || item.type === filter;
-      const searchable = `${item.type} ${item.language} ${item.target_country} ${item.output} ${(item as ResumeHistoryItem).title || ""}`.toLowerCase();
+      const searchable = `${item.type} ${item.language} ${item.target_country} ${displayText(item)} ${(item as ResumeHistoryItem).title || ""}`.toLowerCase();
       return matchesFilter && (!normalizedQuery || searchable.includes(normalizedQuery));
     });
   }, [filter, query, visibleItems]);
@@ -120,9 +124,21 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
   }
 
   function exportPdf(item: HistoryItem) {
-    const text = (item.output || "").trim();
+    const parsed = item.kind === "generation" ? parseGenerationOutput(item.output) : null;
+    const text = (parsed?.text || item.output || "").trim();
     if (!text) return;
-    const html = item.kind === "resume"
+    const html = parsed?.data
+      ? (() => {
+          const data = normalizeResumeData(parsed.data);
+          const template = data.template === "modern" ? "modern" : data.template === "classic" ? "compact" : "executive";
+          return buildStructuredResumePdfPrintDocument({
+            template,
+            title: labelForType(item.type),
+            data,
+            watermarkText: undefined
+          });
+        })()
+      : item.kind === "resume"
       ? (() => {
           const data = normalizeResumeData(item.data || {});
           const template = data.template === "modern" ? "modern" : data.template === "classic" ? "compact" : "executive";
@@ -168,7 +184,7 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
     });
   }
 
-  const dateLocale = intlLocaleForUi(locale);
+    const dateLocale = intlLocaleForUi(locale);
 
   return (
     <div className="grid gap-5">
@@ -240,15 +256,15 @@ export function HistoryList({ items, mode = "history" }: { items: HistoryItem[];
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString(dateLocale)}</p>
                 <p data-clarity-mask="true" className={`${mode === "documents" ? "line-clamp-4" : "line-clamp-2"} mt-3 text-sm leading-6 text-muted-foreground`}>
-                  {item.kind === "resume" ? resumeToPlainText(normalizeResumeData(item.data || {})) : item.output}
+                  {displayText(item)}
                 </p>
               </div>
               <div className={mode === "history" ? "flex flex-wrap gap-1.5 lg:justify-end" : "flex flex-wrap gap-2"}>
-                <button type="button" onClick={() => copyText(item.id, item.output)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
+                <button type="button" onClick={() => copyText(item.id, displayText(item))} className="focus-ring inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
                   <Copy size={16} />
                   {copied === item.id ? h.copied : h.copy}
                 </button>
-                {!(item.output || "").trim() ? (
+                {!displayText(item).trim() ? (
                   <button
                     type="button"
                     disabled
