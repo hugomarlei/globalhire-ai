@@ -12,7 +12,7 @@ import { getServerLocale } from "@/lib/server-locale";
 
 export const dynamic = "force-dynamic";
 
-const generationTypes: GenerationType[] = ["ats_resume", "cover_letter", "linkedin_summary", "recruiter_message", "interview_prep", "translate_resume"];
+const generationTypes: GenerationType[] = ["cover_letter", "linkedin_summary", "recruiter_message", "interview_prep", "translate_resume"];
 
 export default async function GeneratorPage({ searchParams }: { searchParams?: Promise<{ tipo?: string }> }) {
   const locale = await getServerLocale();
@@ -25,7 +25,7 @@ export default async function GeneratorPage({ searchParams }: { searchParams?: P
   const plan = plans[planId] || plans.free;
   const params = searchParams ? await searchParams : {};
   const initialType = generationTypes.includes(params.tipo as GenerationType) ? (params.tipo as GenerationType) : undefined;
-  const selectedType = initialType || "ats_resume";
+  const selectedType = initialType || "cover_letter";
   const context = genUi.byType[selectedType];
   const allowedTypes = allowedGenerationTypes(planId);
 

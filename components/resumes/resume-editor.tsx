@@ -2,10 +2,10 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronDown, ChevronUp, GripVertical, Plus, Trash2, Upload, X } from "lucide-react";
-import { AIInlineButton, DocumentPreviewShell, ExportBar, ProgressHeader, SectionAccordion, TemplatePicker } from "@/components/application-workspace";
-import { Button, cn, inputClass, textareaClass } from "@/components/ui";
-import { emptyCertification, emptyEducation, emptyExperience, mergeResumeData, resumeTemplates, resumeToPlainText } from "@/lib/resumes/defaults";
+import { ChevronDown, ChevronUp, GripVertical, Plus, Trash2, Upload, X } from "lucide-react";
+import { DocumentPreviewShell, ExportBar, ProgressHeader, SectionAccordion, TemplatePicker } from "@/components/application-workspace";
+import { cn, inputClass, textareaClass } from "@/components/ui";
+import { emptyCertification, emptyEducation, emptyExperience, resumeTemplates, resumeToPlainText } from "@/lib/resumes/defaults";
 import { importResumeText } from "@/lib/resumes/import";
 import { calculateResumeScore } from "@/lib/resumes/score";
 import type { ResumeData } from "@/lib/resumes/types";
@@ -15,11 +15,6 @@ type Props = {
   id?: string;
   initialTitle: string;
   initialData: ResumeData;
-};
-
-type ReviewResult = {
-  categories: Array<{ key: string; title: string; score?: number; suggestions: string[] }>;
-  improvedData: ResumeData;
 };
 
 type ListName = "experience" | "education" | "certifications";
@@ -135,12 +130,8 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
   const [title, setTitle] = useState(initialTitle);
   const [data, setData] = useState<ResumeData>(initialData);
   const [notice, setNotice] = useState("");
-  const [suggesting, setSuggesting] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [dragging, setDragging] = useState<{ list: ListName; index: number } | null>(null);
-  const [activeTab, setActiveTab] = useState<"editor" | "review">("editor");
-  const [review, setReview] = useState<ReviewResult | null>(null);
-  const [reviewing, setReviewing] = useState(false);
   const [importing, setImporting] = useState(false);
   const [isPending, startTransition] = useTransition();
   const analysis = useMemo(() => calculateResumeScore(data), [data]);
@@ -151,7 +142,7 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
     { label: "Experiência", done: data.experience.some((item) => Boolean(item.role || item.company || item.description)) },
     { label: "Habilidades", done: data.skills.length >= 6 }
   ];
-  const nextAction = readinessItems.find((item) => !item.done)?.label || (data.targetJobDescription ? "Revisar com IA" : "Colar vaga-alvo");
+  const nextAction = readinessItems.find((item) => !item.done)?.label || "Salvar e exportar";
   const readyToCreate = readinessItems.every((item) => item.done);
 
   function patch(next: Partial<ResumeData>) {
@@ -202,62 +193,6 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
     setNotice("Arquivo importado. Revise os campos preenchidos antes de salvar.");
   }
 
-  async function suggest(section: "summary" | "experience" | "education" | "certification", index = 0) {
-    setSuggesting(`${section}-${index}`);
-    setNotice("");
-    const item = section === "experience" ? data.experience[index] : section === "education" ? data.education[index] : section === "certification" ? data.certifications[index] : null;
-    const response = await fetch("/api/ai/suggest-description", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        section,
-        role: item && "role" in item ? item.role : item && "name" in item ? item.name : data.targetRole,
-        company: item && "company" in item ? item.company : item && "issuer" in item ? item.issuer : "",
-        currentDescription: section === "summary" ? data.summary : item?.description || "",
-        jobDescription: data.targetJobDescription,
-        language: data.language
-      })
-    });
-    const body = await response.json();
-    setSuggesting(null);
-    if (!response.ok) {
-      setNotice(body.error || "Não consegui gerar sugestões.");
-      return;
-    }
-    const text = Array.isArray(body.bullets) ? body.bullets.map((bullet: string) => `- ${bullet}`).join("\n") : "";
-    if (section === "summary") patch({ summary: body.bullets?.join(" ") || data.summary });
-    if (section === "experience") patch({ experience: data.experience.map((exp, expIndex) => expIndex === index ? { ...exp, description: text } : exp) });
-    if (section === "education") patch({ education: data.education.map((edu, eduIndex) => eduIndex === index ? { ...edu, description: text } : edu) });
-    if (section === "certification") patch({ certifications: data.certifications.map((cert, certIndex) => certIndex === index ? { ...cert, description: text } : cert) });
-  }
-
-  async function reviewWithAi() {
-    setNotice("");
-    if (resumeToPlainText(data).trim().length < 120) {
-      setNotice("Adicione dados reais do currículo antes de solicitar a revisão com IA.");
-      return;
-    }
-    setReviewing(true);
-    try {
-      const response = await fetch("/api/ai/review-resume", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data, language: data.language })
-      });
-      const body = await response.json();
-      if (!response.ok) {
-        setNotice(body.error || "Não consegui revisar o currículo.");
-        return;
-      }
-      setReview(body);
-      setActiveTab("review");
-    } catch {
-      setNotice("Não consegui conectar à revisão com IA. Tente novamente em alguns segundos.");
-    } finally {
-      setReviewing(false);
-    }
-  }
-
   function dropOn(list: ListName, index: number) {
     if (dragging?.list !== list) return;
     moveItem(list, dragging.index, index);
@@ -267,20 +202,6 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
   async function copyResume() {
     await navigator.clipboard.writeText(resumeToPlainText(data));
     setNotice("Currículo copiado em texto simples.");
-  }
-
-  function acceptReviewSuggestions() {
-    if (!review) return;
-    setData((current) => mergeResumeData(current, review.improvedData));
-    setReview(null);
-    setActiveTab("editor");
-    setNotice("Sugestões aplicadas. Revise os campos, ajuste o que quiser e salve o currículo.");
-  }
-
-  function rejectReviewSuggestions() {
-    setReview(null);
-    setActiveTab("editor");
-    setNotice("Sugestões rejeitadas. O currículo original foi mantido.");
   }
 
   function downloadTxt() {
@@ -303,7 +224,7 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">Workspace de currículo</p>
             <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Construtor de currículo</h1>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Importe, edite, revise com IA e acompanhe a versão final em tempo real.
+              Importe, edite e acompanhe a versão final em tempo real antes de salvar ou exportar.
             </p>
           </div>
           <div className="min-w-[150px] rounded-2xl border border-primary/25 bg-primary/5 px-4 py-3">
@@ -326,49 +247,13 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,0.92fr)_minmax(620px,1.08fr)]">
         <div className="space-y-4 print:hidden">
-          {activeTab === "review" ? (
-            <section className="rounded-md border border-border bg-card p-4">
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-sm font-semibold">Relatório de revisão</h2>
-                  <p className="text-xs text-muted-foreground">Aceite para aplicar as melhorias conservadoras sugeridas pela IA.</p>
-                </div>
-              </div>
-              {review ? (
-                <div className="space-y-3">
-                  {review.categories.map((category) => (
-                    <div key={category.key} className="rounded-md border border-border p-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="font-semibold">{category.title}</h3>
-                        {typeof category.score === "number" ? <span className="rounded-md bg-primary/10 px-2 py-1 text-xs font-bold text-primary">{category.score}</span> : null}
-                      </div>
-                      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                        {category.suggestions.map((item, index) => <li key={index}>{item}</li>)}
-                      </ul>
-                    </div>
-                  ))}
-                  <div className="flex flex-wrap gap-2">
-                    <Button onClick={acceptReviewSuggestions} className="h-10 rounded-md px-3">
-                      <Check size={16} /> Aceitar sugestões
-                    </Button>
-                    <button type="button" onClick={rejectReviewSuggestions} className="focus-ring inline-flex h-10 items-center gap-2 rounded-md border border-border px-3 text-sm hover:bg-muted">
-                      <X size={16} /> Rejeitar
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Clique em Revisar para gerar um relatório estruturado.</p>
-              )}
-            </section>
-          ) : (
-            <>
-              <SectionAccordion title="Configuração do currículo" description="Defina idioma, cargo-alvo e o contexto que orienta ATS/IA." done={Boolean(data.targetRole)}>
+          <>
+              <SectionAccordion title="Configuração do currículo" description="Defina idioma e cargo-alvo para organizar o documento." done={Boolean(data.targetRole)}>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Field label="Título interno"><input className={inputClass} value={title} onChange={(event) => setTitle(event.target.value)} /></Field>
                   <Field label="Idioma final"><input className={inputClass} value={data.language} onChange={(event) => patch({ language: event.target.value })} /></Field>
                   <Field label="Cargo-alvo"><input className={inputClass} value={data.targetRole} onChange={(event) => patch({ targetRole: event.target.value })} /></Field>
                 </div>
-                <Field label="Descrição da vaga para orientar IA e ATS score"><textarea className={cn(textareaClass, "mt-3 min-h-28")} value={data.targetJobDescription} onChange={(event) => patch({ targetJobDescription: event.target.value })} /></Field>
               </SectionAccordion>
 
               <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
@@ -402,7 +287,6 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
                 title="Resumo profissional"
                 description="Síntese de posicionamento para recrutador e ATS."
                 done={Boolean(data.summary)}
-                actions={<AIInlineButton onClick={() => suggest("summary")} loading={suggesting === "summary-0"}>Melhorar resumo</AIInlineButton>}
               >
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <h2 className="text-sm font-semibold">Resumo</h2>
@@ -421,7 +305,6 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
                       {(["role", "company", "location", "start", "end"] as const).map((field) => <Field key={field} label={{ role: "Cargo", company: "Empresa", location: "Local", start: "Início", end: "Fim" }[field]}><input className={inputClass} value={item[field] as string} onChange={(event) => patch({ experience: data.experience.map((exp, expIndex) => expIndex === index ? { ...exp, [field]: event.target.value } : exp) })} /></Field>)}
                     </div>
                     <RichTextBox label="Descrição / bullets" value={item.description} onChange={(description) => patch({ experience: data.experience.map((exp, expIndex) => expIndex === index ? { ...exp, description } : exp) })} placeholder="Bullets ou descrição" />
-                    <AIInlineButton onClick={() => suggest("experience", index)} loading={suggesting === `experience-${index}`}>Reescrever experiência</AIInlineButton>
                   </FloatingCard>
                 ))}
               </SectionAccordion>
@@ -437,7 +320,6 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
                       {(["degree", "school", "location", "start", "end"] as const).map((field) => <Field key={field} label={{ degree: "Curso / grau", school: "Instituição", location: "Local", start: "Início", end: "Fim" }[field]}><input className={inputClass} value={item[field]} onChange={(event) => patch({ education: data.education.map((edu, eduIndex) => eduIndex === index ? { ...edu, [field]: event.target.value } : edu) })} /></Field>)}
                     </div>
                     <RichTextBox label="Descrição" value={item.description} onChange={(description) => patch({ education: data.education.map((edu, eduIndex) => eduIndex === index ? { ...edu, description } : edu) })} placeholder="Honras, cursos ou detalhes relevantes" />
-                    <AIInlineButton onClick={() => suggest("education", index)} loading={suggesting === `education-${index}`}>Melhorar descrição</AIInlineButton>
                   </FloatingCard>
                 ))}
               </SectionAccordion>
@@ -453,7 +335,6 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
                       {(["name", "issuer", "date", "credentialUrl"] as const).map((field) => <Field key={field} label={{ name: "Certificação", issuer: "Emissor", date: "Data", credentialUrl: "URL da credencial" }[field]}><input className={inputClass} value={item[field]} onChange={(event) => patch({ certifications: data.certifications.map((cert, certIndex) => certIndex === index ? { ...cert, [field]: event.target.value } : cert) })} /></Field>)}
                     </div>
                     <RichTextBox label="Descrição" value={item.description} onChange={(description) => patch({ certifications: data.certifications.map((cert, certIndex) => certIndex === index ? { ...cert, description } : cert) })} placeholder="Detalhes relevantes da certificação" />
-                    <AIInlineButton onClick={() => suggest("certification", index)} loading={suggesting === `certification-${index}`}>Melhorar descrição</AIInlineButton>
                   </FloatingCard>
                 ))}
               </SectionAccordion>
@@ -468,7 +349,7 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
 
               <SectionAccordion
                 title="Revisar e exportar"
-                description="Etapa final: validar prontidão ATS, aplicar revisão com IA e gerar a entrega."
+                description="Etapa final: validar prontidão ATS, salvar e gerar a entrega."
                 done={readyToCreate}
               >
                 <div className="space-y-4">
@@ -478,7 +359,6 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
                     status="Prontidão ATS"
                     nextStep={nextAction}
                     items={readinessItems}
-                    action={<AIInlineButton onClick={reviewWithAi} loading={reviewing}>Revisar currículo</AIInlineButton>}
                   />
                   <div className="rounded-2xl border border-border bg-muted/25 p-3">
                     <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Entrega</p>
@@ -487,7 +367,6 @@ export function ResumeEditor({ id, initialTitle, initialData }: Props) {
                 </div>
               </SectionAccordion>
             </>
-          )}
         </div>
 
         <DocumentPreviewShell>

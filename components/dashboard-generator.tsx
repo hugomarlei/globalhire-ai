@@ -28,7 +28,6 @@ type AppliedImprovement = {
 };
 
 const ALL_GENERATION_TYPES: GenerationType[] = [
-  "ats_resume",
   "cover_letter",
   "linkedin_summary",
   "recruiter_message",
@@ -68,7 +67,7 @@ export function DashboardGenerator({
   const [jobDescription, setJobDescription] = useState("");
   const [language, setLanguage] = useState("English");
   const [targetCountry, setTargetCountry] = useState("Estados Unidos");
-  const [type, setType] = useState<GenerationType>(initialType || "ats_resume");
+  const [type, setType] = useState<GenerationType>(initialType === "ats_resume" ? "cover_letter" : initialType || "cover_letter");
   const [pdfTemplate, setPdfTemplate] = useState<PdfTemplateKey>("executive");
   const [outputLength, setOutputLength] = useState<OutputLength>("medium");
   const [outputTone, setOutputTone] = useState<OutputTone>("professional");

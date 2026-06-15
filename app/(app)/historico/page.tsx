@@ -34,7 +34,8 @@ export default async function HistoryPage() {
       target_country: data.targetRole || data.personal.location || "Brasil",
       output: resumeToPlainText(data),
       created_at: item.updated_at || item.created_at,
-      title: item.title || data.personal.name || "Currículo"
+      title: item.title || data.personal.name || "Currículo",
+      data
     };
   });
 

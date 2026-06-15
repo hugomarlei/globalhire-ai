@@ -45,6 +45,7 @@ function cleanText(text: string) {
   return text
     .replace(/\r/g, "\n")
     .replace(/([A-Za-zÀ-ú])-\n([A-Za-zÀ-ú])/g, "$1-$2")
+    .replace(new RegExp(`(${monthPattern}\\.?\\s+de)\\s*\\n\\s*((?:19|20)\\d{2})`, "gi"), "$1 $2")
     .replace(/\u00a0/g, " ")
     .replace(new RegExp(`([A-Za-zÀ-ú])de\\s+(${monthPattern}\\.?\\s*(?:19|20)\\d{2})`, "gi"), "$1\nde $2")
     .replace(new RegExp(`([A-Za-zÀ-ú])(${monthPattern}\\.?\\s*(?:de\\s*)?(?:19|20)\\d{2})`, "gi"), "$1\n$2")
@@ -142,7 +143,7 @@ function splitListLine(line: string) {
 }
 
 function looksLikeLocation(line: string) {
-  const knownPlace = /(?:\bbrasil\b|\bbrazil\b|\bbr[eé]sil\b|\bfran[cç]a\b|\bfrance\b|\bparis\b|\bcuritiba\b|\bs[aã]o paulo\b|\bs[aã]o jos[eé]\b|\bportugal\b|\bremote\b|\bremoto\b|\busa\b|\bcanada\b)/i.test(line);
+  const knownPlace = /(?:\bbrasil\b|\bbrazil\b|\bbr[eé]sil\b|\bfran[cç]a\b|\bfrance\b|\bparis\b|\bcuritiba\b|(?:^|[\s,])s[aã]o paulo(?:$|[\s,])|(?:^|[\s,])s[aã]o jos[eé](?:$|[\s,])|\bportugal\b|\bremote\b|\bremoto\b|\busa\b|\bcanada\b)/i.test(line);
   const stateCode = /(?:^|[\s,])(?:SP|PR|RJ|MG|RS|SC|BA|PE|CE|DF)(?:$|[\s,])/u.test(line);
   return (knownPlace || stateCode) && line.length < 140;
 }
@@ -206,7 +207,7 @@ function compactDescription(lines: string[]) {
   lines.forEach((rawLine) => {
     const hadBullet = bulletPattern.test(rawLine);
     const line = cleanLine(rawLine.replace(bulletPattern, ""));
-    if (!line || jobDescriptionLinePattern.test(line)) return;
+    if (!line) return;
 
     const headingLike = headingPattern.test(line);
     const wrappedHeadingWord = /^(perfil|profile|profil)$/i.test(line) && current && !/[.!?;:]$/.test(current);
@@ -332,7 +333,7 @@ function assignDates<T extends { start: string; end: string; current?: boolean }
 function splitEntryBlocks(lines: string[], kind: "experience" | "education" | "certification") {
   const cleanLines = lines
     .map(cleanLine)
-    .filter((line) => line && !headingPattern.test(line) && !jobDescriptionLinePattern.test(line) && !profileNoisePattern.test(line));
+    .filter((line) => line && !headingPattern.test(line) && !profileNoisePattern.test(line));
 
   if (kind === "experience") return splitExperienceBlocks(cleanLines);
   if (kind === "education") return splitEducationBlocks(cleanLines);
@@ -401,12 +402,15 @@ function splitEducationBlocks(lines: string[]) {
   lines.forEach((line) => {
     const previous = current[current.length - 1] || "";
     const currentLooksComplete = current.some((item) => dateRangePattern.test(item)) || current.length >= 3;
-    const startsAtSchool = looksLikeSchool(line) && currentLooksComplete;
-    const startsAfterSchool = currentLooksComplete && looksLikeSchool(previous) && !isDateOnlyLine(line) && !bulletPattern.test(line) && !looksLikeDescription(line);
+    const currentOnlyDate = current.length > 0 && current.every(isDateOnlyLine);
+    const currentStartsWithDate = current.length > 0 && isDateOnlyLine(current[0]);
+    const startsAtDate = isDateOnlyLine(line) && currentLooksComplete;
+    const startsAtSchool = looksLikeSchool(line) && currentLooksComplete && !currentOnlyDate && !currentStartsWithDate;
+    const startsAfterSchool = currentLooksComplete && !currentStartsWithDate && looksLikeSchool(previous) && !isDateOnlyLine(line) && !bulletPattern.test(line) && !looksLikeDescription(line);
     const starts =
       current.length > 0 &&
       !looksLikeContactLine(line) &&
-      (startsAtSchool || startsAfterSchool);
+      (startsAtDate || startsAtSchool || startsAfterSchool);
 
     if (starts) {
       entries.push(current);
@@ -517,6 +521,10 @@ function parseExperienceEntry(entry: string[]) {
     locationLine = lines[locationIndex];
     headerEnd = Math.max(headerEnd, locationIndex + 1);
   }
+  if (!locationLine && lines[headerEnd] && looksLikeStandaloneLocation(lines[headerEnd])) {
+    locationLine = lines[headerEnd];
+    headerEnd += 1;
+  }
   const descriptionLines = lines.filter((_, index) => index >= headerEnd && index !== locationIndex);
   const companyParsed = splitCompanyLocation(companyLine);
   const item = {
@@ -537,11 +545,39 @@ function parseEducationLine(line: string) {
   return { degree: cleanLine(degree), school: cleanLine(school), date: cleanDateValue(date) };
 }
 
+function splitDegreeSchool(value: string) {
+  const clean = cleanEducationText(value);
+  const commaParts = clean.split(/\s*,\s*/).map(cleanLine).filter(Boolean);
+  if (commaParts.length >= 2) {
+    const schoolIndex = commaParts.findIndex(looksLikeSchool);
+    if (schoolIndex >= 0) {
+      return {
+        degree: commaParts.filter((_, index) => index !== schoolIndex).join(", "),
+        school: commaParts[schoolIndex]
+      };
+    }
+  }
+
+  const dashParts = clean.split(/\s+-\s+|\s+[–—]\s+/).map(cleanLine).filter(Boolean);
+  if (dashParts.length >= 2) {
+    const schoolIndex = dashParts.findIndex(looksLikeSchool);
+    if (schoolIndex >= 0) {
+      return {
+        degree: dashParts.filter((_, index) => index !== schoolIndex).join(" - "),
+        school: dashParts[schoolIndex]
+      };
+    }
+  }
+
+  return { degree: clean, school: "" };
+}
+
 function cleanEducationText(value: string) {
   return cleanLine(
     value
       .replace(bulletPattern, "")
       .replace(/[()·]/g, " ")
+      .replace(/\s*,?\s*(?:de\s+)?$/, "")
       .replace(new RegExp(`(?:de\\s+)?${monthPattern}\\.?\\s*$`, "i"), "")
       .replace(/\s+[–—-]\s*$/, "")
   );
@@ -551,6 +587,23 @@ function parseEducationEntry(entry: string[]) {
   const lines = entry.map(cleanLine).filter((line) => line && !looksLikeContactLine(line) && !profileNoisePattern.test(line));
   const combined = lines.join(" ");
   const date = combined.match(dateRangePattern)?.[0] || "";
+
+  if (lines[0] && isDateOnlyLine(lines[0])) {
+    const credential = splitDegreeSchool(lines[1] || "");
+    const location = lines.find((line, index) => index > 1 && looksLikeStandaloneLocation(line)) || "";
+    const detail = lines.find((line, index) => index > 1 && line !== location && !isDateOnlyLine(line) && !looksLikeSchool(line)) || "";
+    return assignDates(
+      {
+        ...emptyEducation(),
+        degree: credential.degree,
+        school: credential.school,
+        location,
+        description: compactDescription([detail].filter(Boolean))
+      },
+      lines[0]
+    );
+  }
+
   const useful = lines
     .filter((line) => !isDateOnlyLine(line) && !profileNoisePattern.test(line))
     .map((line) => cleanEducationText(line.replace(dateRangePattern, "")))
@@ -562,8 +615,11 @@ function parseEducationEntry(entry: string[]) {
   const schoolIndex = useful.findIndex(looksLikeSchool);
   if (schoolIndex >= 0) {
     const school = useful[schoolIndex];
-    const degree = useful.find((line, index) => index !== schoolIndex && !looksLikeSchool(line)) || "";
-    const description = useful.filter((_, index) => index !== schoolIndex && useful[index] !== degree);
+    const detailParts = useful
+      .filter((line, index) => index !== schoolIndex && !looksLikeSchool(line))
+      .flatMap((line) => line.split(/\s*,\s*/).map(cleanEducationText).filter(Boolean));
+    const degree = detailParts[0] || "";
+    const description = detailParts.slice(1);
     return assignDates({ ...emptyEducation(), school, degree, description: compactDescription(description) }, date);
   }
 
@@ -649,7 +705,7 @@ export function importResumeText(text: string, current?: ResumeData): ResumeData
       location: locationLine || base.personal.location,
       links: unique(clean.match(/https?:\/\/\S+|(?:www\.)?linkedin\.com\/\S+/gi) || []).join(" | ") || base.personal.links
     },
-    summary: summaryLines.filter((line) => !jobDescriptionLinePattern.test(line)).slice(0, 8).join(" ") || base.summary,
+    summary: summaryLines.filter((line) => !jobDescriptionLinePattern.test(line)).join(" ") || base.summary,
     experience: experienceLines.length ? parseEntries(experienceLines, "experience") : base.experience,
     education: educationLines.length ? parseEntries(educationLines, "education") : base.education,
     certifications: certificationLines.length ? parseEntries(certificationLines, "certification") : base.certifications,

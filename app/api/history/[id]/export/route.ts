@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { rejectInvalidOrigin } from "@/lib/security";
+import { normalizeResumeData, resumeToPlainText } from "@/lib/resumes/defaults";
 
 function sanitizeFilenamePart(value: string) {
   return value.replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48) || "document";
@@ -27,16 +28,30 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     .eq("user_id", user.id)
     .maybeSingle();
 
+  let text = (data?.output || "").trim();
+  let type = data?.type || "export";
+
   if (error || !data) {
-    return NextResponse.json({ error: "Documento não encontrado." }, { status: 404 });
+    const { data: resume, error: resumeError } = await supabase
+      .from("resumes")
+      .select("title,data")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (resumeError || !resume) {
+      return NextResponse.json({ error: "Documento não encontrado." }, { status: 404 });
+    }
+
+    text = resumeToPlainText(normalizeResumeData(resume.data)).trim();
+    type = resume.title || "resume";
   }
 
-  const text = (data.output || "").trim();
   if (!text) {
     return NextResponse.json({ error: "Este documento não tem conteúdo para exportar." }, { status: 404 });
   }
 
-  const typePart = sanitizeFilenamePart(data.type || "export");
+  const typePart = sanitizeFilenamePart(type);
   const idShort = id.replace(/-/g, "").slice(0, 10);
   const filename = `globalhire-${typePart}-${idShort}.txt`;
 
