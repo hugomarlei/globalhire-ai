@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Copy, Download, FileText, FileUp, Loader2, RefreshCw, Sparkles } from "lucide-react";
+import { AlertTriangle, Copy, Download, FileText, FileUp, Linkedin, Loader2, RefreshCw, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Field, cn, inputClass, textareaClass } from "@/components/ui";
 import { normalizeDocumentText } from "@/lib/document-format";
@@ -64,6 +64,7 @@ export function DashboardGenerator({
 }) {
   const { locale } = useLanguage();
   const [resume, setResume] = useState("");
+  const [linkedinUrl, setLinkedinUrl] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [language, setLanguage] = useState("English");
   const [targetCountry, setTargetCountry] = useState("Estados Unidos");
@@ -196,11 +197,12 @@ export function DashboardGenerator({
       trackEvent("job_description_added", { type, chars_bucket: jobDescription.length > 2000 ? "2000+" : "under_2000" });
     }
 
+    const resumeInput = linkedinUrl.trim() ? `${resume}\n\nLinkedIn: ${linkedinUrl.trim()}` : resume;
     const response = await fetch("/api/ai/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        resume,
+        resume: resumeInput,
         jobDescription: usesJobDescription ? jobDescription : "",
         language,
         targetCountry,
@@ -358,8 +360,20 @@ export function DashboardGenerator({
               <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{genUi.uploadHelp}</p>
             </div>
 
-            <Field label={context.resumeLabel}>
-              <textarea data-clarity-mask="true" className={cn(textareaClass, "min-h-[140px]")} value={resume} onChange={(e) => setResume(e.target.value)} placeholder={context.resumePlaceholder} />
+            <Field label="Perfil LinkedIn do candidato">
+              <div className="relative">
+                <Linkedin size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  data-clarity-mask="true"
+                  className={cn(inputClass, "pl-9")}
+                  value={linkedinUrl}
+                  onChange={(event) => setLinkedinUrl(event.target.value)}
+                  placeholder="https://www.linkedin.com/in/seu-perfil"
+                />
+              </div>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                Use como referência complementar. Para importar o perfil completo com fidelidade, exporte o PDF do LinkedIn e envie no campo acima.
+              </p>
             </Field>
             {usesJobDescription ? (
               <Field label={copy.jobDescription}>
@@ -457,7 +471,7 @@ export function DashboardGenerator({
 
             <TurnstileWidget action="generation" onVerify={setTurnstileToken} resetSignal={captchaReset} />
 
-            <Button type="button" className="bg-primary text-primary-foreground hover:brightness-105" onClick={generate} disabled={loading}>
+            <Button type="button" className="bg-primary text-primary-foreground hover:brightness-105 disabled:opacity-50" onClick={generate} disabled={loading || !resume.trim()}>
               {loading ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
               {loading ? copy.generating : context.cta}
             </Button>

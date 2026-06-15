@@ -323,10 +323,10 @@ export const generatorUiCopy: Record<Locale, GeneratorUiStrings> = {
       importResume: "Importar currículo",
       readingFile: "Lendo arquivo...",
       uploadHelp:
-        "Aceitamos PDF e DOCX com texto real, até 5 MB. Se o arquivo for uma imagem ou PDF escaneado, a leitura automática pode não funcionar; nesse caso, cole o texto manualmente abaixo.",
+        "Aceitamos PDF e DOCX com texto real, até 5 MB. PDFs escaneados ou em imagem podem falhar; prefira exportar o currículo com texto selecionável.",
       uploadErrorGeneric:
-        "Não consegui extrair o texto deste arquivo. Use PDF ou DOCX com texto selecionável; se for escaneado ou imagem, cole o conteúdo manualmente no campo abaixo.",
-      uploadErrorNetwork: "Não consegui concluir o upload. Tente novamente ou cole o texto manualmente.",
+        "Não consegui extrair o texto deste arquivo. Use PDF ou DOCX com texto selecionável.",
+      uploadErrorNetwork: "Não consegui concluir o upload. Tente novamente com um PDF ou DOCX selecionável.",
       uploadSuccessIntro: "Currículo importado com sucesso:",
       copyDone: "Copiado",
       copyLabel: "Copiar",
@@ -358,10 +358,10 @@ export const generatorUiCopy: Record<Locale, GeneratorUiStrings> = {
       importResume: "Import resume",
       readingFile: "Reading file...",
       uploadHelp:
-        "We accept PDF and DOCX with real text, up to 5 MB. Scanned PDFs or images may fail; paste the text manually below if needed.",
+        "We accept PDF and DOCX with real selectable text, up to 5 MB. Scanned PDFs or image-based files may fail.",
       uploadErrorGeneric:
-        "We could not extract text from this file. Use PDF or DOCX with selectable text; for scans or images, paste manually below.",
-      uploadErrorNetwork: "Upload failed. Try again or paste the text manually.",
+        "We could not extract text from this file. Use a PDF or DOCX with selectable text.",
+      uploadErrorNetwork: "Upload failed. Try again with a selectable PDF or DOCX.",
       uploadSuccessIntro: "Resume imported successfully:",
       copyDone: "Copied",
       copyLabel: "Copy",
@@ -399,10 +399,10 @@ export const generatorUiCopy: Record<Locale, GeneratorUiStrings> = {
       importResume: "Importar CV",
       readingFile: "Leyendo archivo...",
       uploadHelp:
-        "Aceptamos PDF y DOCX con texto real, hasta 5 MB. Si el archivo es imagen o PDF escaneado, la lectura puede fallar; en ese caso, pega el texto manualmente abajo.",
+        "Aceptamos PDF y DOCX con texto seleccionable, hasta 5 MB. Los archivos escaneados o en imagen pueden fallar.",
       uploadErrorGeneric:
-        "No pudimos extraer texto. Usa PDF o DOCX con texto seleccionable; si es escaneo o imagen, pega el contenido manualmente abajo.",
-      uploadErrorNetwork: "No se pudo completar la subida. Intenta de nuevo o pega el texto manualmente.",
+        "No pudimos extraer texto. Usa PDF o DOCX con texto seleccionable.",
+      uploadErrorNetwork: "No se pudo completar la subida. Intenta de nuevo con un PDF o DOCX seleccionable.",
       uploadSuccessIntro: "CV importado correctamente:",
       copyDone: "Copiado",
       copyLabel: "Copiar",
@@ -440,10 +440,10 @@ export const generatorUiCopy: Record<Locale, GeneratorUiStrings> = {
       importResume: "Importer le CV",
       readingFile: "Lecture du fichier...",
       uploadHelp:
-        "PDF et DOCX avec texte réel, jusqu'à 5 Mo. PDF scannés ou images : la lecture peut échouer ; collez le texte manuellement ci-dessous.",
+        "PDF et DOCX avec texte sélectionnable, jusqu'à 5 Mo. Les fichiers scannés ou en image peuvent échouer.",
       uploadErrorGeneric:
-        "Impossible d'extraire le texte. Utilisez un PDF ou DOCX avec texte sélectionnable ; pour un scan ou une image, collez le contenu manuellement.",
-      uploadErrorNetwork: "Échec du téléversement. Réessayez ou collez le texte manuellement.",
+        "Impossible d'extraire le texte. Utilisez un PDF ou DOCX avec texte sélectionnable.",
+      uploadErrorNetwork: "Échec du téléversement. Réessayez avec un PDF ou DOCX sélectionnable.",
       uploadSuccessIntro: "CV importé avec succès :",
       copyDone: "Copié",
       copyLabel: "Copier",

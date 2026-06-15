@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 
   if (!file.size) {
     console.warn("upload_parse_empty_file");
-    return NextResponse.json({ error: "O arquivo chegou vazio. Tente enviar novamente ou cole o texto manualmente." }, { status: 400 });
+    return NextResponse.json({ error: "O arquivo chegou vazio. Tente enviar novamente com um PDF ou DOCX exportado com texto selecionável." }, { status: 400 });
   }
 
   const fileName = file.name.toLowerCase();
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
     if (cleanText.length < 100) {
       console.warn("upload_parse_insufficient_text", { fileName: file.name, extractedLength: cleanText.length });
       return NextResponse.json({
-        error: "O arquivo abriu, mas não encontrei texto suficiente para importar. Isso acontece com PDF escaneado ou imagem. Você pode copiar e colar o texto do currículo manualmente no campo abaixo."
+        error: "O arquivo abriu, mas não encontrei texto suficiente para importar. Isso acontece com PDF escaneado ou imagem. Exporte novamente como PDF/DOCX com texto selecionável e tente outra vez."
       }, { status: 422 });
     }
 
@@ -127,8 +127,8 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({
       error: isPdf
-        ? "Não consegui extrair o texto deste PDF. Se ele for escaneado ou imagem, cole o conteúdo manualmente. Se o texto for selecionável, tente salvar o PDF novamente e reenviar."
-        : "Não consegui extrair o texto deste DOCX. Tente salvar o arquivo novamente no Word/Google Docs ou cole o conteúdo manualmente."
+        ? "Não consegui extrair o texto deste PDF. Se ele for escaneado ou imagem, exporte novamente com texto selecionável e reenvie."
+        : "Não consegui extrair o texto deste DOCX. Tente salvar o arquivo novamente no Word/Google Docs e reenviar."
     }, { status: 500 });
   }
 }

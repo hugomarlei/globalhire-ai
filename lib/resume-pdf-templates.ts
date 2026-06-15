@@ -233,28 +233,28 @@ export function buildStructuredResumePdfPrintDocument(opts: {
   `;
 
   const styles = `
-    @page { margin: 12mm 14mm; }
+    @page { margin: 11mm 13mm; }
     * { box-sizing: border-box; }
-    body { margin:0; color:#0f172a; background:#fff; font-family:${isCompact ? "Georgia, 'Times New Roman', serif" : "Arial, Helvetica, sans-serif"}; line-height:${isCompact ? "1.38" : "1.46"}; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    body { margin:0; color:#0f172a; background:#fff; font-family:${isCompact ? "Georgia, 'Times New Roman', serif" : "Arial, Helvetica, sans-serif"}; line-height:${isCompact ? "1.34" : "1.4"}; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .sheet { max-width:${isCompact ? "720px" : "820px"}; margin:0 auto; background:#fff; ${isModern ? "display:grid;grid-template-columns:0.72fr 1.28fr;min-height:100vh;" : "padding:0 2mm;"} }
-    .content { padding:${isModern ? "10mm" : "0"}; }
-    .header { border-bottom:1.5px solid; padding-bottom:14px; margin-bottom:18px; ${opts.template === "executive" ? `border-top:8px solid ${color}; padding-top:12px;` : ""} }
-    h1 { margin:0; font-size:${isCompact ? "24pt" : "28pt"}; line-height:1.05; letter-spacing:0; }
+    .content { padding:${isModern ? "9mm" : "0"}; }
+    .header { border-bottom:1.5px solid; padding-bottom:11px; margin-bottom:14px; ${opts.template === "executive" ? `border-top:6px solid ${color}; padding-top:10px;` : ""} }
+    h1 { margin:0; font-size:${isCompact ? "22pt" : "25pt"}; line-height:1.05; letter-spacing:0; }
     .header p, .sidebar header p { margin:6px 0 4px; font-size:10.5pt; font-weight:700; }
     small, .meta { color:#64748b; font-size:8.5pt; }
-    .section { break-inside:avoid; margin:0 0 16px; }
-    .section h2 { margin:0 0 8px; border-bottom:1.5px solid; padding-bottom:3px; font-size:8.8pt; text-transform:uppercase; letter-spacing:.12em; }
-    .section p { margin:0; font-size:10pt; }
-    .entries { display:grid; gap:11px; }
-    .entries.compact { gap:8px; }
+    .section { margin:0 0 12px; }
+    .section h2 { margin:0 0 6px; border-bottom:1.5px solid; padding-bottom:3px; font-size:8.4pt; text-transform:uppercase; letter-spacing:.1em; }
+    .section p { margin:0; font-size:9.5pt; }
+    .entries { display:grid; gap:9px; }
+    .entries.compact { gap:6px; }
     .entry { break-inside:avoid; }
     .entry-head { display:flex; justify-content:space-between; gap:12px; align-items:baseline; }
     h3 { margin:0; font-size:10pt; line-height:1.3; }
     .entry-head span { color:#64748b; font-size:8.5pt; white-space:nowrap; }
     ul { margin:5px 0 0 16px; padding:0; }
-    li { margin:0 0 3px; font-size:9.5pt; }
-    .sidebar { color:#fff; padding:10mm 7mm; }
-    .sidebar h1 { font-size:23pt; }
+    li { margin:0 0 2px; font-size:9.2pt; }
+    .sidebar { color:#fff; padding:9mm 6mm; }
+    .sidebar h1 { font-size:21pt; }
     .sidebar small, .sidebar span { color:rgba(255,255,255,.75); }
     .sidebar section { margin-top:18px; }
     .sidebar h2 { margin:0 0 8px; color:rgba(255,255,255,.72); font-size:8.5pt; text-transform:uppercase; letter-spacing:.13em; }
