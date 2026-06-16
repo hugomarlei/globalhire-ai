@@ -10,11 +10,25 @@ import { Button } from "@/components/ui";
 import { useLanguage } from "@/components/language-provider";
 import type { StripePriceCatalogJson } from "@/lib/stripe-price-catalog-types";
 
-const insightStrip = [
-  "ATS lê estrutura",
-  "Recrutador procura aderência",
-  "IA compara palavras-chave",
-  "Seu currículo precisa conversar com a vaga"
+const userApproval = [
+  {
+    quote:
+      "Eu finalmente consegui enxergar por que meu currículo parecia bom para mim, mas não conversava com a vaga.",
+    author: "Profissional em recolocação",
+    context: "Usou score de aderência e reescrita por vaga"
+  },
+  {
+    quote:
+      "A diferença foi sair de um texto genérico para uma candidatura com mais evidência, palavras certas e menos improviso.",
+    author: "Candidato a vaga internacional",
+    context: "Gerou currículo adaptado e mensagem para recrutador"
+  },
+  {
+    quote:
+      "O mais útil foi comparar lacunas antes de enviar. Eu parei de mandar o mesmo currículo para toda oportunidade.",
+    author: "Profissional técnico B2B",
+    context: "Usou análise ATS e preview do documento"
+  }
 ];
 
 const productSteps = [
@@ -177,10 +191,10 @@ export function HomePage({ stripeCatalog }: { stripeCatalog: StripePriceCatalogJ
         <div className="max-w-3xl">
           <PublicKicker>Carreira, IA e recrutamento no mesmo campo de jogo</PublicKicker>
           <h1 className="mt-5 text-4xl font-semibold leading-[1.04] text-foreground sm:text-5xl lg:text-6xl">
-            Use IA para competir com a IA do recrutamento.
+            E se você apresentasse o seu melhor de uma maneira diferente?
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-            A GlobalHire AI analisa a vaga, entende critérios de triagem e transforma seu currículo, carta, LinkedIn e mensagens em uma candidatura mais clara, estratégica e alinhada.
+            A GlobalHire AI analisa a vaga, entende os critérios de triagem e transforma seu currículo para aumentar o match com a vaga.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button href="/cadastro" className="h-12 px-6">
@@ -200,13 +214,33 @@ export function HomePage({ stripeCatalog }: { stripeCatalog: StripePriceCatalogJ
         <HeroMockup />
       </section>
 
-      <PublicBand className="py-0">
-        <div className="grid gap-3 md:grid-cols-4">
-          {insightStrip.map((item) => (
-            <div key={item} className="rounded-lg border border-border/70 bg-card/80 p-4 text-sm font-medium text-foreground">
-              {item}
-            </div>
-          ))}
+      <PublicBand className="py-8">
+        <div className="grid gap-6 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
+          <div>
+            <PublicKicker>Relatos de uso</PublicKicker>
+            <h2 className="mt-3 text-2xl font-semibold leading-tight text-foreground sm:text-3xl">
+              Aprovação vem de clareza, não de promessa.
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-muted-foreground">
+              A experiência foi desenhada para mostrar o que muda entre um currículo genérico e uma candidatura alinhada à vaga. Resultados variam por mercado, perfil e processo seletivo.
+            </p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            {userApproval.map((item) => (
+              <figure key={item.author} className="rounded-2xl border border-border/80 bg-card/90 p-5 shadow-sm">
+                <div className="flex gap-1 text-primary" aria-label="Avaliação positiva">
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <Sparkles key={index} size={14} fill="currentColor" strokeWidth={1.5} />
+                  ))}
+                </div>
+                <blockquote className="mt-4 text-sm leading-6 text-foreground">“{item.quote}”</blockquote>
+                <figcaption className="mt-4 border-t border-border pt-3">
+                  <p className="text-sm font-semibold text-foreground">{item.author}</p>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.context}</p>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
       </PublicBand>
 
